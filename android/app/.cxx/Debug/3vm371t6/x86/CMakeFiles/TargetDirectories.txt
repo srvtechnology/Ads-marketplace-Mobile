@@ -1,0 +1,2 @@
+D:/Nishant/srv/eclassifyapp/android/app/.cxx/Debug/3vm371t6/x86/CMakeFiles/edit_cache.dir
+D:/Nishant/srv/eclassifyapp/android/app/.cxx/Debug/3vm371t6/x86/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "850804605491",
+    "project_id": "bhutan-echoes-5b62b",
+    "storage_bucket": "wrteam-5b62b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:850804605491:android:8b5f7cdea9ce76675ed946",
+        "android_client_info": {
+          "package_name": "com.eclassify.wrteam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGTlaVXyNzH7qxxNc3E5HK7n8fuHr04Kg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
