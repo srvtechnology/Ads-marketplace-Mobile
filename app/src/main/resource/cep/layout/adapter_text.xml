@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.textview.MaterialTextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:paddingVertical="@dimen/dimen4dp"
+    android:paddingHorizontal="@dimen/dimen8dp"
+    android:background="@color/white"
+    android:text="@string/_8am_9am"
+    android:textColor="@color/dark_grey"
+    android:textSize="@dimen/textSmall12sp"
+    android:textStyle="bold" />

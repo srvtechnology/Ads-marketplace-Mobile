@@ -1,0 +1,1035 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="@dimen/dimen10dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/added_edittext"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusableInTouchMode="true"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="true"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Owner Title"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_title"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord Title"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutFirstName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord First Name"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_first_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord first name"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:id="@+id/layoutOrganizationName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Organization Name"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_organization_Name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Organization Name"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:id="@+id/layoutOrganizationType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Organization Type"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_organization_Type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Organization Type"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    tools:visibility="visible"
+                    android:id="@+id/layoutSchoolType"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusableInTouchMode="true">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="School Type"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_school_Type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="School Type"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutMiddleName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Middle Name"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_middle_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord middle name"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/layoutSurtName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Surname"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_surname"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord surname"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/layoutTin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="TIN"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_tin"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="TIN"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+                <LinearLayout
+                    android:id="@+id/layoutNin"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="NIN"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_nin"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="NIN"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Old Street Number"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_old_street_number"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord Old Street Number"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Gender"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <RadioGroup
+                        android:id="@+id/gender_rg"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/rb_male"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:buttonTint="@color/colorPrimary"
+                            android:checked="true"
+                            android:text="Male" />
+
+                        <RadioButton
+                            android:id="@+id/rb_female"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="@dimen/dimen5dp"
+                            android:buttonTint="@color/colorPrimary"
+                            android:text="Female" />
+
+                    </RadioGroup>
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/lyt_new_street_number"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Street Number"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_street_number"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord Street Number"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Street Name"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_street_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord street name"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Additional Address"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_additional_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Additional Address"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/layoutPropertyArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Area"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_area"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="PropertyArea"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Section"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_section"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Enter Section"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Ward"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_ward"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Ward"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Constituency"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_constituency"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Constituency"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Chiefdom"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_chiefdom"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Chiefdom"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="District"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_district"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="District"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Province"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_province"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Province"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Post Code"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_postcode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="PostCode"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Email"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_email"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord email"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Mobile"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_mobile_1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord mobile"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_weight=".4"
+                        android:text="Landlord Mobile 2"
+                        android:textColor="@color/colorBlack" />
+
+
+                    <EditText
+                        android:id="@+id/edt_landlord_mobile_2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:layout_marginTop="@dimen/dimen16dp"
+                        android:layout_marginEnd="@dimen/dimen10dp"
+                        android:layout_weight=".6"
+                        android:background="@drawable/rounded_corner_solid_grey"
+                        android:hint="Landlord mobile 2"
+                        android:padding="@dimen/dimen16dp"
+                        android:textColor="@color/colorBlack"
+                        android:textSize="@dimen/headerTextSize14sp"
+                        android:textStyle="bold" />
+
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/lin_id_proof"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_margin="@dimen/dimen5dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/img_verification_document"
+                            android:layout_width="match_parent"
+                            android:layout_height="@dimen/dimen120dp"
+                            android:layout_gravity="center_horizontal"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/placeholder"
+
+                            />
+                        <!--    </androidx.cardview.widget.CardView>-->
+
+                        <TextView
+                            android:id="@+id/edt_note_id_proof"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/dimen5dp"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/dimen5dp"
+                            android:text="Id proof"
+                            android:textColor="@color/colorRed"
+                            android:visibility="visible" />
+
+                        <TextView
+
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/dimen5dp"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/dimen5dp"
+                            android:text="Verification Document"
+                            android:visibility="gone" />
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lin_address_proof"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_margin="@dimen/dimen5dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+
+                        <ImageView
+                            android:id="@+id/img_address_proof"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/dimen120dp"
+                            android:layout_gravity="center_horizontal"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/placeholder"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/edt_note_address_proof"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/dimen5dp"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/dimen5dp"
+                            android:text="Address proof"
+                            android:textColor="@color/colorRed"
+                            android:visibility="visible" />
+
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/lin_conveyance_capture"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_margin="@dimen/dimen5dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+
+                        <ImageView
+                            android:id="@+id/img_lin_conveyance_capture"
+                            android:layout_width="wrap_content"
+                            android:layout_height="@dimen/dimen120dp"
+                            android:layout_gravity="center_horizontal"
+                            android:adjustViewBounds="true"
+                            android:scaleType="fitCenter"
+                            android:src="@drawable/placeholder"
+
+                            />
+
+                        <TextView
+                            android:id="@+id/edt_note_lin_conveyance_capture"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_marginTop="@dimen/dimen5dp"
+                            android:gravity="center"
+                            android:paddingBottom="@dimen/dimen5dp"
+                            android:text="Conveyance Proof"
+                            android:textColor="@color/colorRed"
+                            android:visibility="visible" />
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/btn_save_landlord_info"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/button_height40dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dimen16dp"
+                android:background="@drawable/rounded_corner_solid_blue"
+                android:text="@string/save"
+                android:textAllCaps="false"
+                android:textColor="@color/colorWhite" />
+        </LinearLayout>
+
+    </ScrollView>
+
+
+</LinearLayout>
+
+    <!--
+    edt_landlord_title
+    rb_male rb_female
+        edt_landlord_postcode
+        edt_landlord_province
+        edt_landlord_district
+        edt_landlord_chiefdom
+        edt_landlord_word
+        edt_landlord_section
+        edt_landlord_mobile_2-->

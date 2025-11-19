@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:orientation="vertical">
+    <include layout="@layout/toolbar_header_back" />
+       <ScrollView
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:scrollbars="none"
+           android:fadingEdge="none">
+           <androidx.appcompat.widget.LinearLayoutCompat
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:orientation="vertical"
+               android:paddingHorizontal="@dimen/dimen16dp">
+               <FrameLayout
+                   android:layout_width="wrap_content"
+                   android:layout_height="wrap_content"
+                   android:layout_gravity="center_horizontal"
+                   android:layout_marginTop="@dimen/dimen48dp" >
+               <de.hdodenhof.circleimageview.CircleImageView
+                   android:layout_width="@dimen/dimen120dp"
+                   android:layout_height="@dimen/dimen120dp"
+                   android:src="@drawable/ic_profile"
+                   app:civ_border_color="@color/textGrey"
+                   app:civ_border_width="@dimen/dimen1dp"
+                   app:civ_circle_background_color="@color/lightGray"/>
+                   <androidx.appcompat.widget.AppCompatImageView
+                       android:layout_width="@dimen/dimen32dp"
+                       android:layout_height="@dimen/dimen32dp"
+                      android:padding="@dimen/dimen6dp"
+                       android:elevation="@dimen/dimen4dp"
+                       android:src="@drawable/ic_edit_pen"
+                       android:layout_marginEnd="@dimen/dimen8dp"
+                       android:layout_marginBottom="@dimen/dimen8dp"
+                       android:layout_gravity="bottom|end"
+                       android:background="@drawable/circle_white"/>
+               </FrameLayout>
+               <View
+                   android:layout_width="match_parent"
+                   android:layout_height="@dimen/dimen1dp"
+                   android:background="@color/lightGray"
+                   android:layout_marginTop="@dimen/dimen48dp"/>
+               <RelativeLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:paddingVertical="@dimen/dimen12dp">
+                   <androidx.appcompat.widget.AppCompatImageView
+                       android:id="@+id/ivUserName"
+                       android:layout_width="@dimen/dimen32dp"
+                       android:layout_height="@dimen/dimen32dp"
+                       android:padding="@dimen/dimen2dp"
+                       android:layout_centerVertical="true"
+                       android:src="@drawable/ic_edit_profile"
+                       app:tint="@color/colorBlack"/>
+
+
+                   <com.google.android.material.textview.MaterialTextView
+                       android:id="@+id/tvUserName"
+                       android:layout_toEndOf="@+id/ivUserName"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="Salieu Kamara"
+                       android:layout_centerVertical="true"
+                       android:textColor="@color/dark_grey"
+                       android:textSize="@dimen/textMedium14sp"
+                       android:layout_marginHorizontal="@dimen/dimen16dp"/>
+                   <androidx.appcompat.widget.AppCompatImageView
+                       android:id="@+id/ivEditName"
+                       android:layout_width="@dimen/dimen32dp"
+                       android:layout_height="@dimen/dimen32dp"
+                       android:padding="@dimen/dimen6dp"
+                       android:layout_alignParentEnd="true"
+                       android:layout_centerVertical="true"
+                       android:src="@drawable/ic_edit_pen"/>
+               </RelativeLayout>
+               <View
+                   android:layout_width="match_parent"
+                   android:layout_height="@dimen/dimen1dp"
+                   android:background="@color/lightGray"
+                  />
+               <RelativeLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:paddingVertical="@dimen/dimen12dp">
+                   <androidx.appcompat.widget.AppCompatImageView
+                       android:id="@+id/ivEmail"
+                       android:layout_width="@dimen/dimen32dp"
+                       android:layout_height="@dimen/dimen32dp"
+                       android:padding="@dimen/dimen2dp"
+                       android:layout_centerVertical="true"
+                       android:src="@drawable/ic_email"/>
+
+                   <com.google.android.material.textview.MaterialTextView
+                       android:id="@+id/tvEmail"
+                       android:layout_toEndOf="@+id/ivEmail"
+                       android:layout_width="wrap_content"
+                       android:layout_height="wrap_content"
+                       android:text="skamara@svl.com"
+                       android:layout_centerVertical="true"
+                       android:textColor="@color/dark_grey"
+                       android:textSize="@dimen/textMedium14sp"
+                       android:layout_marginHorizontal="@dimen/dimen16dp"/>
+               </RelativeLayout>
+               <View
+                   android:layout_width="match_parent"
+                   android:layout_height="@dimen/dimen1dp"
+                   android:background="@color/lightGray"
+                   />
+               <RelativeLayout
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:paddingVertical="@dimen/dimen12dp">
+               <androidx.appcompat.widget.AppCompatImageView
+                   android:id="@+id/ivDistrict"
+                   android:layout_width="@dimen/dimen32dp"
+                   android:layout_height="@dimen/dimen32dp"
+                   android:padding="@dimen/dimen2dp"
+                   android:layout_centerVertical="true"
+                   android:src="@drawable/ic_district"/>
+               <FrameLayout
+                   android:id="@+id/frmlytDistrictSpinner"
+                   android:layout_toEndOf="@+id/ivDistrict"
+                   android:layout_width="match_parent"
+                   android:layout_height="wrap_content"
+                   android:layout_centerVertical="true"
+                   android:layout_marginStart="@dimen/dimen12dp">
+
+                   <androidx.appcompat.widget.AppCompatSpinner
+                       android:id="@+id/spnrDistrict"
+                       android:layout_width="match_parent"
+                       android:layout_height="wrap_content"
+                       android:gravity="center"/>
+
+                 <!--  <androidx.appcompat.widget.AppCompatImageView
+                       android:layout_width="@dimen/dimen32dp"
+                       android:layout_height="@dimen/dimen32dp"
+                       android:layout_gravity="end"
+                       app:srcCompat="@drawable/ic_baseline_arrow_drop_down_24" />-->
+               </FrameLayout>
+               </RelativeLayout>
+
+           </androidx.appcompat.widget.LinearLayoutCompat>
+       </ScrollView>
+
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>

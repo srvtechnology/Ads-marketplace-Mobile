@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_assessment_history"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/assessment_history"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+            <include
+                android:id="@+id/include_assessment_history"
+                layout="@layout/activity_search_user_details_assessment_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_assessment_history" />
+
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_landlord_details"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_text5dp"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/landlord_details"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_assessment_history" />
+
+            <LinearLayout
+                android:id="@+id/include_landlord_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:orientation="vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_landlord_details" >
+
+                <Button
+                    android:id="@+id/btn_edit_landlord"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/dimen30dp"
+                    android:layout_marginEnd="@dimen/dialog_boarder_margin_15dp"
+                    android:layout_gravity="end"
+                    android:layout_marginTop="@dimen/dimen10dp"
+                    android:background="@drawable/bg_btn_login"
+                    android:text="Edit"
+                    android:textColor="@color/white" />
+                <ImageView
+                    android:id="@+id/ivProfilePicLandload"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/dimen200dp"
+                    android:contentDescription="@string/my_profile"
+                    android:src="@drawable/ic_my_profile"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvLandload"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen10dp"
+                    tools:listitem="@layout/rowview_details"
+                    android:focusable="false"/>
+
+            </LinearLayout>
+
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_property_details"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_text5dp"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/property_details"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_landlord_details" />
+
+            <include
+                android:id="@+id/include_property_details"
+                layout="@layout/activity_search_user_details_property_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_property_details" />
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_occupancy_details"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_text5dp"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/occupancy_details"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_property_details" />
+
+            <include
+                android:id="@+id/include_occupancy_details"
+                layout="@layout/activity_search_user_details_occupancy_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_occupancy_details" />
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_assessment_details"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_text5dp"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/assessment_details"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_occupancy_details" />
+
+            <include
+                android:id="@+id/include_assessment_details"
+                layout="@layout/activity_search_user_details_assessment_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_assessment_details" />
+
+
+            <TextView
+                android:id="@+id/activitySearchDetails_tv_geo_registry_details"
+                style="@style/styleButtonWrapContent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_between_text5dp"
+                android:background="@drawable/square_corner_solid_grey"
+                android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+                android:text="@string/geo_registry_details"
+                android:textColor="@color/colorBlack"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/include_assessment_details" />
+
+            <include
+                android:id="@+id/include_geo_registry_details"
+                layout="@layout/activity_search_user_details_geo_registry_details"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_geo_registry_details" />
+
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+
+</LinearLayout>

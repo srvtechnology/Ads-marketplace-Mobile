@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/square_corner_solid_grey"
+    android:padding="@dimen/layout_border_margin_16dp">
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_assesment_year"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="@string/assessment_year"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_assesment_year_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_assesment_year_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text=""
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_assesment_year"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_arrear"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="@string/assessment_amount"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_arrear_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_assesment_year" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_arrear_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="0"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_arrear"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_assesment_year" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_penalty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="@string/arrears"
+
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_penalty_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_arrear" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_penalty_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="0"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_penalty"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_arrear" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_amount_paid"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="@string/penalty"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_amount_paid_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_penalty" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_amount_paid_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="0"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_amount_paid"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_penalty" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_balance"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="Amount Paid"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_balance_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_amount_paid" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_balance_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="0"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_balance"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_amount_paid_value" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_due"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:text="Due"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/activityDetailsAssesmentHistory_tv_due_value"
+        app:layout_constraintHorizontal_weight=".75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_balance_value" />
+
+    <TextView
+        android:id="@+id/activityDetailsAssesmentHistory_tv_due_value"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dimen10dp"
+        android:layout_marginEnd="@dimen/dimen10dp"
+        android:paddingBottom="@dimen/dimen20dp"
+        android:text="0"
+        android:textColor="@color/navy_blue"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_weight=".25"
+        app:layout_constraintStart_toEndOf="@+id/activityDetailsAssesmentHistory_tv_due"
+        app:layout_constraintTop_toBottomOf="@+id/activityDetailsAssesmentHistory_tv_balance_value" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

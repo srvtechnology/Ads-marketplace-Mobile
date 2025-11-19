@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+<RelativeLayout
+    android:id="@+id/rlComplaints"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/colorWhite"
+    android:paddingHorizontal="@dimen/dimen16dp"
+    android:paddingVertical="@dimen/dimen4dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivComplaints"
+        android:layout_width="@dimen/dimen40dp"
+        android:layout_height="@dimen/dimen40dp"
+        android:padding="@dimen/dimen4dp"
+        app:srcCompat="@drawable/grey_circle" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toEndOf="@+id/ivComplaints"
+        android:paddingHorizontal="@dimen/dimen12dp"
+        android:text="@string/municipal_rate_management_system"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/textMedium14sp"
+        android:textStyle="bold" />
+</RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen1dp"
+        android:background="@color/lightGray1"/>
+</androidx.appcompat.widget.LinearLayoutCompat>

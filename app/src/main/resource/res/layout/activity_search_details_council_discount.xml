@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:paddingStart="10dp"
+    android:paddingEnd="10dp"
+    >
+    <!--
+        <TextView
+            android:id="@+id/activitySearchDetails_tv_pensioner_receipt"
+            style="@style/styleButtonWrapContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_text5dp"
+            android:background="@drawable/square_corner_solid_grey"
+            android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+            android:text="Pensioner Discount"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_assessment_details" />
+
+        <include
+            android:id="@+id/include_tv_pensioner_receipt"
+            layout="@layout/activity_search_details_pensioner_receipt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_geo_registry_details" />
+
+
+        <TextView
+            android:id="@+id/activitySearchDetails_tv_disability_receipt"
+            style="@style/styleButtonWrapContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/margin_between_text5dp"
+            android:background="@drawable/square_corner_solid_grey"
+            android:drawableEnd="@drawable/ic_baseline_keyboard_arrow_down_24"
+            android:text="@string/disability_receipt"
+            android:textColor="@color/colorBlack"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/include_assessment_details" />
+
+        <include
+            android:id="@+id/include_tv_disability_receipt"
+            layout="@layout/activity_search_details_disability_receipt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activitySearchDetails_tv_geo_registry_details" />
+    -->
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Pensioner Discount"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvPensionerDiscount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen5dp"
+            android:layout_weight="1.5"
+            android:gravity="end"
+            android:text=""
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/disability_receipt"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDisabilityDiscount"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="@dimen/dimen5dp"
+            android:layout_weight="1.5"
+            android:gravity="end"
+            android:text=""
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvDiscountedRatePayableText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:text="DISCOUNTED RATE PAYABLE 2024"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvDiscountedRatePayable1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen5dp"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:text=""
+            android:textStyle="bold"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+
+</LinearLayout>
+

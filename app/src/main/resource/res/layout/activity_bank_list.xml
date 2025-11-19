@@ -1,0 +1,368 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/rlTopHeader"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/green"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="45dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="@dimen/dimen5dp"
+            android:padding="@dimen/dimen5dp"
+            android:src="@drawable/ic_back_foreground" />
+
+        <TextView
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/banks_list"
+            android:textColor="@color/white"
+            android:textSize="17sp" />
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen10dp"
+                android:layout_marginEnd="@dimen/dimen10dp"
+                android:layout_marginTop="@dimen/dimen20dp"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+
+                    android:layout_width="0dp"
+                    android:layout_height="170dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_bg_outer">
+
+                    <ImageView
+                        android:id="@+id/ivBank"
+                        android:layout_width="@dimen/dimen180dp"
+                        android:layout_height="@dimen/dimen140dp"
+                        android:layout_centerHorizontal="true"
+                        android:padding="@dimen/dimen5dp"
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivBank"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/dimen5dp"
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:text="Bank 1"
+                        android:textAlignment="center"
+                        android:visibility="visible" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="170dp"
+                    android:layout_marginStart="@dimen/dimen10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_bg_outer">
+
+                    <ImageView
+                        android:id="@+id/ivMobileMoney"
+                        android:layout_width="@dimen/dimen160dp"
+                        android:layout_height="@dimen/dimen140dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:padding="@dimen/dimen5dp"
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivMobileMoney"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:text="Bank 2"
+                        android:textAlignment="center"
+                        android:visibility="visible"
+
+                        />
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen10dp"
+                android:layout_marginEnd="@dimen/dimen10dp"
+                android:layout_marginTop="@dimen/dimen10dp"
+                android:orientation="horizontal"
+                android:visibility="visible"
+                >
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="170dp"
+                    android:layout_weight="1"
+
+                    android:background="@drawable/edit_text_bg_outer">
+
+                    <ImageView
+                        android:id="@+id/ivSigmaPay"
+                        android:layout_width="160dp"
+                        android:layout_height="120dp"
+                        android:layout_centerHorizontal="true"
+                        android:padding="@dimen/dimen5dp"
+
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivSigmaPay"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="@dimen/dimen5dp"
+                        android:layout_marginEnd="@dimen/dimen5dp"
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:text="Bank 3"
+                        android:textAlignment="center"
+                        android:visibility="visible" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dimen170dp"
+                    android:layout_marginStart="@dimen/dimen10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_bg_outer"
+
+                    >
+
+                    <ImageView
+                        android:id="@+id/ivPayPal"
+                        android:layout_width="@dimen/dimen160dp"
+                        android:layout_height="@dimen/dimen120dp"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="@dimen/dimen10dp"
+                        android:padding="@dimen/dimen5dp"
+
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivPayPal"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginStart="@dimen/dimen5dp"
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:lines="2"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:text="Bank 4"
+                        android:textAlignment="center"
+                        android:visibility="visible" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen10dp"
+                android:layout_marginTop="@dimen/dimen10dp"
+                android:layout_marginEnd="@dimen/dimen10dp"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/dimen170dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_bg_outer">
+
+
+                    <ImageView
+                        android:id="@+id/ivEuropay_visa_mastercard"
+                        android:layout_width="@dimen/dimen140dp"
+                        android:layout_height="@dimen/dimen120dp"
+                        android:layout_centerHorizontal="true"
+                        android:padding="@dimen/dimen5dp"
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivEuropay_visa_mastercard"
+                        android:layout_centerHorizontal="true"
+
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:lines="2"
+                        android:text="Bank 5"
+                        android:textAlignment="center"
+                        android:visibility="visible" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="170dp"
+                    android:layout_marginStart="@dimen/dimen10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/edit_text_bg_outer">
+
+                    <ImageView
+                        android:id="@+id/ivPayOnDelivery"
+                        android:layout_width="@dimen/dimen140dp"
+                        android:layout_height="@dimen/dimen120dp"
+                        android:layout_centerHorizontal="true"
+                        android:padding="@dimen/dimen5dp"
+                        android:src="@drawable/bank_logo" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivPayOnDelivery"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="@dimen/dimen5dp"
+                        android:textSize="@dimen/bodyTextSize12sp"
+                        android:text="Bank 6"
+                        android:textAlignment="center"
+                        android:visibility="visible" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen30dp"
+                android:layout_marginTop="@dimen/dimen20dp"
+                android:layout_marginEnd="@dimen/dimen30dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+
+                    <ImageView
+                        android:id="@+id/ivEuropay_visa_mastercard1"
+                        android:layout_width="@dimen/dimen110dp"
+                        android:layout_height="@dimen/dimen110dp"
+                        android:layout_centerHorizontal="true"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivEuropay_visa_mastercard1"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/dimen10dp"
+                        android:text="@string/europay_visa_mastercard"
+                        android:textAlignment="center" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/ivPayOnDelivery1"
+                        android:layout_width="@dimen/dimen110dp"
+                        android:layout_height="@dimen/dimen110dp"
+                        android:layout_centerHorizontal="true"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivPayOnDelivery1"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/dimen10dp"
+                        android:text="@string/pay_on_delivery"
+                        android:textAlignment="center" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen30dp"
+                android:layout_marginTop="@dimen/dimen20dp"
+                android:layout_marginEnd="@dimen/dimen30dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+
+                    <ImageView
+                        android:id="@+id/ivEuropay_visa_mastercard2"
+                        android:layout_width="@dimen/dimen110dp"
+                        android:layout_height="@dimen/dimen110dp"
+                        android:layout_centerHorizontal="true"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivEuropay_visa_mastercard2"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/dimen10dp"
+                        android:text="@string/europay_visa_mastercard"
+                        android:textAlignment="center" />
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/ivPayOnDelivery2"
+                        android:layout_width="@dimen/dimen110dp"
+                        android:layout_height="@dimen/dimen110dp"
+                        android:layout_centerHorizontal="true"
+                        android:src="@mipmap/ic_launcher" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/ivPayOnDelivery2"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="@dimen/dimen10dp"
+                        android:text="@string/pay_on_delivery"
+                        android:textAlignment="center" />
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/margin_80dp" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

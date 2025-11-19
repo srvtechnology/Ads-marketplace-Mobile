@@ -1,0 +1,399 @@
+<resources>
+    <string name="app_name">Self Service</string>
+    <string name="cashier_login">Cashier Sign In</string>
+    <string name="cashier">Sigma Cashier</string>
+    <string name="user">User</string>
+    <string name="user_email">Email *</string>
+    <string name="pass">Password*</string>
+    <string name="login">Sign In</string>
+    <string name="user_login">Sign In</string>
+    <string name="enter_user_phone_number">Enter user phone number</string>
+    <string name="verify">Verify</string>
+    <string name="enter_your_registered_phone_number">Enter your registered phone number</string>
+    <string name="verify_otp_send_to_your_registered_number">Verify OTP send to your registered number</string>
+    <string name="send_otp">Send OTP</string>
+    <string name="internet_connection_not_available">Internet connection not available</string>
+    <string name="do_you_want_to_logout">Do you want to logout?</string>
+    <string name="OK">Ok</string>
+    <string name="view_details">View Details</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <!--from another place-->
+
+    <string name="submit">Submit</string>
+    <string name="user_name">Username</string>
+    <string name="user_name2">User name*</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="large_text">
+        "Material is the metaphor.\n"
+
+        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
+        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
+        "technologically advanced and open to imagination and magic.\n"
+        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
+        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
+        "flexibility of the material creates new affordances that supercede those in the physical "
+        "world, without breaking the rules of physics.\n"
+        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
+        "interact, and exist in space and in relation to each other. Realistic lighting shows "
+        "seams, divides space, and indicates moving parts.\n"
+
+        "Bold, graphic, intentional.\n"
+
+        "The foundational elements of print based design typography, grids, space, scale, color, "
+        "and use of imagery guide visual treatments. These elements do far more than please the "
+        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
+        "imagery, large scale typography, and intentional white space create a bold and graphic "
+        "interface that immerse the user in the experience.\n"
+        "An emphasis on user actions makes core functionality immediately apparent and provides "
+        "waypoints for the user.\n"
+
+        "Motion provides meaning.\n"
+
+        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
+        "inflection points that initiate motion, transforming the whole design.\n"
+        "All action takes place in a single environment. Objects are presented to the user without "
+        "breaking the continuity of experience even as they transform and reorganize.\n"
+        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
+        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n"
+
+        "3D world.\n"
+
+        "The material environment is a 3D space, which means all objects have x, y, and z "
+        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
+        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
+        "position along the z-axis and has a standard 1dp thickness.\n"
+        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
+        "emulated by manipulating the y-axis.\n"
+
+        "Light and shadow.\n"
+
+        "Within the material environment, virtual lights illuminate the scene. Key lights create "
+        "directional shadows, while ambient light creates soft shadows from all angles.\n"
+        "Shadows in the material environment are cast by these two light sources. In Android "
+        "development, shadows occur when light sources are blocked by sheets of material at "
+        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
+        "y-axis only. The following example shows the card with a height of 6dp.\n"
+
+        "Resting elevation.\n"
+
+        "All material objects, regardless of size, have a resting elevation, or default elevation "
+        "that does not change. If an object changes elevation, it should return to its resting "
+        "elevation as soon as possible.\n"
+    </string>
+
+    <string name="ok">OK</string>
+    <string name="open">Open</string>
+
+    <string name="from_date">From date</string>
+    <string name="to_date">To date</string>
+    <string name="view_invoice">View Invoice</string>
+    <string name="item">Item</string>
+    <string name="terms_and_conditions"><![CDATA[- Terms & Conditions -]]></string>
+
+    <string name="enterEmailErrorText">Email is required</string>
+    <string name="enterValidEmailErrorText">Enter a valid email</string>
+    <string name="enterPasswordErrorText">Password is required</string>
+    <string name="enterPasswordLengthErrorText">Password must contain at least 8 characters</string>
+    <string name="usernameIsRequired">display is required</string>
+    <string name="usernameLengthErrorText">Username must contain at least 4 characters</string>
+
+    <string name="Yes">Yes</string>
+    <string name="No">No</string>
+
+    <string name="enterAboutMeErrorText">About me is required</string>
+    <string name="enterVerificationCodeError">Verification code can\'t be empty</string>
+
+    <string name="enterDOBErrorText">Date of birth is required</string>
+    <string name="enterCountryErrorText">Country is required</string>
+    <string name="enterGenderErrorText">Gender is required</string>
+
+    <string name="time_out_messages"> Time out error internet connection is too low . </string>
+    <string name="pick_up">Pick Up</string>
+    <string name="kv_group">An online platform initiative of KV Group</string>
+    <string name="password">Password</string>
+    <string name="request_change_password">Request to change password</string>
+
+    <string name="thank_you">Thank You</string>
+    <string name="order_successfully_delivered">Order Successfully Delivered</string>
+    <string name="sent_to_your">All order details sent to your registered mail Id.</string>
+    <string name="Do_you_want_to_Logout">Do you want to logout?</string>
+    <string name="my_profile">My Profile</string>
+    <string name="picked_up_order">Picked Up Order</string>
+    <string name="delivery_details">Delivery Details</string>
+    <string name="help">Help</string>
+    <string name="logout">Logout</string>
+    <string name="customer_details">Customer Details</string>
+    <string name="order_summary">Order Summary</string>
+    <string name="item_name">Item Name</string>
+    <string name="quantity">Quantity</string>
+    <string name="price_omr">Price (OMR)</string>
+    <string name="sub_total">Sub-Total</string>
+    <string name="coupon_discount">Coupon Discount</string>
+    <string name="net_amount">Net Amount</string>
+    <string name="confirm">Confirm</string>
+    <string name="text_return">Return</string>
+    <string name="choose_reason">Choose Reason</string>
+    <string name="missing_order_items">Missing Order Items</string>
+    <string name="not_present_home">Not Present Home</string>
+    <string name="seal_broken">Seal Broken</string>
+    <string name="others">Others</string>
+    <string name="describe_your_reason">Describe Your Reason</string>
+    <string name="write_to_us">Write to us…</string>
+    <string name="u00a9_2020">© 2020</string>
+    <string name="resend_again">Resend again in </string>
+    <string name="_1">1</string>
+    <string name="_2">2</string>
+    <string name="_3">3</string>
+
+    <string name="current_delivery_details">Current Delivery Details</string>
+    <string name="dummy_address">P.O. Box 1555, CPO 115641, Muscat\nSultanate of Oman</string>
+    <string name="reach">Reach</string>
+    <string name="call">Call</string>
+    <string name="picked_up_items_list">Picked Up Items List</string>
+    <string name="pick_up_items_list">Pick Up Items List</string>
+    <string name="dummy_order_id">Order ID: #13524563</string>
+    <string name="dummy_mobile">Mobile No: 987874564</string>
+    <string name="dummy_name">John Doe</string>
+    <string name="dummy_email_mobile">john@abc.com, 987874564</string>
+    <string name="order_details">Order Details</string>
+    <string name="order_return">Order Return</string>
+    <string name="new_order_place">New Order Place</string>
+    <string name="total">Total</string>
+    <string name="order_items_list">Order Items List</string>
+
+    <string name="property_management_system">Property Management System</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_in_to_start_your_session">Sign in to start your session</string>
+    <string name="enter_one_time_password_otp">Enter one time password (OTP)</string>
+    <string name="search">Search</string>
+    <string name="property_id">Property ID</string>
+    <string name="notice_no">Notice No.</string>
+    <string name="search_property">Search Property</string>
+
+    <string name="_2020_assesment">2020 Assesment</string>
+    <string name="dummy_amount">100,040</string>
+    <string name="arrear_due">Arrears Due</string>
+    <string name="penalty">Penalty</string>
+    <string name="amount_paid">Amount Paid</string>
+    <string name="balance">Balance</string>
+    <string name="save">Save</string>
+    <string name="enter_amount_paying">Enter Amount Paying</string>
+    <string name="paying_amount">Paying Amount</string>
+    <string name="pre_calculated">Pre-calculated: </string>
+    <string name="payment_type">Payment Type</string>
+    <string name="total_amount">Total Amount</string>
+    <string name="enter_total_paying">Enter Total Paying</string>
+    <string name="cheque_no">Cheque No</string>
+    <string name="enter_cheque_no">Enter Cheque No</string>
+    <string name="payee_name">Payee Name</string>
+    <string name="enter_payee_name">Enter Payee Name</string>
+    <string name="details">Details</string>
+    <string name="assessment_history">Assessment History</string>
+    <string name="landlord_details">Landlord Details</string>
+    <string name="property_details">Property Details</string>
+    <string name="occupancy_details">Occupancy Details</string>
+    <string name="assessment_details">Assessment Details</string>
+    <string name="geo_registry_details">Geo-Registry Details</string>
+    <string name="assessment_year">Assessment Year</string>
+    <string name="assessment_amount">Assessment Amount</string>
+    <string name="arrears">Arrears</string>
+    <string name="first_name">First Name</string>
+    <string name="surname">Surname</string>
+    <string name="middle_name">Middle Name</string>
+    <string name="street_number">Street Number</string>
+    <string name="gender">Gender</string>
+    <string name="street_name">Street Name</string>
+    <string name="tin_number">TIN Number</string>
+    <string name="id_number">ID Number</string>
+    <string name="ward">Ward</string>
+    <string name="constituency">Constituency</string>
+    <string name="chieddom">Chieddom</string>
+    <string name="province">Province</string>
+    <string name="section">Section</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="district">District</string>
+    <string name="post_code">Post Code</string>
+
+    <string name="cash">Cash</string>
+    <string name="cheque">Cheque</string>
+    <string name="online">Online</string>
+    <string name="occupancy_type">Occupancy Type</string>
+    <string name="tenant_first_name">Tenant First Name</string>
+    <string name="mobile_number_1">Mobile Number 1</string>
+    <string name="mobile_number_2">Mobile Number 2</string>
+    <string name="property_category">Property Category</string>
+    <string name="property_type">Property Type</string>
+    <string name="roofs_material">Roofs Material</string>
+    <string name="property_dimension">Property Dimension</string>
+    <string name="value_added">Value Added</string>
+    <string name="property_use">Property Use</string>
+    <string name="property_zone">Property Zone</string>
+    <string name="calculated_property_rate">Calculated Property Rate</string>
+    <string name="assessment_images">Assessment Images</string>
+    <string name="enter_id_to_receive_the_one_time_password_otp">Enter id to receive the one time password (OTP)</string>
+    <string name="sigma_pay_">Sigma Pay</string>
+
+    <string name="hi_cashier_please_sign_in_to_start_your_session"> Hi Cashier, Please Sign In to Start</string>
+    <string name="not_cashier_please_click_here_to_sign_in">Landlord/Property Owner ? Please <font color='#2196F3'>Click here to Sign In</font></string>
+    <string name="hi_user_please_enter_your_mobile_number_to_sign_in">Please enter your mobile number to Sign In</string>
+    <string name="valid_number_associated_with_your_property_id">*Valid Number associated with your Property ID</string>
+    <string name="cashier_please_click_here_to_sign_in">Council Cashier ? Please <font color='#2196F3'>Click here to Sign In</font></string>
+    <string name="one_time_password_otp_nverification">One Time Password(OTP) \nVERIFICATION</string>
+    <string name="one_time_password">One Time Password</string>
+    <string name="to_resend_otp">Sec to <font color='#2196F3'>Resend OTP</font></string>
+    <string name="property">Property</string>
+    <string name="property_list">Property list</string>
+    <string name="error_occur">Some internal error occur</string>
+    <string name="_0">0</string>
+    <string name="isd_code">isd code</string>
+    <string name="_91">91</string>
+    <string name="payment">Payment</string>
+    <string name="enter_your_otp">Enter your OTP.</string>
+    <string name="signin">Signing In ...</string>
+    <string name="connecting_server">Connecting server...</string>
+    <string name="clear_search">Clear</string>
+    <string name="tran_date">Transaction Date</string>
+    <string name="remaining_balance">Balance Due</string>
+    <string name="amount_due">Amount Due</string>
+    <string name="cashier_name">Cashier Name</string>
+    <string name="tran_id">Transaction ID</string>
+    <string name="assessment_transactions">Transaction Details</string>
+    <string name="payment_details">Payment Details</string>
+    <string name="payment_option_list">Payment Options</string>
+
+    <string name="europay_visa_mastercard"><![CDATA[Europay Visa & Mastercard]]></string>
+    <string name="pay_on_delivery"> Pay On Delivery</string>
+
+    <string name="banks_list">Banks</string>
+    <string name="meter_number">Meter Number:</string>
+    <string name="get_property">Get Property</string>
+    <string name="no_property_found_for_this_mobile_number">No property found for this Mobile Number.</string>
+    <string name="_232">232</string>
+    <string name="mobile_money">Mobile Money</string>
+    <string name="sigma_pay">Sigma Pay</string>
+    <string name="bank">Bank</string>
+    <string name="_10000_le_1_usd"> Le 10,000 = 1 USD</string>
+    <string name="_0_usd">0 USD</string>
+    <string name="_0_gbp">0 GBP</string>
+
+
+    <string name="paying_amount_pre_calculated_le_amount_in_usd">Paying Amount Amount Due Le Amount in USD</string>
+    <string name="le_12000_1_usd">Le 12000 = 1 GBP</string>
+    <string name="please_check_your_internet_connection">Please check your internet connection</string>
+    <string name="disability_receipt">Disability Discount</string>
+    <string name="cashier_receipt">Receipt</string>
+    <string name="council_discount">Council Discounts</string>
+    <string name="landlord_property_owner_sign_in">Landlord/Property Owner</string>
+    <string name="_2020_assessed_value">2020 Assessed Value</string>
+    <string name="municipal_rate_management_system">municipal rate management system</string>
+    <string name="community_engagement_platform">community engagement platform</string>
+    <string name="community_engagement_platform_1">Community Engagement Platform</string>
+    <string name="check_in">Check In</string>
+    <string name="self_service">Self Service portal</string>
+    <string name="council_cashier">Council cashier</string>
+    <string name="council_cashier_1">Council Cashier</string>
+    <string name="press_back_again">Press back again to exit</string>
+    <string name="capture_image">Capture Image</string>
+    <string name="information">Information:</string>
+    <string name="additional_description">Additional Description:</string>
+    <string name="tag_location">Tag Location</string>
+    <string name="images">Images</string>
+    <string-array name="payment_type">
+        <item>Part Payment</item>
+        <item>Full Payment</item>
+    </string-array>
+
+    <string-array name="payment_year">
+        <item>2022</item>
+    </string-array>
+    <string name="demand_note_info">Here we can make complaints relating to your demand notes for instances of assessment; specifically ownership and biodata mistakes. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="water_info">Here we can make complaints relating to the provisioning and availability of pipe borne water, well water or Water Tank placement all for access to clean and safe drinking water;  Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="electricity_info">Here we can make complaints relating to the provisioning and availability of an electrical power grid for electrification of your homes. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="motorable_access_road_info">Here we can make complaints relating to the availability of a motrable acces road to your home/house. specifically you could also identify the harzardss that is causing you. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="flooding_roads_info">Here we can make complaints relating to damaged roads roads that are vulnerable to flooding and its hazards. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="drainage_info">Here we can make complaints relating to the provisioning of a road drainage system/network that minimizes flooding and eventual road damage.  Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="waste_management_info">Here we can make complaints relating to the provisioning of Waste Management Services in your locality. specifically a dumpsite/skiff/landfill and the possible hazards that is causing you. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="garbage_dumping_info">Here we can make complaints relating to the habit of dumping garbage in undesignated locations as mandated by the council. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="market_info">Here we can make complaints relating to the provisioning of a market where community inhabitatnts can shop for groceries and other food items. The boundary delimitation for such a complaing is limited provisioning the same on a WARD level Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="sand_mining_info">Here we can make complaints relating to the destructive habit of sandmining along the coastline which eradicated the natural beauty of the beaches and destroy the eco friendly nature of their existence. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="logging_info">Here we can make complaints relating to the destructive exercise of deforestation and logging which is a catalyst for global warming and other nature destroying effects. Your complaint will be forwarded to the respective individual/team for resolution with subsequent feedback to you by means of a notification in the app.</string>
+    <string name="pick_up_location">PickUp Location</string>
+    <string name="schedule_garbage_collection">Schedule garbage collection</string>
+    <string name="select_from_digital_address">Select digital address</string>
+    <string name="time">Time</string>
+    <string name="_8am_9am">8am-9am</string>
+    <string name="schedule_collection">Schedule collection</string>
+    <string name="select_date_amp_time_below">select date &amp; time below</string>
+    <string name="schedule_appointment">Schedule Appointment</string>
+    <string name="garbage_collection">Garbage Collection</string>
+    <string name="schedule_appointment_with">book appointment with</string>
+    <string name="add_select_digital_address">Add/Select Digital Address</string>
+    <string name="sample_address">Popsy house</string>
+    <string name="sample_address1">6CW8FP3Q+V2</string>
+    <string name="fire_incident_location">Fire incident location</string>
+    <string name="lorem_ipsum">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</string>
+    <string name="the_video">The video may contain light pattern or images thst could trigger seizures or cause discomfort for people with visual sensibilities</string>
+    <string name="by_stephen_quillen_virginia">By</string>
+    <string name="existing_user">Existing User ? <b><font color='#2275cf'>LOGIN</font></b></string>
+    <string name="new_user">New User ? <b><font color='#2275cf'>REGISTER</font></b></string>
+    <string name="schedule_app_info">Here we can schedule appointments with council key stakeholders and designated members of staff for a contact meetings.</string>
+    <string name="garbage_collection_info">Here you can schedule pickup/collection of your domestic, solid and other waste types. This service is being offered at a cost of Le 10 per every  50 Kg rice-bag.</string>
+    <string name="emergency_service_info">This is a hailing service in terms of Emergencies. The top 3 and most important respondents as listed The Police, Fire force and Ambulance/Medical Service will be part of this service ensuring its fulfilment as expected</string>
+    <string name="check_in_info">This services and features in this module are council specific. Please select the council you wish to connect with for an associated and tailored service provisioning.</string>
+    <string name="set_as_default_council">Set as default council</string>
+
+    <string-array name="arrayDistrictName">
+        <item>Select Council</item>
+        <item>Kailahun District Council</item>
+        <item>Kenema District Council</item>
+        <item>Kono District Council</item>
+        <item>Bombali District Council</item>
+        <item>Falaba District Council</item>
+        <item>Koinadugu District Council</item>
+        <item>Tonkolili District Council</item>
+        <item>Kambia District Council</item>
+        <item>Karene District Council</item>
+        <item>Port Loko District Council</item>
+        <item>Bo District Council</item>
+        <item>Bonthe District Council</item>
+        <item>Moyamba District Council</item>
+        <item>Pujehun District Council</item>
+        <item>Western Rural District Council</item>
+        <item>Freetown City Council</item>
+        <item>Bo City Council</item>
+        <item>Bonthe Municipal Council</item>
+        <item>Kenema City Council</item>
+        <item>Port Loko City Council</item>
+        <item>Koidu New Sembehun City Council</item>
+        <item>Makeni City Council</item>
+    </string-array>
+    <string name="legal_terms">Legal terms</string>
+    <string name="sierra_leone">Sierra Leone</string>
+    <string name="country_region">Country &amp; Region</string>
+    <string name="language">Language</string>
+    <string name="welcome_to">Welcome to the Koinadugu District Council</string>
+    <string name="constituencies_colon">constituencies:</string>
+    <string name="district_colon">District:</string>
+    <string name="province_colon">province:</string>
+    <string name="ward_colon">Wards:</string>
+    <string name="continue_dot">Continue...</string>
+    <string name="please_select_council">Please select a council to continue</string>
+    <string name="loading_please_wait">Loading Please Wait ...</string>
+    <string name="registering_please_wait">Registering Please Wait ...</string>
+    <string name="logging_in_please_wait">Logging in Please Wait ...</string>
+    <string name="download_receipt">Download Receipt</string>
+    <string name="my_account">My Account</string>
+    <string name="personal_info">Personal Info</string>
+    <string name="user_settings">User settings</string>
+    <string name="remember_me">Remember Me</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>

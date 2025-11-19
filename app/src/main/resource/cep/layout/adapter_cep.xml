@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frmlytCepMenu"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dimen160dp"
+    android:background="@drawable/bg_square_black_border"
+    android:layout_marginHorizontal="@dimen/dimen6dp"
+    android:layout_marginVertical="@dimen/dimen6dp">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivCep"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="@dimen/dimen16dp"
+        android:padding="@dimen/dimen16dp"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_marginHorizontal="@dimen/dimen16dp"
+        android:layout_marginBottom="@dimen/dimen16dp"
+        android:gravity="center"
+        android:text="@string/municipal_rate_management_system"
+        android:textColor="@color/navy_blue"
+        android:textSize="@dimen/textSmall12sp"
+        android:textStyle="bold" />
+</FrameLayout>

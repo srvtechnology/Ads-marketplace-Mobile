@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <include layout="@layout/toolbar_header_back" />
+    <TextView
+        android:id="@+id/tvReadMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SMS Message "
+        android:visibility="gone"
+        />
+
+    <ImageView
+        android:layout_width="@dimen/dimen150dp"
+        android:layout_height="@dimen/dimen140dp"
+        android:text="@string/app_name"
+        android:src="@drawable/ic_splash"
+        android:textSize="22sp"
+        android:textColor="@color/blue_light"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/dimen40dp"
+        android:fontFamily="@font/font_roboto_regular"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="2dp"
+        android:text="@string/one_time_password_otp_nverification"
+        android:textAlignment="center"
+        android:textSize="20sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="30dp">
+
+        <EditText
+            android:id="@+id/et1Box"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="5dp"
+            android:background="@drawable/bg_square_otp__blue_border"
+            android:gravity="center"
+            android:hint="0"
+            android:inputType="number"
+            android:maxLength="1"
+
+            />
+
+        <EditText
+            android:id="@+id/et2Box"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_square_otp__blue_border"
+            android:gravity="center"
+            android:inputType="number"
+            android:hint="0"
+            android:maxLength="1"
+
+            />
+
+        <EditText
+            android:id="@+id/et3Box"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_square_otp__blue_border"
+            android:gravity="center"
+            android:hint="0"
+            android:inputType="number"
+            android:maxLength="1" />
+
+        <EditText
+            android:id="@+id/et4Box"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="10dp"
+            android:background="@drawable/bg_square_otp__blue_border"
+            android:gravity="center"
+            android:hint="0"
+            android:inputType="number"
+            android:maxLength="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dimen30dp"
+        android:layout_gravity="center_horizontal"
+        >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Didn\'t Received ? Wait"
+            android:textAlignment="center"
+            android:textSize="12sp"
+            android:padding="@dimen/dimen3dp"
+            />
+
+
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="0:00"
+            android:textAlignment="center"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:padding="@dimen/dimen3dp"
+            />
+
+        <TextView
+            android:id="@+id/tvResend"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/to_resend_otp"
+            android:textAlignment="center"
+            android:textSize="13sp"
+            android:padding="@dimen/dimen3dp"
+            />
+
+
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btVerify"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/etEmail"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_btn_login"
+        android:text="@string/verify"
+        android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="13sp"
+        />
+</LinearLayout>

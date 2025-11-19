@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorWhite">
+
+    <include
+        layout="@layout/toolbar_header_back"/>
+
+
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:orientation="vertical"
+            android:paddingVertical="@dimen/dimen12dp"
+            android:layout_marginStart="@dimen/dimen12dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/country_region"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/textSmall12sp" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/tvCountry"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/sierra_leone"
+                android:layout_marginTop="@dimen/dimen4dp"
+                android:textColor="@color/gray_text_color"
+                android:textSize="@dimen/textSmall12sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen1dp"
+            android:background="@color/lightGray"
+            android:layout_marginHorizontal="@dimen/dimen12dp"/>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/dimen12dp"
+        android:layout_marginStart="@dimen/dimen12dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/language"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/textSmall12sp" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvLanguage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="English"
+            android:layout_marginTop="@dimen/dimen4dp"
+            android:textColor="@color/gray_text_color"
+            android:textSize="@dimen/textSmall12sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen1dp"
+        android:background="@color/lightGray"
+        android:layout_marginHorizontal="@dimen/dimen12dp"/>
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:paddingVertical="@dimen/dimen12dp"
+        android:layout_marginStart="@dimen/dimen12dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Currency"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/textSmall12sp" />
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvCurrency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="New Leones(NLE)"
+            android:layout_marginTop="@dimen/dimen4dp"
+            android:textColor="@color/gray_text_color"
+            android:textSize="@dimen/textSmall12sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen1dp"
+        android:background="@color/lightGray"
+        android:layout_marginHorizontal="@dimen/dimen12dp"/>
+
+    <include
+        layout="@layout/fragment_cep_menu"/>
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>

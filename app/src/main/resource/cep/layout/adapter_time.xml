@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/llTime"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_alignParentEnd="true"
+    android:orientation="horizontal">
+
+    <com.google.android.material.radiobutton.MaterialRadioButton
+        android:id="@+id/rbTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:buttonTint="@color/lightGreen"
+        android:checked="true" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginEnd="@dimen/dimen4dp"
+        android:background="@drawable/rounded_corner_grey1"
+        android:gravity="center"
+        android:padding="@dimen/dimen4dp"
+        android:text="@string/_8am_9am"
+        android:textColor="@color/dark_grey"
+        android:textSize="@dimen/textSmall12sp"
+        android:textStyle="bold" />
+</androidx.appcompat.widget.LinearLayoutCompat>

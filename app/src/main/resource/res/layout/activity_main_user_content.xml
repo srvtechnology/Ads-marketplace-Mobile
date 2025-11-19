@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:paddingStart="@dimen/dimen20dp"
+    android:paddingTop="@dimen/dimen20dp"
+    android:paddingEnd="@dimen/dimen20dp"
+    android:paddingBottom="@dimen/dimen10dp"
+    android:scrollbars="none"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:showIn="@layout/app_bar_cashier">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/activityMain_et_propertyId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_corner_solid_grey"
+            android:gravity="center_vertical"
+            android:hint="@string/property_id"
+            android:imeOptions="actionNext"
+            android:inputType="text"
+            android:padding="@dimen/layout_border_margin_16dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/headerTextSize14sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <EditText
+            android:id="@+id/activityMain_et_noticeNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen15dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+
+            android:gravity="center_vertical"
+            android:hint="@string/notice_no"
+            android:imeOptions="actionDone"
+            android:inputType="number"
+            android:padding="@dimen/layout_border_margin_16dp"
+            android:textColor="@color/colorBlack"
+            android:textSize="@dimen/headerTextSize14sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityMain_et_propertyId" />
+
+
+        <Button
+            android:id="@+id/activityMain_bt_search"
+            style="@style/styleButtonWrapContent"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height40dp"
+            android:layout_marginTop="@dimen/button_height40dp"
+            android:background="@drawable/rounded_corner_solid_blue"
+            android:text="@string/search"
+            android:textAllCaps="false"
+            android:textColor="@color/colorWhite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityMain_et_noticeNo" />
+
+        <include
+            android:id="@+id/activityMain_view_search"
+            layout="@layout/activity_user_search_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen20dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityMain_bt_search" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
+

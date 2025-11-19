@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="nav_header_vertical_spacing">8dp</dimen>
+    <dimen name="nav_header_height">176dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="headerTextSize14sp">14sp</dimen>
+    <dimen name="bodyTextSize12sp">12sp</dimen>
+    <dimen name="smallTestSize11sp">11sp</dimen>
+    <dimen name="smallTestSize9sp">9sp</dimen>
+    <dimen name="toolbar_back_height30dp">30dp</dimen>
+
+
+    <dimen name="iconClose16dp">16dp</dimen>
+
+
+    <dimen name="layout_border_margin_8dp">8dp</dimen>
+
+    <dimen name="layout_border_margin_15dp">15dp</dimen>
+    <dimen name="layout_border_margin_18dp">18dp</dimen>
+    <dimen name="layout_border_margin_20dp">20dp</dimen>
+
+    <dimen name="dimen1dp">1dp</dimen>
+    <dimen name="dimen5dp">5dp</dimen><!--two line gap-->
+    <dimen name="dimen8dp">8dp</dimen>
+    <dimen name="dimen9dp">9dp</dimen>
+
+    <dimen name="dimen15dp">15dp</dimen>
+    <dimen name="dimen20dp">20dp</dimen>
+    <dimen name="dimen30dp">30dp</dimen>
+    <dimen name="dimen40dp">40dp</dimen>
+    <dimen name="dimen60dp">60dp</dimen>
+    <dimen name="dimen63dp">63dp</dimen><!--feed page image size-->
+    <dimen name="dimen100dp">100dp</dimen>
+    <dimen name="dimen2dp">2dp</dimen>
+    <dimen name="margin_2dp">2dp</dimen>
+
+    <dimen name="button_height30dp">30dp</dimen>
+    <dimen name="margin_1dp">1dp</dimen>
+
+    <dimen name="list_image_size">55dp</dimen>
+
+    <dimen name="margin_between_text5dp">5dp</dimen>
+    <dimen name="dimen7dp">7dp</dimen>
+    <dimen name="image_attach_height">200dp</dimen>
+    <dimen name="padding_2dp">2dp</dimen>
+    <dimen name="image_attach_height_half">100dp</dimen>
+    <dimen name="dimen3dp">3dp</dimen>
+    <dimen name="bottom_adview_height50dp">50dp</dimen>
+    <dimen name="profile_pic_110dp">110dp</dimen>
+    <dimen name="margin_3dp">3dp</dimen>
+
+    <dimen name="dimen50dp">50dp</dimen>
+    <dimen name="dimen150dp">150dp</dimen>
+    <dimen name="margin_200dp">200dp</dimen>
+
+    <dimen name="dimen160dp">160dp</dimen>
+    <dimen name="dimen70dp">70dp</dimen>
+    <dimen name="dimen140dp">140dp</dimen>
+    <dimen name="dimen170dp">170dp</dimen>
+    <dimen name="dimen200dp">200dp</dimen>
+    <dimen name="dimen110dp">110dp</dimen>
+    <dimen name="dimen18sp">18sp</dimen>
+    <dimen name="dimen16sp">16sp</dimen>
+    <dimen name="dimen17sp">17sp</dimen>
+
+    <dimen name="like_button_height_25dp">25dp</dimen>
+
+    <dimen name="layout_space_margin_20dp">20dp</dimen>
+    <dimen name="layout_border_margin_5dp">5dp</dimen>
+
+    <dimen name="dialog_boarder_margin_20dp">20dp</dimen>
+    <dimen name="dialog_boarder_margin_15dp">15dp</dimen>
+    <dimen name="dialog_view_padding">15dp</dimen>
+    <dimen name="margin_25dp">25dp</dimen>
+    <dimen name="margin_35dp">35dp</dimen>
+    <dimen name="margin_80dp">80dp</dimen>
+
+    <dimen name="margin_220dp">220dp</dimen>
+    <dimen name="dimen45dp">45dp</dimen>
+
+    <dimen name="dimen87">88dp</dimen>
+    <dimen name="dimen62">63dp</dimen>
+
+    <dimen name="margin_180dp">180dp</dimen>
+
+    <dimen name="custom_image_padding">7dp</dimen>
+    <dimen name="dimen85dp">85dp</dimen>
+    <dimen name="dimen80dp">80dp</dimen>
+    <dimen name="dimen36sp">36dp</dimen>
+
+    <dimen name="dimen4dp">4dp</dimen>
+    <dimen name="dimen12dp">12dp</dimen>
+    <dimen name="dimen16dp">16dp</dimen>
+    <dimen name="dimen18dp">18dp</dimen>
+
+    <dimen name="dimen240dp">240dp</dimen>
+
+    <dimen name="padding_common">@dimen/dimen4dp</dimen>
+
+    <dimen name="padding_small">@dimen/dimen2dp</dimen>
+    <dimen name="padding_medium">@dimen/dimen4dp</dimen>
+    <dimen name="padding_large">@dimen/dimen10dp</dimen>
+    <dimen name="padding_xlarge">@dimen/dimen16dp</dimen>
+
+    <dimen name="margin_bottom_small">@dimen/dimen4dp</dimen>
+
+    <dimen name="list_item_side_margin">@dimen/padding_xlarge</dimen>
+
+    <dimen name="corners_small_value">3dp</dimen>
+    <dimen name="image_view_small_avatar_layout_width">48dp</dimen>
+    <dimen name="avatar_border_width">1dp</dimen>
+
+    <dimen name="attach_image_width_preview">@dimen/dimen80dp</dimen>
+    <dimen name="attach_image_height_preview">@dimen/dimen80dp</dimen>
+
+    <dimen name="host_icon_width">@dimen/dimen12dp</dimen>
+    <dimen name="host_icon_height">@dimen/dimen12dp</dimen>
+
+    <dimen name="smallTestSize8sp">8sp</dimen>
+    <dimen name="menu_item_icon_size">18dp</dimen>
+    <dimen name="dimen90dp">90dp</dimen>
+    <dimen name="dimen6dp">6dp</dimen>
+    <dimen name="dimen24dp">24dp</dimen>
+    <dimen name="dimen28dp">28dp</dimen>
+    <dimen name="textSmall12sp">12sp</dimen>
+    <dimen name="textMedium14sp">14sp</dimen>
+    <dimen name="textLarge24sp">24sp</dimen>
+    <dimen name="dimen55dp">55dp</dimen>
+    <dimen name="textLarge20sp">20sp</dimen>
+    <dimen name="dimens25sp">25sp</dimen>
+    <dimen name="dimens17sp">17sp</dimen>
+    <dimen name="layout_border_margin_16dp">16dp</dimen>
+    <dimen name="margin_0dp">0dp</dimen>
+    <dimen name="dimen10dp">10dp</dimen>
+    <dimen name="button_height40dp">40dp</dimen>
+    <dimen name="dimen120dp">120dp</dimen>
+    <dimen name="dimen25dp">25dp</dimen>
+    <dimen name="dimen130dp">130dp</dimen>
+    <dimen name="dimen95dp">95dp</dimen>
+    <dimen name="dimen180dp">180dp</dimen>
+    <dimen name="dimen224dp">224dp</dimen>
+    <dimen name="dimen48dp">48dp</dimen>
+    <dimen name="dimen32dp">32dp</dimen>
+    <dimen name="dimen10sp">10sp</dimen>
+    <dimen name="dimen400dp">400dp</dimen>
+    <dimen name="dimen13sp">13sp</dimen>
+    <dimen name="dimen32sp">32sp</dimen>
+    <dimen name="dimen300dp">300dp</dimen>
+</resources>
+

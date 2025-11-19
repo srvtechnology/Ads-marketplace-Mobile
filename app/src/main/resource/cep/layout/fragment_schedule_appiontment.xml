@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_header_back" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fadingEdge="none"
+        android:scrollbars="none">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen12dp"
+                android:background="@drawable/rounded_corner_grey1"
+                android:orientation="vertical"
+                android:padding="@dimen/dimen8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/information"
+                    android:textAllCaps="true"
+                    android:textColor="@color/navy_blue"
+                    android:textSize="@dimen/textMedium14sp"
+                    android:textStyle="bold" />
+
+                <com.codesgood.views.JustifiedTextView
+                    android:id="@+id/tvInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/schedule_app_info"
+                    android:textColor="@color/colorDarkGreen"
+                    android:textStyle="bold"
+                    android:textSize="@dimen/textMedium14sp"
+                    android:justificationMode="inter_word"/>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/schedule_appointment"
+                android:textAllCaps="true"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:textColor="@color/navy_blue"
+                android:textSize="@dimen/textMedium14sp"
+                android:textStyle="bold" />
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:layout_marginTop="@dimen/dimen8dp"
+                android:orientation="horizontal">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="1"
+                    android:text="@string/schedule_appointment_with"
+                    android:textAllCaps="true"
+                    android:textColor="@color/dark_grey"
+                    android:textSize="@dimen/textSmall12sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="@dimen/dimen12dp"
+                    android:background="@drawable/rounded_corner_grey1">
+
+                    <androidx.appcompat.widget.AppCompatSpinner
+                        android:id="@+id/appointmentSpinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="@dimen/dimen4dp" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="@dimen/dimen32dp"
+                        android:layout_height="@dimen/dimen32dp"
+                        android:layout_gravity="end"
+                        app:srcCompat="@drawable/ic_baseline_arrow_drop_down_24" />
+                </FrameLayout>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:layout_marginTop="@dimen/dimen8dp"
+                android:text="@string/select_date_amp_time_below"
+                android:textAllCaps="true"
+                android:textColor="@color/dark_grey"
+                android:textSize="@dimen/textSmall12sp"
+                android:textStyle="bold" />
+
+            <CalendarView
+                android:id="@+id/calendarView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:layout_marginTop="@dimen/dimen12dp"
+                android:background="@drawable/rounded_corner_grey2"
+                android:dateTextAppearance="@style/CalenderViewDateCustomText"
+                android:theme="@style/CalenderViewCustom"
+                android:weekDayTextAppearance="@style/CalenderViewWeekCustomText" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:layout_marginTop="@dimen/dimen12dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:background="@drawable/rounded_corner_solid_blue"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/dimen24dp"
+                    android:paddingVertical="@dimen/dimen8dp"
+                    android:text="@string/time"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSmall12sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="@dimen/dimen40dp"
+                android:layout_marginBottom="@dimen/dimen48dp"
+                android:background="@drawable/rounded_corner_solid_green"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/dimen32dp"
+                android:paddingVertical="@dimen/dimen8dp"
+                android:text="@string/schedule_appointment"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSmall12sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
+</androidx.appcompat.widget.LinearLayoutCompat>

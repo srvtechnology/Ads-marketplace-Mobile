@@ -1,0 +1,145 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.dpm.payment'
+    compileSdkVersion 35
+
+    defaultConfig {
+        applicationId "com.dpm.payment"
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName "1.0.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
+    }
+
+    signingConfigs {
+        development {
+            keyAlias 'drm'
+            keyPassword 'drm123'
+            storePassword 'drm123'
+            storeFile file('drm.jks')
+        }
+        qa {
+            keyAlias 'drm'
+            keyPassword 'drm123'
+            storePassword 'drm123'
+            storeFile file('drm.jks')
+        }
+        release {
+            keyAlias 'drm'
+            keyPassword 'drm123'
+            storePassword 'drm123'
+            storeFile file('drm.jks')
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            signingConfig signingConfigs.development
+            buildConfigField "boolean", "LOG_STAT", "true"
+            buildConfigField "String", "BASE_URL", "\"https://dpm.sigmaventuressl.com/apiv2\""
+            buildConfigField "String", "BASE_URL_MAIN", "\"https://dpm.sigmaventuressl.com\""
+            buildConfigField "String", "BASE_URL_TERMS", "\"https:l\""
+        }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "LOG_STAT", "true"
+            buildConfigField "boolean", "CRASHLATICS_SEND", "true"
+            buildConfigField "String", "BASE_URL", "\"https://dpm.sigmaventuressl.com/apiv2\""
+            buildConfigField "String", "BASE_URL_MAIN", "\"https://dpm.sigmaventuressl.com\""
+            buildConfigField "String", "BASE_URL_TERMS", "\"https:l\""
+        }
+    }
+
+    flavorDimensions "env"
+    productFlavors {
+        development {
+            dimension "env"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            signingConfig signingConfigs.development
+        }
+        qa {
+            dimension "env"
+            applicationIdSuffix ".qa"
+            versionNameSuffix "-qa"
+            signingConfig signingConfigs.qa
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    buildFeatures {
+        viewBinding true
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs += 'src/main/kotlin'
+            res.srcDirs += [
+                    'src/main/resource/res',
+                    'src/main/resource/cep',
+                    'src/main/resource/complaints',
+                    'src/main/resource/emergencyservice',
+                    'src/main/resource/login'
+            ]
+        }
+    }
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:2.1.0"
+    implementation 'androidx.core:core-ktx:1.16.0'
+    implementation "androidx.appcompat:appcompat:1.7.1"
+    implementation "androidx.legacy:legacy-support-v4:1.0.0"
+    implementation "com.google.android.material:material:1.12.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.2.1"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.9.2"
+    implementation "androidx.navigation:navigation-ui-ktx:2.9.2"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.9.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2"
+
+    implementation "com.google.firebase:firebase-core:21.1.1"
+    implementation "com.google.firebase:firebase-messaging:25.0.0"
+    implementation "com.google.android.gms:play-services-maps:19.2.0"
+    implementation "com.google.android.gms:play-services-location:21.3.0"
+
+    implementation "com.google.code.gson:gson:2.10.1"
+    implementation "com.karumi:dexter:6.2.3"
+    implementation "com.android.volley:volley:1.2.1"
+    implementation 'com.github.stfalcon-studio:SmsVerifyCatcher:0.3.3'
+    implementation "com.squareup.picasso:picasso:2.71828"
+    implementation "de.hdodenhof:circleimageview:3.1.0"
+    implementation "com.github.dhaval2404:imagepicker:1.7.1"
+    implementation "com.codesgood:justifiedtextview:1.1.0"
+    implementation "com.hbb20:ccp:2.7.0"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+    implementation "com.squareup.retrofit2:converter-scalars:2.8.1"
+    implementation "com.squareup.okhttp3:logging-interceptor:4.9.0"
+
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.6.1"
+}

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.appcompat.widget.LinearLayoutCompat
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/frmlytCepMenu"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivCep"
+            android:layout_width="@dimen/dimen28dp"
+            android:layout_height="@dimen/dimen28dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="@dimen/dimen12dp" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/dimen12dp"
+            android:paddingVertical="@dimen/dimen16dp"
+            android:text="@string/sample_address1"
+            android:textColor="@color/dark_grey"
+            android:textSize="@dimen/textMedium14sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dimen1dp"
+        android:background="@color/lightGray"
+        android:layout_marginHorizontal="@dimen/dimen12dp"/>
+</androidx.appcompat.widget.LinearLayoutCompat>

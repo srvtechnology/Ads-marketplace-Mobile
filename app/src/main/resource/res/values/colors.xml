@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2275cf</color>
+    <color name="colorPrimaryDark">#2196F3</color>
+    <color name="colorAccent">#D81B60</color>
+   <!-- <color name="colorPrimaryDark">#2196F3</color>-->
+   <!-- <color name="blue_light">#2255FF</color>-->
+
+    <color name="blue_light">#2275cf</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="colorRed">#890428</color>
+
+    <color name="colorWhite">#ffffff</color>
+    <color name="lightGreen">#6CBD45</color>
+    <color name="colorBlue">#2196F3</color>
+    <color name="green">#4BB543</color>
+
+    <color name="lightGray">#cccccc</color> <!--line color-->
+    <color name="colorBlack">#020202</color>
+    <color name="textGrey">#383838</color>
+    <color name="textLightGrey">#6C6C6C</color>
+
+    <color name="textDarkGreen">#1B5116</color> <!--line color-->
+
+    <color name="homeDarkPink">#A30B30</color> <!--line color-->
+
+    <color name="editext_background_grey">#F1F3F2</color>
+    <color name="gray_text_color">#8b8b8b</color>
+    <color name="gray_text1_color">#BBBBBB</color>
+    <color name="white_text_color">#FFFFFF</color>
+    <color name="black_text_color">#000000</color>
+    <color name="black3_text_color">#333333</color>
+    <color name="black4_text_color">#444444</color>
+    <color name="colorButtonFacebook">#395799</color>
+    <color name="colorButtonFacebook_d">#393399</color>
+    <color name="colorButtonGoogle">#d2422c</color>
+    <color name="colorButtonGoogle_d">#dd422c</color>
+    <color name="fun_green">#006f39</color>
+    <color name="wild_sand">#f5f5f5</color>
+    <color name="azure_rediance">#597ce6</color>
+    <color name="deep_komaru">#26126e</color>
+    <color name="maroon">#800000</color>
+    <color name="icon_leaf_color">#6cbd45</color>
+    <color name="navy_blue">#000080</color>
+    <color name="lightGray1">#DFDFDF</color>
+    <color name="dark_grey">#666666</color>
+    <color name="color_light_blue">#DBE9F4</color>
+    <color name="color_light_grey2">#FDFDFD</color>
+    <color name="colorYellow">#F38800</color>
+    <color name="colorBorder">#8EA5AA</color>
+    <color name="colorDarkGreen">#00A300</color>
+    <color name="colorRed1">#E25D56</color>
+    <!-- <color name="colorPrimary">#2275cf</color>
+     <color name="colorPrimaryDark">#1E63AD</color>-->
+
+</resources>

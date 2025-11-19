@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <application
+        android:name=".DPMPaymentApplication"
+        android:allowBackup="true"
+        android:usesCleartextTraffic="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        tools:ignore="GoogleAppIndexingWarning">
+
+
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"/>
+        </provider>
+
+
+
+        <activity
+            android:name="com.dpm.payment.activities.WebViewActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.MobileWalletActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.cashier.WebViewPaymentRecipt"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.ActivityUserLogin"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="adjustResize|stateAlwaysHidden"
+            tools:node="merge">
+
+        </activity>
+        <activity
+            android:name="com.dpm.payment.activities.ActivitySplash"
+            android:exported="true"
+            android:screenOrientation="fullSensor"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.BankListActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.PaymentOptionUserActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.WebViewPaymentActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.landlord.LandlordPropertyViewDetails"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.PickUpLocationActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:label=""
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.cashier.ActivityMainCashierProperty"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.landlord.LandlordPropertyDetailsActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.cashier.ActivityCashierLogin"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.ActivityHelp"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+
+        <activity
+            android:name="com.dpm.payment.activities.cashier.ActivityMainDetails"
+            android:exported="true"
+            android:label="@string/app_name"
+
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden" />
+        <activity
+            android:name="com.dpm.payment.activities.user.ActivityMainUser"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.ActivityUserOTP"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.user.ListPropertyUserActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+        <activity
+            android:name="com.dpm.payment.activities.cep.ActivityCep"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge" />
+
+        <activity
+            android:name="com.dpm.payment.activities.login.ActivityLogin"
+            android:exported="true"
+
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreenApplication"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            tools:node="merge">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>

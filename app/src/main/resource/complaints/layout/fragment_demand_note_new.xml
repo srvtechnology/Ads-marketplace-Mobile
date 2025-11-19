@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar_header_back" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="none"
+        android:fadingEdge="none">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen12dp"
+                android:background="@drawable/rounded_corner_grey1"
+                android:orientation="vertical"
+                android:padding="@dimen/dimen8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/information"
+                    android:textAllCaps="true"
+                    android:textColor="@color/navy_blue"
+                    android:textSize="@dimen/textMedium14sp"
+                    android:textStyle="bold" />
+                <com.codesgood.views.JustifiedTextView
+                    android:id="@+id/tvInfo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/information"
+                    android:textColor="@color/colorDarkGreen"
+                    android:textSize="@dimen/textMedium14sp"
+                    android:textStyle="bold"
+                    android:justificationMode="inter_word"/>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvDemandNote"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:orientation="vertical"
+                android:scrollbars="none"
+                android:fadingEdge="none"/>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen8dp"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:background="@drawable/rounded_corner_grey1"
+                android:orientation="vertical"
+                android:padding="@dimen/dimen8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/additional_description"
+                    android:textAllCaps="true"
+                    android:textColor="@color/navy_blue"
+                    android:textSize="@dimen/textSmall12sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dimen8dp"
+                    android:background="@drawable/rounded_corner_grey1"
+                    android:gravity="top|start"
+                    android:inputType="textMultiLine|textNoSuggestions"
+                    android:lines="5"
+                    android:padding="@dimen/dimen4dp"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="@dimen/textMedium14sp" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:orientation="horizontal"
+                android:layout_marginTop="@dimen/dimen8dp">
+
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="@dimen/dimen4dp"
+                    android:background="@drawable/rounded_corner_green1"
+                    android:gravity="center"
+                    android:paddingHorizontal="@dimen/dimen12dp"
+                    android:paddingVertical="@dimen/dimen8dp"
+                    android:text="Property ID"
+                    android:textAllCaps="true"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/textSmall12sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edtPropertyId"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen4dp"
+                    android:paddingHorizontal="@dimen/dimen6dp"
+                    android:background="@drawable/rounded_corner_grey"
+                    android:paddingVertical="@dimen/dimen8dp"
+                    android:textColor="@color/colorBlack"
+                    android:textSize="@dimen/textSmall12sp"
+                    android:imeOptions="actionDone"/>
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen12dp"
+                android:layout_marginVertical="@dimen/dimen8dp"
+                android:background="@color/lightGray1"
+                android:gravity="center"
+                android:paddingVertical="@dimen/dimen4dp"
+                android:paddingStart="@dimen/dimen12dp"
+                android:paddingEnd="@dimen/dimen48dp"
+                android:text="@string/images"
+                android:textAllCaps="true"
+                android:textColor="@color/colorBlack"
+                android:textSize="@dimen/textSmall12sp"
+                android:textStyle="bold" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvImages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:fadingEdge="none"/>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/dimen12dp"
+                android:layout_gravity="end"
+                android:background="@drawable/rounded_corner_solid_blue"
+                android:gravity="center"
+                android:paddingHorizontal="@dimen/dimen32dp"
+                android:layout_marginVertical="@dimen/dimen12dp"
+                android:paddingVertical="@dimen/dimen8dp"
+                android:text="@string/submit"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/textSmall12sp"
+                android:textStyle="bold" />
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
+</androidx.appcompat.widget.LinearLayoutCompat>

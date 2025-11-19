@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
+
+    <Button
+        android:visibility="visible"
+        android:id="@+id/btn_edit_property_details"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dimen30dp"
+        android:layout_marginEnd="@dimen/dialog_boarder_margin_15dp"
+        android:layout_gravity="end"
+        android:background="@drawable/bg_btn_login"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Edit"
+        android:textColor="@color/white" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_marginTop="@dimen/dimen5dp"
+        android:id="@+id/rvProperty"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btn_edit_property_details"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/rowview_details"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite"
+        android:paddingTop="@dimen/layout_border_margin_16dp"
+        android:paddingBottom="@dimen/layout_border_margin_16dp">
+
+        <View
+            android:id="@+id/activityUserSearchResult_view_grey"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/margin_0dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+            app:layout_constraintBottom_toBottomOf="@+id/activityUserSearchResult_tv_balance_value"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/dummy_name"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@+id/activityUserSearchResult_bt_view_details"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_bt_view_details"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/activityUserSearchResult_bt_view_details" />
+
+        <Button
+            android:id="@+id/activityUserSearchResult_bt_view_details"
+            style="@style/styleButtonWrapContent"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height40dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:background="@drawable/rounded_corner_solid_blue"
+            android:text="@string/view_details"
+            android:textAllCaps="false"
+            android:textColor="@color/colorWhite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/activityUserSearchResult_view_grey" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_assesment_year"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dimen80dp"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen80dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/_2020_assesment"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_assesment_year_value"
+            app:layout_constraintHorizontal_weight=".75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_bt_view_details" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_assesment_year_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/dummy_amount"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".25"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_assesment_year"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_bt_view_details" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_discount_applicable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="Discount Applicable"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_discount_applicable_value"
+            app:layout_constraintHorizontal_weight=".65"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_assesment_year" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_discount_applicable_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen2dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:gravity="end"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".65"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_discount_applicable"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_assesment_year_value" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_rate_payable"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="Rate Payable"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_rate_payable_value"
+            app:layout_constraintHorizontal_weight=".65"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_discount_applicable" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_rate_payable_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen2dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:gravity="end"
+            android:textColor="@color/navy_blue"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".65"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_rate_payable"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_discount_applicable_value" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_arrear"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/arrear_due"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_arrear_value"
+            app:layout_constraintHorizontal_weight=".75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_rate_payable" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_arrear_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/dummy_amount"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".25"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_arrear"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_rate_payable_value" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_penalty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/penalty"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_penalty_value"
+            app:layout_constraintHorizontal_weight=".75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_arrear" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_penalty_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/dummy_amount"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".25"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_penalty"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_arrear" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_amount_paid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/amount_paid"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_amount_paid_value"
+            app:layout_constraintHorizontal_weight=".75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_penalty" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_amount_paid_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/dummy_amount"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".25"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_amount_paid"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_penalty" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_balance"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:text="@string/balance"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_tv_balance_value"
+            app:layout_constraintHorizontal_weight=".75"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_amount_paid" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_balance_value"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen10dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:paddingBottom="@dimen/dimen20dp"
+            android:text="@string/dummy_amount"
+            android:textColor="@color/navy_blue"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".25"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_balance"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_amount_paid" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_paying_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:text="@string/paying_amount"
+            android:textColor="@color/navy_blue"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_paying_amount"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_view_grey" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_paying_pre_calculate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/margin_between_text5dp"
+            android:text="@string/pre_calculated"
+            android:textColor="@color/navy_blue"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_paying_amount"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_paying_amount" />
+
+        <EditText
+            android:id="@+id/activityUserSearchResult_et_paying_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+            android:hint="@string/enter_amount_paying"
+            android:padding="@dimen/dimen16dp"
+            android:textColor="@color/navy_blue"
+            android:textSize="@dimen/headerTextSize14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".60"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_paying_pre_calculate"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_view_grey" />
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_payment_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:text="@string/payment_type"
+            android:textColor="@color/navy_blue"
+            app:layout_constraintBottom_toBottomOf="@+id/activityUserSearchResult_rg_payment_type"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_rg_payment_type"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_et_paying_amount" />
+
+        <RadioGroup
+            android:id="@+id/activityUserSearchResult_rg_payment_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".60"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_payment_type"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_et_paying_amount">
+
+            <androidx.appcompat.widget.AppCompatRadioButton
+                android:id="@+id/activityUserSearchResult_rb_one"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/cheque" />
+
+            <androidx.appcompat.widget.AppCompatRadioButton
+                android:id="@+id/activityUserSearchResult_rb_two"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:buttonTint="@color/colorPrimary"
+                android:text="@string/online" />
+
+        </RadioGroup>
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_total_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:text="@string/total_amount"
+            android:textColor="@color/navy_blue"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_paying_amount"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_rg_payment_type" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_total_pre_calculate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/margin_between_text5dp"
+            android:text="@string/pre_calculated"
+            android:textColor="@color/navy_blue"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_paying_amount"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_tv_total_amount" />
+
+        <EditText
+            android:id="@+id/activityUserSearchResult_et_total_amount"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+            android:hint="@string/enter_total_paying"
+            android:inputType="numberDecimal"
+            android:padding="@dimen/dimen16dp"
+            android:textColor="@color/navy_blue"
+            android:textSize="@dimen/headerTextSize14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".60"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_paying_pre_calculate"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_rg_payment_type" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_cheque_no"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:text="@string/cheque_no"
+            android:textColor="@color/navy_blue"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_cheque_no"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/activityUserSearchResult_et_cheque_no" />
+
+
+        <EditText
+            android:id="@+id/activityUserSearchResult_et_cheque_no"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+            android:hint="@string/enter_cheque_no"
+            android:padding="@dimen/dimen16dp"
+            android:textColor="@color/navy_blue"
+            android:textSize="@dimen/headerTextSize14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".60"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_cheque_no"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_et_total_amount" />
+
+
+        <TextView
+            android:id="@+id/activityUserSearchResult_tv_payee_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:text="@string/payee_name"
+            android:textColor="@color/navy_blue"
+            app:layout_constraintEnd_toStartOf="@+id/activityUserSearchResult_et_payee_name"
+            app:layout_constraintHorizontal_weight=".40"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/activityUserSearchResult_et_payee_name" />
+
+
+        <EditText
+            android:id="@+id/activityUserSearchResult_et_payee_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen10dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:layout_marginEnd="@dimen/dimen10dp"
+            android:background="@drawable/rounded_corner_solid_grey"
+            android:hint="@string/enter_payee_name"
+            android:inputType="textCapWords"
+            android:padding="@dimen/dimen16dp"
+            android:textColor="@color/navy_blue"
+            android:textSize="@dimen/headerTextSize14sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_weight=".60"
+            app:layout_constraintStart_toEndOf="@+id/activityUserSearchResult_tv_cheque_no"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_et_cheque_no" />
+
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/activityUserSearchResult_rv_dates"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dimen16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_et_payee_name" />
+
+
+        <Button
+            android:id="@+id/activityOrderDetails_bt_save"
+            style="@style/styleButtonWrapContent"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/button_height40dp"
+            android:layout_marginTop="@dimen/dimen16dp"
+            android:background="@drawable/rounded_corner_solid_blue"
+            android:text="@string/save"
+            android:textAllCaps="false"
+            android:textColor="@color/colorWhite"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/activityUserSearchResult_rv_dates" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
