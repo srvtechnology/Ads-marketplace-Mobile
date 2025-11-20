@@ -673,32 +673,33 @@ class _ProfileScreenState extends State<ProfileScreen>
                           context: context);
                     },
                   ),
-                  customTile(
-                    context,
-                    title: "subscription".translate(context),
-                    svgImagePath: AppIcons.subscription,
-                    onTap: () async {
-                      UiUtils.checkUser(
-                          onNotGuest: () {
-                            Navigator.pushNamed(
-                                context, Routes.subscriptionPackageListRoute);
-                          },
-                          context: context);
-                    },
-                  ),
-                  customTile(
-                    context,
-                    title: "transactionHistory".translate(context),
-                    svgImagePath: AppIcons.transaction,
-                    onTap: () {
-                      UiUtils.checkUser(
-                          onNotGuest: () {
-                            Navigator.pushNamed(
-                                context, Routes.transactionHistory);
-                          },
-                          context: context);
-                    },
-                  ),
+                  //if it require the uncomment this option for future
+                  // customTile(
+                  //   context,
+                  //   title: "subscription".translate(context),
+                  //   svgImagePath: AppIcons.subscription,
+                  //   onTap: () async {
+                  //     UiUtils.checkUser(
+                  //         onNotGuest: () {
+                  //           Navigator.pushNamed(
+                  //               context, Routes.subscriptionPackageListRoute);
+                  //         },
+                  //         context: context);
+                  //   },
+                  // ),
+                  // customTile(
+                  //   context,
+                  //   title: "transactionHistory".translate(context),
+                  //   svgImagePath: AppIcons.transaction,
+                  //   onTap: () {
+                  //     UiUtils.checkUser(
+                  //         onNotGuest: () {
+                  //           Navigator.pushNamed(
+                  //               context, Routes.transactionHistory);
+                  //         },
+                  //         context: context);
+                  //   },
+                  // ),
                   customTile(
                     context,
                     title: "myReview".translate(context),

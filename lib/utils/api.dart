@@ -55,7 +55,7 @@ class Api {
 
 
   static const String _placeApiBaseUrl =
-      "https://maps.googleapis.com/maps/api/place/";
+      "https://secondhandplatform.srvtechnology.com/api/place/";
   static String placeApiKey = "key";
   static const String input = "input";
   static const String types = "types";

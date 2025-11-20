@@ -292,6 +292,7 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                 }
 
                 if (state is ManageItemFail) {
+
                   HelperUtils.showSnackBarMessage(
                       context, state.error.toString());
                   Widgets.hideLoder(context);

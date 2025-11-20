@@ -74,12 +74,8 @@ dependencies:
   google_cloud_translation: ^0.0.4
   phonepe_payment_sdk: ^2.0.3
 
-
-
 dependency_overrides:
   intl: ^0.20.0
-
-
 
 dev_dependencies:
   rename: ^3.0.0

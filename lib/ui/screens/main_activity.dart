@@ -366,6 +366,8 @@ class MainActivityState extends State<MainActivity>
     }
   }
 
+  bool isFromPlusButton = false;
+
   BottomAppBar bottomBar() {
     return BottomAppBar(
       color: context.color.secondaryColor,
@@ -373,54 +375,64 @@ class MainActivityState extends State<MainActivity>
       child: Container(
         color: context.color.secondaryColor,
         child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: <Widget>[
-              buildBottomNavigationbarItem(0, AppIcons.homeNav,
-                  AppIcons.homeNavActive, "homeTab".translate(context)),
-              buildBottomNavigationbarItem(1, AppIcons.chatNav,
-                  AppIcons.chatNavActive, "chat".translate(context)),
-              BlocListener<FetchUserPackageLimitCubit,
-                      FetchUserPackageLimitState>(
-                  listener: (context, state) {
-                    if (state is FetchUserPackageLimitFailure) {
-                      UiUtils.noPackageAvailableDialog(context);
-                    }
-                    if (state is FetchUserPackageLimitInSuccess) {
-                      Navigator.pushNamed(context, Routes.selectCategoryScreen,
-                          arguments: <String, dynamic>{});
-                    }
-                  },
-                  child: Transform(
-                    transform: Matrix4.identity()..translate(0.toDouble(), -20),
-                    child: InkWell(
-                      onTap: () async {
-                        //TODO:TEMP
-                        UiUtils.checkUser(
-                            onNotGuest: () {
-                              context
-                                  .read<FetchUserPackageLimitCubit>()
-                                  .fetchUserPackageLimit(
-                                      packageType: "item_listing");
-                            },
-                            context: context);
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            buildBottomNavigationbarItem(0, AppIcons.homeNav,
+                AppIcons.homeNavActive, "homeTab".translate(context)),
+            buildBottomNavigationbarItem(1, AppIcons.chatNav,
+                AppIcons.chatNavActive, "chat".translate(context)),
+
+            BlocListener<FetchUserPackageLimitCubit, FetchUserPackageLimitState>(
+              listener: (context, state) {
+               /* if (state is FetchUserPackageLimitFailure) {
+                  // ❌ Show dialog only if action is NOT from plus button
+                  if (!isFromPlusButton) {
+                    UiUtils.noPackageAvailableDialog(context);
+                  }
+                }*/
+                //if (state is FetchUserPackageLimitInSuccess) {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.selectCategoryScreen,
+                    arguments: <String, dynamic>{},
+                  );
+                //}
+
+                // Reset flag after handling
+                isFromPlusButton = false;
+              },
+              child: Transform(
+                transform: Matrix4.identity()..translate(0.toDouble(), -20),
+                child: InkWell(
+                  onTap: () async {
+                    isFromPlusButton = true; // ✅ Mark it as from plus button
+                    UiUtils.checkUser(
+                      onNotGuest: () {
+                        context
+                            .read<FetchUserPackageLimitCubit>()
+                            .fetchUserPackageLimit(packageType: "item_listing");
                       },
-                      child: SizedBox(
-                        width: 53,
-                        height: 58,
-                        child: svgLoaded == false
-                            ? Container()
-                            : SvgPicture.string(
-                                svgEdit.toSVGString() ?? "",
-                              ),
-                      ),
-                    ),
-                  )),
-              buildBottomNavigationbarItem(2, AppIcons.myAdsNav,
-                  AppIcons.myAdsNavActive, "myAdsTab".translate(context)),
-              buildBottomNavigationbarItem(3, AppIcons.profileNav,
-                  AppIcons.profileNavActive, "profileTab".translate(context))
-            ]),
+                      context: context,
+                    );
+                  },
+                  child: SizedBox(
+                    width: 53,
+                    height: 58,
+                    child: svgLoaded == false
+                        ? Container()
+                        : SvgPicture.string(svgEdit.toSVGString() ?? ""),
+                  ),
+                ),
+              ),
+            ),
+
+            buildBottomNavigationbarItem(2, AppIcons.myAdsNav,
+                AppIcons.myAdsNavActive, "myAdsTab".translate(context)),
+            buildBottomNavigationbarItem(3, AppIcons.profileNav,
+                AppIcons.profileNavActive, "profileTab".translate(context)),
+          ],
+        ),
       ),
     );
   }

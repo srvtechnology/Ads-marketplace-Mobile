@@ -209,10 +209,10 @@ class SplashScreenState extends State<SplashScreen>
                   ),
                   child: Scaffold(
                     backgroundColor: context.color.territoryColor,
-                    bottomNavigationBar: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10.0),
-                      child: UiUtils.getSvg(AppIcons.companyLogo),
-                    ),
+                    // bottomNavigationBar: Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    //   child: UiUtils.getSvg(AppIcons.companyLogo),
+                    // ),
                     body: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -224,30 +224,30 @@ class SplashScreenState extends State<SplashScreen>
                             child: SizedBox(
                               width: 150,
                               height: 150,
-                              child: UiUtils.getSvg(AppIcons.splashLogo),
+                              child: UiUtils.getSvg(AppIcons.splashLogo,color: null),
                             ),
                           ),
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 10.0),
-                          child: Column(
-                            children: [
-                              CustomText(
-                                AppSettings.applicationName,
-                                fontSize: context.font.xxLarge,
-                                color: context.color.secondaryColor,
-                                textAlign: TextAlign.center,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              CustomText(
-                                "\"${"buyAndSellAnything".translate(context)}\"",
-                                fontSize: context.font.smaller,
-                                color: context.color.secondaryColor,
-                                textAlign: TextAlign.center,
-                              )
-                            ],
-                          ),
-                        ),
+                        // Padding(
+                        //   padding: EdgeInsets.only(top: 10.0),
+                        //   child: Column(
+                        //     children: [
+                        //       CustomText(
+                        //         AppSettings.applicationName,
+                        //         fontSize: context.font.xxLarge,
+                        //         color: context.color.secondaryColor,
+                        //         textAlign: TextAlign.center,
+                        //         fontWeight: FontWeight.w600,
+                        //       ),
+                        //       CustomText(
+                        //         "\"${"buyAndSellAnything".translate(context)}\"",
+                        //         fontSize: context.font.smaller,
+                        //         color: context.color.secondaryColor,
+                        //         textAlign: TextAlign.center,
+                        //       )
+                        //     ],
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),

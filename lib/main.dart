@@ -80,9 +80,7 @@ class _AppState extends State<App> {
             statusBarColor: context.color.secondaryColor,
           ),
           child: MaterialApp(
-
             initialRoute: Routes.splash,
-
             navigatorKey: Constant.navigatorKey,
             title: Constant.appName,
             debugShowCheckedModeBanner: false,

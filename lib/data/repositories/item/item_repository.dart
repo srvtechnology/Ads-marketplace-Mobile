@@ -16,35 +16,26 @@ class ItemRepository {
     try {
       Map<String, dynamic> parameters = {};
       parameters.addAll(itemDetails);
-
-
       MultipartFile image = await MultipartFile.fromFile(mainImage.path,
           filename: path.basename(mainImage.path));
-
       if (otherImages != null && otherImages.isNotEmpty) {
         List<Future<MultipartFile>> futures = otherImages.map((imageFile) {
-
           return MultipartFile.fromFile(imageFile.path,
               filename: path.basename(imageFile.path));
         }).toList();
-
         List<MultipartFile> galleryImages = await Future.wait(futures);
-
         if (galleryImages.isNotEmpty) {
           parameters["gallery_images"] = galleryImages;
         }
       }
-
       parameters.addAll({
         "image": image,
         "show_only_to_premium": 1,
       });
-
       Map<String, dynamic> response = await Api.post(
         url: Api.addItemApi,
         parameter: parameters,
       );
-
       return ItemModel.fromJson(response['data'][0]);
     } catch (e) {
       rethrow;

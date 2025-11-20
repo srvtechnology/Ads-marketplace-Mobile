@@ -27,12 +27,11 @@ class PaymentGateway {
 
 class AppSettings {
   /// Basic Settings
-    static const String applicationName = 'eClassify';
+    static const String applicationName = 'eMarketplace';
   static const String packageName = 'com.eclassify.wrteam';
   static const String shareAppText = "Share this App";
 
-  static const String hostUrl = "https://eclassify.wrteam.me";
-
+  static const String hostUrl = "https://secondhandplatform.srvtechnology.com";
 
   ///API Setting
 

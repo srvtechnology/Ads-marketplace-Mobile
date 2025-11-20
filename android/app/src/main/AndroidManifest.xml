@@ -47,7 +47,7 @@
         android:allowBackup="false"
         android:fullBackupOnly="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="eClassify"
+        android:label="eMarketplace"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
@@ -90,12 +90,12 @@
                 <data
                     android:host="eclassifyweb.wrteam.me"
                     android:pathPattern="/product-details/.*"
-                    android:scheme="eclassify" />
+                    android:scheme="eMarketplace" />
 
                 <data
                     android:host="eclassifyweb.wrteam.me"
                     android:pathPattern="/seller/.*"
-                    android:scheme="eclassify" />
+                    android:scheme="eMarketplace" />
             
 
             </intent-filter>

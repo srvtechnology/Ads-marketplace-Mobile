@@ -683,10 +683,10 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             child: BlocListener<FetchUserPackageLimitCubit,
                 FetchUserPackageLimitState>(
               listener: (context, state) async {
-                if (state is FetchUserPackageLimitFailure) {
-                  UiUtils.noPackageAvailableDialog(context);
-                }
-                if (state is FetchUserPackageLimitInSuccess) {
+                // if (state is FetchUserPackageLimitFailure) {
+                //   UiUtils.noPackageAvailableDialog(context);
+                // }
+              //  if (state is FetchUserPackageLimitInSuccess) {
                   await UiUtils.showBlurredDialoge(
                     context,
                     dialoge: BlurredDialogBox(
@@ -711,7 +711,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                               );
                             })),
                   );
-                }
+               // }
               },
               child: AnimatedCrossFade(
                 duration: Duration(milliseconds: 500),
