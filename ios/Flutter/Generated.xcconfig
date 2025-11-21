@@ -1,8 +1,8 @@
 // This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=C:\flutter
-FLUTTER_APPLICATION_PATH=D:\Nishant\srv\eclassifyapp
+FLUTTER_ROOT=/Users/pranabeshsarkar/fvm/versions/3.32.0
+FLUTTER_APPLICATION_PATH=/Users/pranabeshsarkar/srv/Ads-marketplace-Mobile
 COCOAPODS_PARALLEL_CODE_SIGN=true
-FLUTTER_TARGET=lib\main.dart
+FLUTTER_TARGET=lib/main.dart
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=2.5.0
 FLUTTER_BUILD_NUMBER=28
