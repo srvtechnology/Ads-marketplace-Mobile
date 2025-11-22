@@ -1,34 +1,41 @@
 {
   "project_info": {
-    "project_number": "848559936012",
-    "project_id": "eclassify-35d83",
-    "storage_bucket": "eclassify-35d83.firebasestorage.app"
+    "project_number": "160192430600",
+    "project_id": "bhutan-marketplace",
+    "storage_bucket": "bhutan-marketplace.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:848559936012:android:e52e69d493e6d23cca1429",
+        "mobilesdk_app_id": "1:160192430600:android:d82cae4b230afc411647bd",
         "android_client_info": {
           "package_name": "com.eclassify.wrteam"
         }
       },
       "oauth_client": [
         {
-          "client_id": "848559936012-g8i6g0cgd8jg7pkvuflnmi6itkgsdd79.apps.googleusercontent.com",
+          "client_id": "160192430600-crbqo3bq5hmsktir6rpcdrbqhv4vmmin.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCLsxLIVU1DqiBolp_6--4M4iKtKl7LbUs"
+          "current_key": "AIzaSyBevby0kJa-ZrpL4RlixothV8GsljZQobg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "848559936012-g8i6g0cgd8jg7pkvuflnmi6itkgsdd79.apps.googleusercontent.com",
+              "client_id": "160192430600-crbqo3bq5hmsktir6rpcdrbqhv4vmmin.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "160192430600-l0s9hff35k6g8efcr2h3i1j9756rp8go.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.eclassify.wrteam"
+              }
             }
           ]
         }

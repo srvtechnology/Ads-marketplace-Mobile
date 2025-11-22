@@ -50,22 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
+    apiKey: 'AIzaSyBevby0kJa-ZrpL4RlixothV8GsljZQobg',
+    appId: '1:160192430600:android:d82cae4b230afc411647bd',
+    messagingSenderId: '160192430600',
+    projectId: 'bhutan-marketplace',
+    storageBucket: 'bhutan-marketplace.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: '',
-    appId: '',
-    messagingSenderId: '',
-    projectId: '',
-    storageBucket: '',
-    androidClientId: '',
-    iosClientId: '',
-    iosBundleId: '',
+    apiKey: 'AIzaSyDdHxy0tePQkP1tXPPeexzIrJuPsmt9-Xc',
+    appId: '1:160192430600:ios:f9ebaf36d565207a1647bd',
+    messagingSenderId: '160192430600',
+    projectId: 'bhutan-marketplace',
+    storageBucket: 'bhutan-marketplace.firebasestorage.app',
+    iosClientId: '160192430600-l0s9hff35k6g8efcr2h3i1j9756rp8go.apps.googleusercontent.com',
+    iosBundleId: 'com.eclassify.wrteam',
   );
 
 }

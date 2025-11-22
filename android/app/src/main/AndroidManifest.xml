@@ -47,7 +47,7 @@
         android:allowBackup="false"
         android:fullBackupOnly="false"
         android:icon="@mipmap/ic_launcher"
-        android:label="eMarketplace"
+        android:label="Bhutan Market"
         android:largeHeap="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
@@ -90,12 +90,12 @@
                 <data
                     android:host="eclassifyweb.wrteam.me"
                     android:pathPattern="/product-details/.*"
-                    android:scheme="eMarketplace" />
+                    android:scheme="bhutanmarket" />
 
                 <data
                     android:host="eclassifyweb.wrteam.me"
                     android:pathPattern="/seller/.*"
-                    android:scheme="eMarketplace" />
+                    android:scheme="bhutanmarket" />
             
 
             </intent-filter>
