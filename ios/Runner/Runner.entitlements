@@ -15,12 +15,8 @@
 		<string>applinks:e-classify-app-router.vercel.app</string>
 	</array>
 	<key>com.apple.developer.icloud-container-identifiers</key>
-	<array>
-		<string>iCloud.com.eclassify.wrteam</string>
-	</array>
+	<array/>
 	<key>com.apple.developer.icloud-services</key>
-	<array>
-		<string>CloudKit</string>
-	</array>
+	<array/>
 </dict>
 </plist>

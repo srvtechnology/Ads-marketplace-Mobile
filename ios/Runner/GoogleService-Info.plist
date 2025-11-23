@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>160192430600-l0s9hff35k6g8efcr2h3i1j9756rp8go.apps.googleusercontent.com</string>
+	<string>160192430600-8co6vdd9p9n696rc64mq2a2tqsass9o8.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.160192430600-l0s9hff35k6g8efcr2h3i1j9756rp8go</string>
+	<string>com.googleusercontent.apps.160192430600-8co6vdd9p9n696rc64mq2a2tqsass9o8</string>
 	<key>API_KEY</key>
 	<string>AIzaSyDdHxy0tePQkP1tXPPeexzIrJuPsmt9-Xc</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +13,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.eclassify.wrteam</string>
+	<string>com.bhutanmarket.srvtech</string>
 	<key>PROJECT_ID</key>
 	<string>bhutan-marketplace</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:160192430600:ios:f9ebaf36d565207a1647bd</string>
+	<string>1:160192430600:ios:3baa7e5273363df41647bd</string>
 </dict>
 </plist>

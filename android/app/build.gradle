@@ -29,7 +29,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace "com.eclassify.wrteam"
+    namespace "com.bhutanmarket.srvtech"
     compileSdkVersion 35
     ndkVersion "26.3.11579264"
 
@@ -52,7 +52,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.eclassify.wrteam"
+        applicationId "com.bhutanmarket.srvtech"
         minSdkVersion 24
         targetSdkVersion 35
         multiDexEnabled true

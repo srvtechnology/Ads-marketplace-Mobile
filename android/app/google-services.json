@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:160192430600:android:d82cae4b230afc411647bd",
+        "mobilesdk_app_id": "1:160192430600:android:d0520e4571d2f2d11647bd",
         "android_client_info": {
-          "package_name": "com.eclassify.wrteam"
+          "package_name": "com.bhutanmarket.srvtech"
         }
       },
       "oauth_client": [

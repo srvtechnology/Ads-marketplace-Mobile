@@ -1,4 +1,4 @@
-package com.eclassify.wrteam
+package com.bhutanmarket.srvtech
 
 
 import io.flutter.embedding.android.FlutterActivity
