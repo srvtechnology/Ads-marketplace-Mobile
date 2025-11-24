@@ -19,6 +19,7 @@ import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({this.itemSlug, super.key, this.sellerId});
@@ -202,13 +203,13 @@ class SplashScreenState extends State<SplashScreen>
                 top: false,
                 child: AnnotatedRegion(
                   value: SystemUiOverlayStyle(
-                    statusBarColor: context.color.territoryColor,
+                    // statusBarColor: context.color.territoryColor,
                     statusBarIconBrightness: Brightness.light,
                     systemNavigationBarIconBrightness: Brightness.light,
-                    systemNavigationBarColor: context.color.territoryColor,
+                    // systemNavigationBarColor: context.color.territoryColor,
                   ),
                   child: Scaffold(
-                    backgroundColor: context.color.territoryColor,
+                    // backgroundColor: context.color.territoryColor,
                     // bottomNavigationBar: Padding(
                     //   padding: const EdgeInsets.symmetric(vertical: 10.0),
                     //   child: UiUtils.getSvg(AppIcons.companyLogo),
@@ -222,9 +223,12 @@ class SplashScreenState extends State<SplashScreen>
                           child: Padding(
                             padding: EdgeInsets.only(top: 10.0),
                             child: SizedBox(
-                              width: 150,
-                              height: 150,
-                              child: UiUtils.getSvg(AppIcons.splashLogo,color: null),
+                              width: 400,
+                              height: 300,
+                              child: Image.asset(
+                                AppIcons.splashplain,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ),

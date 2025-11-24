@@ -53,9 +53,8 @@ class Api {
   static const String verifyTwilioOtp = 'verify-otp';
   static const String otp = 'otp';
 
-
   static const String _placeApiBaseUrl =
-      "https://secondhandplatform.srvtechnology.com/api/place/";
+      "http://thebhutanmarket.com/admin/public/api/place/";
   static String placeApiKey = "key";
   static const String input = "input";
   static const String types = "types";
@@ -63,9 +62,7 @@ class Api {
   static String placeAPI = "${_placeApiBaseUrl}autocomplete/json";
   static String placeApiDetails = "${_placeApiBaseUrl}details/json";
 
-
   static String stripeIntentAPI = "https://api.stripe.com/v1/payment_intents";
-
 
   static String loginApi = "user-signup";
   static String updateProfileApi = "update-profile";
@@ -121,7 +118,6 @@ class Api {
   static String unBlockUserApi = "unblock-user";
   static String blockedUsersListApi = "blocked-users";
   static String getPaymentDetailsApi = "payment-transactions";
-
 
   static String userPurchasePackageApi = "user-purchase-package";
   static String deleteInquiryApi = "delete-inquiry";
@@ -259,17 +255,14 @@ class Api {
 
         parameter.forEach((key, value) {
           if (value is File) {
-
             formMap[key] = MultipartFile.fromFileSync(value.path,
                 filename: value.path.split('/').last);
           } else if (value is List<File>) {
-
             formMap[key] = value
                 .map((file) => MultipartFile.fromFileSync(file.path,
                     filename: file.path.split('/').last))
                 .toList();
           } else {
-
             formMap[key] = value;
           }
         });
@@ -350,15 +343,13 @@ class Api {
       Map<String, dynamic>? queryParameters,
       bool? useBaseUrl}) async {
     try {
-
       final Dio dio = Dio();
       dio.interceptors.add(NetworkRequestInterceptor());
 
-      final response =
-          await dio.delete(((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
-              queryParameters: queryParameters,
-              options:
-                  Options(headers: headers()) );
+      final response = await dio.delete(
+          ((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
+          queryParameters: queryParameters,
+          options: Options(headers: headers()));
 
       if (response.data['error'] == true) {
         throw ApiException(response.data['message'].toString());
@@ -367,7 +358,6 @@ class Api {
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
         userExpired();
-
       }
       if (e.response?.statusCode == 503) {
         throw "server-not-available";
@@ -388,7 +378,6 @@ class Api {
       Map<String, dynamic>? queryParameters,
       bool? useBaseUrl}) async {
     try {
-
       final Dio dio = Dio();
       dio.interceptors.add(NetworkRequestInterceptor());
 
@@ -398,7 +387,6 @@ class Api {
           options: Options(headers: headers()));
 
       if (response.data['error'] == true) {
-
         throw ApiException(response.data['message'].toString());
       }
       return Map.from(response.data);

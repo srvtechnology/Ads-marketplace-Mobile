@@ -27,11 +27,11 @@ class PaymentGateway {
 
 class AppSettings {
   /// Basic Settings
-  static const String applicationName = 'Bhutan Market';
+  static const String applicationName = 'Tshong';
   static const String packageName = 'com.eclassify.wrteam';
   static const String shareAppText = "Share this App";
 
-  static const String hostUrl = "https://secondhandplatform.srvtechnology.com";
+  static const String hostUrl = "http://thebhutanmarket.com/admin/public";
 
   ///API Setting
 
