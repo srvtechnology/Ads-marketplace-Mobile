@@ -16,10 +16,11 @@ class HomeRepository {
     try {
       Map<String, dynamic> parameters = {
         if (radius == null) ...{
-          if (city != null && city != "") 'city': city,
-          if (areaId != null && areaId != "") 'area_id': areaId,
-          if (country != null && country != "") 'country': country,
-          if (state != null && state != "") 'state': state,
+          // TODO: remove this when we have radius
+          // if (city != null && city != "") 'city': city,
+          // if (areaId != null && areaId != "") 'area_id': areaId,
+          // if (country != null && country != "") 'country': country,
+          // if (state != null && state != "") 'state': state,
         },
         if (radius != null && radius != "") 'radius': radius,
         if (latitude != null && latitude != "") 'latitude': latitude,

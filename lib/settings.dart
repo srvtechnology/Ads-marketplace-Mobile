@@ -31,7 +31,7 @@ class AppSettings {
   static const String packageName = 'com.eclassify.wrteam';
   static const String shareAppText = "Share this App";
 
-  static const String hostUrl = "http://thebhutanmarket.com/admin/public";
+  static const String hostUrl = "https://admin.thebhutanmarket.com";
 
   ///API Setting
 

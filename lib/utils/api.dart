@@ -54,7 +54,7 @@ class Api {
   static const String otp = 'otp';
 
   static const String _placeApiBaseUrl =
-      "http://thebhutanmarket.com/admin/public/api/place/";
+      "https://admin.thebhutanmarket.com/api/place/";
   static String placeApiKey = "key";
   static const String input = "input";
   static const String types = "types";
