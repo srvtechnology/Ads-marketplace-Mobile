@@ -22,9 +22,9 @@ class HomeRepository {
           // if (country != null && country != "") 'country': country,
           // if (state != null && state != "") 'state': state,
         },
-        if (radius != null && radius != "") 'radius': radius,
-        if (latitude != null && latitude != "") 'latitude': latitude,
-        if (longitude != null && longitude != "") 'longitude': longitude,
+        // if (radius != null && radius != "") 'radius': radius,
+        // if (latitude != null && latitude != "") 'latitude': latitude,
+        // if (longitude != null && longitude != "") 'longitude': longitude,
       };
 
       Map<String, dynamic> response = await Api.get(
@@ -53,14 +53,15 @@ class HomeRepository {
       Map<String, dynamic> parameters = {
         "page": page,
         if (radius == null) ...{
-          if (city != null && city != "") 'city': city,
-          if (areaId != null && areaId != "") 'area_id': areaId,
-          if (country != null && country != "") 'country': country,
-          if (state != null && state != "") 'state': state,
+          //TODO: remove this when we have radius
+          // if (city != null && city != "") 'city': city,
+          // if (areaId != null && areaId != "") 'area_id': areaId,
+          // if (country != null && country != "") 'country': country,
+          // if (state != null && state != "") 'state': state,
         },
-        if (radius != null && radius != "") 'radius': radius,
-        if (latitude != null && latitude != "") 'latitude': latitude,
-        if (longitude != null && longitude != "") 'longitude': longitude,
+        // if (radius != null && radius != "") 'radius': radius,
+        // if (latitude != null && latitude != "") 'latitude': latitude,
+        // if (longitude != null && longitude != "") 'longitude': longitude,
         "sort_by": "new-to-old"
       };
 
@@ -93,14 +94,14 @@ class HomeRepository {
         "page": page,
         "featured_section_id": sectionId,
         if (radius == null) ...{
-          if (city != null && city != "") 'city': city,
-          if (areaId != null && areaId != "") 'area_id': areaId,
-          if (country != null && country != "") 'country': country,
-          if (state != null && state != "") 'state': state,
+          // if (city != null && city != "") 'city': city,
+          // if (areaId != null && areaId != "") 'area_id': areaId,
+          // if (country != null && country != "") 'country': country,
+          // if (state != null && state != "") 'state': state,
         },
-        if (radius != null && radius != "") 'radius': radius,
-        if (latitude != null && latitude != "") 'latitude': latitude,
-        if (longitude != null && longitude != "") 'longitude': longitude,
+        // if (radius != null && radius != "") 'radius': radius,
+        // if (latitude != null && latitude != "") 'latitude': latitude,
+        // if (longitude != null && longitude != "") 'longitude': longitude,
       };
 
       Map<String, dynamic> response =

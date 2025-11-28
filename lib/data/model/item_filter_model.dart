@@ -69,14 +69,14 @@ class ItemFilterModel {
       'min_price': minPrice,
       'category_id': categoryId,
       'posted_since': postedSince,
-      'city': city,
-      'state': state,
-      'country': country,
+      // 'city': city,
+      // 'state': state,
+      // 'country': country,
       'area': area,
-      'radius': radius,
+      // 'radius': radius,
       'area_id': areaId,
-      'longitude': longitude,
-      'latitude': latitude,
+      // 'longitude': longitude,
+      // 'latitude': latitude,
     };
   }
 

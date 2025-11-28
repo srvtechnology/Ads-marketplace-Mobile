@@ -153,31 +153,30 @@ class ItemRepository {
     if (filter != null) {
       parameters.addAll(filter.toMap());
 
-      if (filter.radius != null) {
-        if (filter.latitude != null && filter.longitude != null) {
-          parameters['latitude'] = filter.latitude;
-          parameters['longitude'] = filter.longitude;
-        }
+      // if (filter.radius != null) {
+      //   if (filter.latitude != null && filter.longitude != null) {
+      //     parameters['latitude'] = filter.latitude;
+      //     parameters['longitude'] = filter.longitude;
+      //   }
 
-        parameters.remove('city');
-        parameters.remove('area');
-        parameters.remove('area_id');
-        parameters.remove('country');
-        parameters.remove('state');
-      } else {
+      //   parameters.remove('city');
+      //   parameters.remove('area');
+      //   parameters.remove('area_id');
+      //   parameters.remove('country');
+      //   parameters.remove('state');
+      // } else {
 
-        if (city != null && city != "") parameters['city'] = city;
-        if (areaId != null) parameters['area_id'] = areaId;
-        if (country != null && country != "") parameters['country'] = country;
-        if (state != null && state != "") parameters['state'] = state;
-      }
+      //   if (city != null && city != "") parameters['city'] = city;
+      //   if (areaId != null) parameters['area_id'] = areaId;
+      //   if (country != null && country != "") parameters['country'] = country;
+      //   if (state != null && state != "") parameters['state'] = state;
+      // }
 
       if (filter.areaId == null) {
         parameters.remove('area_id');
       }
 
       parameters.remove('area');
-
 
       if (filter.customFields != null) {
         filter.customFields!.forEach((key, value) {
@@ -207,7 +206,6 @@ class ItemRepository {
 
     return DataOutput(total: response['data']['total'] ?? 0, modelList: items);
   }
-
 
   Future<DataOutput<ItemModel>> fetchPopularItems(
       {required String sortBy, required int page}) async {
