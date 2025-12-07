@@ -21,7 +21,8 @@ import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_search.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_shimmers.dart';
-import 'package:eClassify/ui/screens/home/widgets/location_widget.dart';
+// TODO: Location feature commented out
+// import 'package:eClassify/ui/screens/home/widgets/location_widget.dart';
 import 'package:eClassify/ui/screens/native_ads_screen.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
@@ -139,7 +140,6 @@ class HomeScreenState extends State<HomeScreen>
     //homeScreenController.addListener(pageScrollListener);
   }
 
-
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -151,7 +151,28 @@ class HomeScreenState extends State<HomeScreen>
           leading: Padding(
               padding: EdgeInsetsDirectional.only(
                   start: sidePadding, end: sidePadding),
-              child: const LocationWidget()),
+              child: Row(
+                children: [
+                  Image.asset(
+                    "assets/logo.png",
+                    width: 40,
+                    height: 40,
+                  ),
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  Text(
+                    "Tshong",
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: context.color.textColorDark,
+                        ),
+                  ),
+                ],
+              )
+              // TODO: Location feature commented out
+              // child: const LocationWidget()
+              ),
           backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         ),
         backgroundColor: context.color.primaryColor,
@@ -224,9 +245,7 @@ class HomeScreenState extends State<HomeScreen>
                     );
                   }
 
-                  if (state is FetchHomeScreenFail) {
-
-                  }
+                  if (state is FetchHomeScreenFail) {}
                   return SizedBox.shrink();
                 },
               ),
