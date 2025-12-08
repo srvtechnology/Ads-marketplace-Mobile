@@ -382,21 +382,21 @@ class MainActivityState extends State<MainActivity>
                 AppIcons.homeNavActive, "homeTab".translate(context)),
             buildBottomNavigationbarItem(1, AppIcons.chatNav,
                 AppIcons.chatNavActive, "chat".translate(context)),
-
-            BlocListener<FetchUserPackageLimitCubit, FetchUserPackageLimitState>(
+            BlocListener<FetchUserPackageLimitCubit,
+                FetchUserPackageLimitState>(
               listener: (context, state) {
-               /* if (state is FetchUserPackageLimitFailure) {
+                /* if (state is FetchUserPackageLimitFailure) {
                   // ❌ Show dialog only if action is NOT from plus button
                   if (!isFromPlusButton) {
                     UiUtils.noPackageAvailableDialog(context);
                   }
                 }*/
                 //if (state is FetchUserPackageLimitInSuccess) {
-                  Navigator.pushNamed(
-                    context,
-                    Routes.selectCategoryScreen,
-                    arguments: <String, dynamic>{},
-                  );
+                Navigator.pushNamed(
+                  context,
+                  Routes.selectCategoryScreen,
+                  arguments: <String, dynamic>{},
+                );
                 //}
 
                 // Reset flag after handling
@@ -426,9 +426,8 @@ class MainActivityState extends State<MainActivity>
                 ),
               ),
             ),
-
             buildBottomNavigationbarItem(2, AppIcons.myAdsNav,
-                AppIcons.myAdsNavActive, "myAdsTab".translate(context)),
+                AppIcons.myAdsNavActive, "myItemsTab".translate(context)),
             buildBottomNavigationbarItem(3, AppIcons.profileNav,
                 AppIcons.profileNavActive, "profileTab".translate(context)),
           ],

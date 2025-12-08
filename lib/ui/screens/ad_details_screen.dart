@@ -494,7 +494,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       height: 10,
                     ),
                     if (isAddedByMe)
-                      if (!model.isFeature!) createFeaturesAds(),
+                      if (!model.isFeature!) createFeaturesItems(),
                     if (model.customFields!.isNotEmpty) customFields(),
                     //detailsContainer Widget
                     //Dynamic Ads here
@@ -521,8 +521,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                       ),
                     ],
 
-                    if (!isAddedByMe) reportedAdsWidget(),
-                    if (!isAddedByMe) relatedAds(),
+                    if (!isAddedByMe) reportedItemsWidget(),
+                    if (!isAddedByMe) relatedItems(),
                     // const SizedBox(height: 15),
                   ],
                 ),
@@ -532,7 +532,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  Widget reportedAdsWidget() {
+  Widget reportedItemsWidget() {
     return BlocBuilder<UpdatedReportItemCubit, UpdatedReportItemState>(
       builder: (context, state) {
         bool isItemInCubit =
@@ -551,7 +551,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  Widget relatedAds() {
+  Widget relatedItems() {
     return BlocBuilder<FetchRelatedItemsCubit, FetchRelatedItemsState>(
         builder: (context, state) {
       if (state is FetchRelatedItemsInProgress) {
@@ -596,7 +596,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CustomText(
-            "relatedAds".translate(context),
+            "relatedItems".translate(context),
             fontSize: context.font.large,
             fontWeight: FontWeight.w600,
             maxLines: 1,
@@ -654,7 +654,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             }));
   }
 
-  Widget createFeaturesAds() {
+  Widget createFeaturesItems() {
     if (model.status == "active" || model.status == "approved") {
       return AnimatedCrossFade(
         duration: Duration(milliseconds: 500),
@@ -688,7 +688,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      "${"featureYourAdsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
+                      "${"featureYourItemsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
                       color:
                           context.color.textDefaultColor.withValues(alpha: 0.7),
                       fontSize: context.font.large,
@@ -899,8 +899,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           : context.color.textDefaultColor
                               .withValues(alpha: 0.1),
                       width: 1.5)),
-              child:
-                  !model.isActive! ? adsWidget(model) : activeAdsWidget(model),
+              child: !model.isActive!
+                  ? itemsWidget(model)
+                  : activeItemsWidget(model),
             ),
           ),
         ],
@@ -908,7 +909,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  Widget adsWidget(SubscriptionPackageModel model) {
+  Widget itemsWidget(SubscriptionPackageModel model) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.min,
@@ -929,7 +930,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomText(
-                    '${model.limit == "unlimited" ? "unlimitedLbl".translate(context) : model.limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
+                    '${model.limit == "unlimited" ? "unlimitedLbl".translate(context) : model.limit.toString()}\t${"itemsLbl".translate(context)}\t\t·\t\t',
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
                     color:
@@ -964,7 +965,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     );
   }
 
-  Widget activeAdsWidget(SubscriptionPackageModel model) {
+  Widget activeItemsWidget(SubscriptionPackageModel model) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       mainAxisSize: MainAxisSize.min,
@@ -987,7 +988,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   Text.rich(
                     TextSpan(
                       text: model.limit == "unlimited"
-                          ? "${"unlimitedLbl".translate(context)}\t${"adsLbl".translate(context)}\t\t·\t\t"
+                          ? "${"unlimitedLbl".translate(context)}\t${"itemsLbl".translate(context)}\t\t·\t\t"
                           : '',
                       style: TextStyle(
                         color: context.color.textDefaultColor
@@ -1004,7 +1005,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         if (model.limit != "unlimited")
                           TextSpan(
                             text:
-                                '/${model.limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
+                                '/${model.limit.toString()}\t${"itemsLbl".translate(context)}\t\t·\t\t',
                           ),
                       ],
                     ),

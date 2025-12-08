@@ -171,7 +171,7 @@ class _AddMoreDetailsScreenState extends CloudState<AddMoreDetailsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CustomText(
-                        "giveMoreDetailsAboutYourAds".translate(context),
+                        "giveMoreDetailsAboutYourItems".translate(context),
                         fontSize: context.font.large,
                         fontWeight: FontWeight.w600,
                       ),

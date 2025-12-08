@@ -1,5 +1,3 @@
-
-
 import 'dart:convert';
 
 import 'package:eClassify/utils/hive_utils.dart';
@@ -9,28 +7,27 @@ import 'package:flutter/services.dart';
 class AppLocalization {
   final Locale locale;
 
-
   late Map<String, String> _localizedValues;
 
   AppLocalization(this.locale);
 
-
   static AppLocalization? of(BuildContext context) {
     return Localizations.of(context, AppLocalization);
   }
-
 
   Future loadJson() async {
     String jsonStringValues =
         await rootBundle.loadString('assets/languages/template.json');
     Map<String, dynamic> mappedJson = {};
 
-    if (HiveUtils.getLanguage() == null ||
-        HiveUtils.getLanguage()['data'] == null) {
-      mappedJson = json.decode(jsonStringValues);
-    } else {
-      mappedJson = Map<String, dynamic>.from(HiveUtils.getLanguage()['data']);
-    }
+    // TEMPORARY: Force use of local template.json for testing
+    // TODO: Update backend translations and uncomment this
+    // if (HiveUtils.getLanguage() == null ||
+    //     HiveUtils.getLanguage()['data'] == null) {
+    mappedJson = json.decode(jsonStringValues);
+    // } else {
+    //   mappedJson = Map<String, dynamic>.from(HiveUtils.getLanguage()['data']);
+    // }
     _localizedValues =
         mappedJson.map((key, value) => MapEntry(key, value.toString()));
   }
@@ -39,15 +36,12 @@ class AppLocalization {
     return _localizedValues[key!];
   }
 
-
   static const LocalizationsDelegate<AppLocalization> delegate =
       _AppLocalizationDelegate();
 }
 
-
 class _AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {
   const _AppLocalizationDelegate();
-
 
   @override
   bool isSupported(Locale locale) {

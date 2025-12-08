@@ -1,4 +1,3 @@
-
 import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -68,7 +67,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
     // Listen for changes in tab selection
     _tabController.addListener(() {
-
       setState(() {});
     });
 
@@ -84,8 +82,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
   }
 
   void _loadMore() async {
-
-
     if (context.read<FetchSellerItemsCubit>().hasMoreData()) {
       context
           .read<FetchSellerItemsCubit>()
@@ -103,7 +99,6 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
 
   @override
   Widget build(BuildContext context) {
-
     return DefaultTabController(
         length: 2,
         child: Scaffold(
@@ -336,7 +331,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                                     .titleMedium!
                                     .copyWith(fontWeight: FontWeight.w500),
                                 tabs: [
-                                  Tab(text: 'liveAds'.translate(context)),
+                                  Tab(text: 'liveItems'.translate(context)),
                                   Tab(text: 'ratings'.translate(context)),
                                 ],
                               ),
@@ -357,7 +352,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     child: TabBarView(
                       controller: _tabController,
                       children: [
-                        liveAdsWidget(),
+                        liveItemsWidget(),
                         ratingsListWidget(),
                       ],
                     ),
@@ -370,7 +365,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
         ));
   }
 
-  Widget liveAdsWidget() {
+  Widget liveItemsWidget() {
     return BlocBuilder<FetchSellerItemsCubit, FetchSellerItemsState>(
         builder: (context, state) {
       if (state is FetchSellerItemsInProgress) {

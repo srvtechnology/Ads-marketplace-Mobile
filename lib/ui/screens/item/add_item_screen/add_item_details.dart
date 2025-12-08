@@ -349,7 +349,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         height: 15,
                       ),
                       CustomText(
-                          "${"adSlug".translate(context)}\t(${"englishOnlyLbl".translate(context)})"),
+                          "${"itemSlug".translate(context)}\t(${"englishOnlyLbl".translate(context)})"),
                       SizedBox(
                         height: 10,
                       ),
@@ -367,7 +367,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         // controller: _itemNameController,
                         validator: CustomTextFieldValidator.slug,
                         action: TextInputAction.next,
-                        hintText: "adSlugHere".translate(context),
+                        hintText: "itemSlugHere".translate(context),
                         hintTextStyle: TextStyle(
                             color: context.color.textDefaultColor
                                 .withValues(alpha: 0.5),
@@ -416,7 +416,8 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         "recommendedSize".translate(context),
                         fontStyle: FontStyle.italic,
                         fontSize: context.font.small,
-                        color: context.color.textLightColor.withValues(alpha: 0.4),
+                        color:
+                            context.color.textLightColor.withValues(alpha: 0.4),
                       ),
                       SizedBox(
                         height: 10,
@@ -450,7 +451,8 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         "recommendedSize".translate(context),
                         fontStyle: FontStyle.italic,
                         fontSize: context.font.small,
-                        color: context.color.textLightColor.withValues(alpha: 0.4),
+                        color:
+                            context.color.textLightColor.withValues(alpha: 0.4),
                       ),
                       SizedBox(
                         height: 10,
@@ -723,8 +725,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         .add(item!.galleryImages![matchingIndex].id!);
 
                     setState(() {});
-                  } else {
-                  }
+                  } else {}
                 }
 
                 mixedItemImageList.removeAt(index);

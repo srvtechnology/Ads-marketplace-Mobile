@@ -142,8 +142,8 @@ class _SubscriptionPackageListScreenState
                   child: TabBar(
                     controller: _tabController!,
                     tabs: [
-                      Tab(text: "adsListing".translate(context)),
-                      Tab(text: "featuredAdsLbl".translate(context)),
+                      Tab(text: "itemsListing".translate(context)),
+                      Tab(text: "featuredItemsLbl".translate(context)),
                     ],
 
                     indicatorColor: context.color.territoryColor,
@@ -172,14 +172,14 @@ class _SubscriptionPackageListScreenState
           : TabBarView(
               controller: _tabController!,
               children: [
-                adsListing(),
+                itemsListing(),
                 featuredAds(),
               ],
             ),
     );
   }
 
-  Builder adsListing() {
+  Builder itemsListing() {
     return Builder(builder: (context) {
       if (!isInterstitialAdShown) {
         AdHelper.showInterstitialAd();

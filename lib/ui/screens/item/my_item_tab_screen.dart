@@ -206,7 +206,6 @@ class _MyItemTabState extends CloudState<MyItemTab> {
     }
   }
 
-
   Color _getStatusTextColor(String? status) {
     switch (status) {
       case "review":
@@ -226,7 +225,6 @@ class _MyItemTabState extends CloudState<MyItemTab> {
         return context.color.territoryColor;
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -263,8 +261,8 @@ class _MyItemTabState extends CloudState<MyItemTab> {
           if (state is FetchMyItemsSuccess) {
             if (state.items.isEmpty) {
               return NoDataFound(
-                mainMessage: "noAdsFound".translate(context),
-                subMessage: "noAdsAvailable".translate(context),
+                mainMessage: "noItemsFound".translate(context),
+                subMessage: "noItemsAvailable".translate(context),
                 onTap: () {
                   context.read<FetchMyItemsCubit>().fetchMyItems(
                       getItemsWithStatus: widget.getItemsWithStatus);
@@ -316,7 +314,8 @@ class _MyItemTabState extends CloudState<MyItemTab> {
                                         .withValues(alpha: 0.5)
                                     : context.color.secondaryColor,
                                 border: Border.all(
-                                    color: context.color.textLightColor.withValues(alpha: 0.18),
+                                    color: context.color.textLightColor
+                                        .withValues(alpha: 0.18),
                                     width: 1)),
                             width: double.infinity,
                             child: Row(
@@ -362,8 +361,8 @@ class _MyItemTabState extends CloudState<MyItemTab> {
                                               child: CustomText(
                                                 (item.price ?? 0.0)
                                                     .currencyFormat,
-                                                color:
-                                                    context.color.territoryColor,
+                                                color: context
+                                                    .color.territoryColor,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -375,9 +374,7 @@ class _MyItemTabState extends CloudState<MyItemTab> {
                                           maxLines: 2,
                                           firstUpperCaseWidget: true,
                                         ),
-
                                         Row(
-
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           mainAxisSize: MainAxisSize.min,

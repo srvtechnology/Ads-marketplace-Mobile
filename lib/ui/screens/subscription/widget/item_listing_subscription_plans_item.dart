@@ -233,10 +233,10 @@ class _ItemListingSubscriptionPlansItemState
           SizedBox(height: 15),
           if (widget.model.type == "item_listing")
             checkmarkPoint(context,
-                "${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"adsListing".translate(context)}"),
+                "${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"itemsListing".translate(context)}"),
           if (widget.model.type == "advertisement")
             checkmarkPoint(context,
-                "${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"featuredAdsListing".translate(context)}"),
+                "${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"featuredItemsListing".translate(context)}"),
           checkmarkPoint(context,
               "${widget.model.duration.toString()}\t${"days".translate(context)}"),
           if (widget.model.description != null &&
@@ -276,10 +276,10 @@ class _ItemListingSubscriptionPlansItemState
           SizedBox(height: 15),
           if (widget.model.type == "item_listing")
             checkmarkPoint(context,
-                "${widget.model.userPurchasedPackages![0].remainingItemLimit}/${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"adsListing".translate(context)}"),
+                "${widget.model.userPurchasedPackages![0].remainingItemLimit}/${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"itemsListing".translate(context)}"),
           if (widget.model.type == "advertisement")
             checkmarkPoint(context,
-                "${widget.model.userPurchasedPackages![0].remainingItemLimit}/${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"featuredAdsListing".translate(context)}"),
+                "${widget.model.userPurchasedPackages![0].remainingItemLimit}/${widget.model.limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.model.limit.toString()}\t${"featuredItemsListing".translate(context)}"),
           checkmarkPoint(context,
               "${widget.model.userPurchasedPackages![0].remainingDays}/${widget.model.duration.toString()}\t${"days".translate(context)}"),
           if (widget.model.description != null &&

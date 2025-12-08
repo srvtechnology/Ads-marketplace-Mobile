@@ -661,7 +661,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                   customTile(
                     context,
-                    title: "myFeaturedAds".translate(context),
+                    title: "myFeaturedItems".translate(context),
                     svgImagePath: AppIcons.promoted,
                     onTap: () async {
                       APICallTrigger.trigger();
@@ -1129,7 +1129,8 @@ class _ProfileScreenState extends State<ProfileScreen>
             ? Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  bulletPoint("yourAdsAndTransactionDelete".translate(context)),
+                  bulletPoint(
+                      "yourItemsAndTransactionDelete".translate(context)),
                   bulletPoint("accDetailsCanNotRecovered".translate(context)),
                   bulletPoint("subscriptionsCancelled".translate(context)),
                   bulletPoint(

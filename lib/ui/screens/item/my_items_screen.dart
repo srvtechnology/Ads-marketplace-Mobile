@@ -1,4 +1,3 @@
-
 import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
 
 import 'package:eClassify/ui/theme/theme.dart';
@@ -37,7 +36,7 @@ class MyItemState extends State<ItemsScreen> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     sections = [
       {
-        "title": "allAds".translate(context),
+        "title": "allItems".translate(context),
         "status": "",
       },
       {"title": "featured".translate(context), "status": "featured"},
@@ -81,7 +80,7 @@ class MyItemState extends State<ItemsScreen> with TickerProviderStateMixin {
         backgroundColor: context.color.primaryColor,
         appBar: UiUtils.buildAppBar(
           context,
-          title: "myAds".translate(context),
+          title: "myItems".translate(context),
           // bottomHeight: 49,
           bottomHeight: 49,
 

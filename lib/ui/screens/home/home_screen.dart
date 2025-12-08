@@ -149,30 +149,16 @@ class HomeScreenState extends State<HomeScreen>
           elevation: 0,
           leadingWidth: double.maxFinite,
           leading: Padding(
-              padding: EdgeInsetsDirectional.only(
-                  start: sidePadding, end: sidePadding),
-              child: Row(
-                children: [
-                  Image.asset(
-                    "assets/logo.png",
-                    width: 40,
-                    height: 40,
-                  ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Text(
-                    "Tshong",
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: context.color.textColorDark,
-                        ),
-                  ),
-                ],
-              )
-              // TODO: Location feature commented out
-              // child: const LocationWidget()
-              ),
+            padding: EdgeInsetsDirectional.only(
+                start: sidePadding, end: sidePadding),
+            child: Image.asset(
+              "assets/full-logo.png",
+              height: 28,
+              alignment: Alignment.centerLeft,
+            ),
+            // TODO: Location feature commented out
+            // child: const LocationWidget()
+          ),
           backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         ),
         backgroundColor: context.color.primaryColor,

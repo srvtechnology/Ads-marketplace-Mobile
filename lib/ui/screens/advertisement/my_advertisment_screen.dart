@@ -95,7 +95,7 @@ class _MyAdvertisementScreenState extends State<MyAdvertisementScreen> {
     return Scaffold(
       backgroundColor: context.color.backgroundColor,
       appBar: UiUtils.buildAppBar(context,
-          showBackButton: true, title: "myFeaturedAds".translate(context)),
+          showBackButton: true, title: "myFeaturedItems".translate(context)),
       body: RefreshIndicator(
         onRefresh: () async {
           context.read<FetchMyPromotedItemsCubit>().fetchMyPromotedItems();

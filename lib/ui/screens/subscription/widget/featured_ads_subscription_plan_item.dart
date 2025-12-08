@@ -56,7 +56,7 @@ class _FeaturedAdsSubscriptionPlansItemState
               height: 35,
             ),
             CustomText(
-              "featureAd".translate(context),
+              "featureItem".translate(context),
               fontWeight: FontWeight.w600,
               fontSize: context.font.larger,
             ),
@@ -241,7 +241,7 @@ class _FeaturedAdsSubscriptionPlansItemState
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CustomText(
-                    '${widget.modelList[index].limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.modelList[index].limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
+                    '${widget.modelList[index].limit == "unlimited" ? "unlimitedLbl".translate(context) : widget.modelList[index].limit.toString()}\t${"itemsLbl".translate(context)}\t\t·\t\t',
                     overflow: TextOverflow.ellipsis,
                     softWrap: true,
                     color:
@@ -299,7 +299,7 @@ class _FeaturedAdsSubscriptionPlansItemState
                   Text.rich(
                     TextSpan(
                       text: widget.modelList[index].limit == "unlimited"
-                          ? "${"unlimitedLbl".translate(context)}\t${"adsLbl".translate(context)}\t\t·\t\t"
+                          ? "${"unlimitedLbl".translate(context)}\t${"itemsLbl".translate(context)}\t\t·\t\t"
                           : '',
                       style: TextStyle(
                         color: context.color.textDefaultColor
@@ -316,7 +316,7 @@ class _FeaturedAdsSubscriptionPlansItemState
                         if (widget.modelList[index].limit != "unlimited")
                           TextSpan(
                             text:
-                                '/${widget.modelList[index].limit.toString()}\t${"adsLbl".translate(context)}\t\t·\t\t',
+                                '/${widget.modelList[index].limit.toString()}\t${"itemsLbl".translate(context)}\t\t·\t\t',
                           ),
                       ],
                     ),

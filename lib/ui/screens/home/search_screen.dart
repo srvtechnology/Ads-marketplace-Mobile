@@ -165,8 +165,8 @@ class SearchScreenState extends State<SearchScreen>
                                             AppTheme.dark
                                         ? 0
                                         : 1,
-                                    color:
-                                        context.color.textLightColor.withValues(alpha: 0.18)),
+                                    color: context.color.textLightColor
+                                        .withValues(alpha: 0.18)),
                                 borderRadius:
                                     const BorderRadius.all(Radius.circular(10)),
                                 color: context.color.secondaryColor),
@@ -224,7 +224,8 @@ class SearchScreenState extends State<SearchScreen>
                             decoration: BoxDecoration(
                               border: Border.all(
                                   width: 1,
-                                  color: context.color.textLightColor.withValues(alpha: 0.18)),
+                                  color: context.color.textLightColor
+                                      .withValues(alpha: 0.18)),
                               color: context.color.secondaryColor,
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -266,7 +267,6 @@ class SearchScreenState extends State<SearchScreen>
                   ))),
         ),
       ),
-
       elevation: context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
           ? 0
           : 6,
@@ -377,12 +377,9 @@ class SearchScreenState extends State<SearchScreen>
     );
   }
 
-
   Widget bodyData() {
     return BlocConsumer<SearchItemCubit, SearchItemState>(
-      listener: (context, searchState) {
-
-      },
+      listener: (context, searchState) {},
       builder: (context, searchState) {
         bool hasSearchResults = searchState is SearchItemSuccess &&
             searchState.searchedItems.isNotEmpty;
@@ -452,7 +449,8 @@ class SearchScreenState extends State<SearchScreen>
                   shrinkWrap: true,
                   separatorBuilder: (BuildContext context, int index) {
                     return Divider(
-                      color: context.color.textLightColor.withValues(alpha: 0.2),
+                      color:
+                          context.color.textLightColor.withValues(alpha: 0.2),
                       thickness: 1.2,
                     );
                   },
@@ -507,8 +505,6 @@ class SearchScreenState extends State<SearchScreen>
       },
     );
   }
-
-
 
   void insertNewItem(ItemModel model) {
     var box = Hive.box(HiveKeys.historyBox);
@@ -679,7 +675,7 @@ class SearchScreenState extends State<SearchScreen>
                 Padding(
                     padding: EdgeInsetsDirectional.only(start: 5.0),
                     child: CustomText(
-                      "popularAds".translate(context),
+                      "popularItems".translate(context),
                       color:
                           context.color.textDefaultColor.withValues(alpha: 0.5),
                       fontSize: context.font.normal,
@@ -689,8 +685,6 @@ class SearchScreenState extends State<SearchScreen>
                 ),
                 ListView.separated(
                   shrinkWrap: true,
-
-
                   physics: NeverScrollableScrollPhysics(),
                   separatorBuilder: (context, index) {
                     return Container(
