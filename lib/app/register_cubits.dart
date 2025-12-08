@@ -41,6 +41,7 @@ import 'package:eClassify/data/cubits/location/fetch_cities_cubit.dart';
 import 'package:eClassify/data/cubits/location/fetch_countries_cubit.dart';
 import 'package:eClassify/data/cubits/location/fetch_states_cubit.dart';
 import 'package:eClassify/data/cubits/my_item_review_report_cubit.dart';
+import 'package:eClassify/data/cubits/payment/bfs_payment_cubit.dart';
 import 'package:eClassify/data/cubits/profile_setting_cubit.dart';
 import 'package:eClassify/data/cubits/renew_item_cubit.dart';
 import 'package:eClassify/data/cubits/report/fetch_item_report_reason_list.dart';
@@ -54,12 +55,9 @@ import 'package:eClassify/data/cubits/seller/fetch_verification_request_cubit.da
 import 'package:eClassify/data/cubits/seller/send_verification_field_cubit.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/bank_transfer_update_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_ads_listing_subscription_packages_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_featured_subscription_packages_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/in_app_purchase_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_language_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
@@ -69,6 +67,7 @@ import 'package:eClassify/data/cubits/system/notification_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/cubits/utility/fetch_transactions_cubit.dart';
 import 'package:eClassify/data/cubits/utility/item_edit_global.dart';
+import 'package:eClassify/data/repositories/bfs_payment_repository.dart';
 import 'package:eClassify/data/repositories/favourites_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:nested/nested.dart';
@@ -118,10 +117,8 @@ class RegisterCubits {
     BlocProvider(create: (context) => CreateFeaturedAdCubit()),
     BlocProvider(create: (context) => AssignFreePackageCubit()),
     BlocProvider(create: (context) => FetchUserPackageLimitCubit()),
-    BlocProvider(create: (context) => GetPaymentIntentCubit()),
     BlocProvider(create: (context) => DeleteUserCubit()),
     BlocProvider(create: (context) => MakeAnOfferItemCubit()),
-    BlocProvider(create: (context) => InAppPurchaseCubit()),
     BlocProvider(create: (context) => SendMessageCubit()),
     BlocProvider(create: (context) => DeleteMessageCubit()),
     BlocProvider(create: (context) => LoadChatMessagesCubit()),
@@ -147,7 +144,7 @@ class RegisterCubits {
     BlocProvider(create: (context) => FetchMyRatingsCubit()),
     BlocProvider(create: (context) => AddMyItemReviewReportCubit()),
     BlocProvider(create: (context) => RenewItemCubit()),
-    BlocProvider(create: (context) => BankTransferUpdateCubit()),
     BlocProvider(create: (context) => FetchTransactionsCubit()),
+    BlocProvider(create: (context) => BfsPaymentCubit(BfsPaymentRepository())),
   ];
 }

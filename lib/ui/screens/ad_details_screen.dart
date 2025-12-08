@@ -24,7 +24,6 @@ import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart
 import 'package:eClassify/data/cubits/safety_tips_cubit.dart';
 import 'package:eClassify/data/cubits/seller/fetch_seller_ratings_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_ads_listing_subscription_packages_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/fetch_user_package_limit_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
@@ -37,6 +36,7 @@ import 'package:eClassify/ui/screens/google_map_screen.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
+import 'package:eClassify/ui/screens/payment/bfs_payment_screen.dart';
 import 'package:eClassify/ui/screens/subscription/widget/featured_ads_subscription_plan_item.dart';
 
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
@@ -318,7 +318,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           onPressed: () {
                             //HelperUtils.share(context, model.slug!);
                             HelperUtils.shareItem(
-                                context, "product-details", model.slug! );
+                                context, "product-details", model.slug!);
                           },
                           icon: Icon(
                             Icons.share,
@@ -656,136 +656,90 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
 
   Widget createFeaturesAds() {
     if (model.status == "active" || model.status == "approved") {
-      return MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => CreateFeaturedAdCubit(),
+      return AnimatedCrossFade(
+        duration: Duration(milliseconds: 500),
+        crossFadeState: isFeaturedWidget
+            ? CrossFadeState.showFirst
+            : CrossFadeState.showSecond,
+        firstChild: Container(
+          margin: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: context.color.territoryColor.withValues(alpha: 0.1),
+            border: Border.all(
+                color: context.color.textLightColor.withValues(alpha: 0.18)),
           ),
-          BlocProvider(
-            create: (context) => FetchUserPackageLimitCubit(),
-          ),
-        ],
-        child: Builder(builder: (context) {
-          return BlocListener<CreateFeaturedAdCubit, CreateFeaturedAdState>(
-            listener: (context, state) {
-              if (state is CreateFeaturedAdInSuccess) {
-                HelperUtils.showSnackBarMessage(
-                    context, state.responseMessage.toString(),
-                    messageDuration: 3);
-
-                Navigator.pop(context, "refresh");
-              }
-              if (state is CreateFeaturedAdFailure) {
-                HelperUtils.showSnackBarMessage(context, state.error.toString(),
-                    messageDuration: 3);
-              }
-            },
-            child: BlocListener<FetchUserPackageLimitCubit,
-                FetchUserPackageLimitState>(
-              listener: (context, state) async {
-                // if (state is FetchUserPackageLimitFailure) {
-                //   UiUtils.noPackageAvailableDialog(context);
-                // }
-              //  if (state is FetchUserPackageLimitInSuccess) {
-                  await UiUtils.showBlurredDialoge(
-                    context,
-                    dialoge: BlurredDialogBox(
-                        title: "createFeaturedAd".translate(context),
-                        content: CustomText(
-                          "areYouSureToCreateThisItemAsAFeaturedAd"
-                              .translate(context),
-                        ),
-                        isAcceptContainerPush: true,
-                        onAccept: () => Future.value().then((_) {
-                              Future.delayed(
-                                Duration.zero,
-                                () {
-                                  context
-                                      .read<CreateFeaturedAdCubit>()
-                                      .createFeaturedAds(
-                                        itemId: model.id!,
-                                      );
-                                  Navigator.pop(context);
-                                  return;
-                                },
-                              );
-                            })),
-                  );
-               // }
-              },
-              child: AnimatedCrossFade(
-                duration: Duration(milliseconds: 500),
-                crossFadeState: isFeaturedWidget
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                firstChild: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  padding: const EdgeInsets.all(12),
-                  //height: 116,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: context.color.territoryColor.withValues(alpha: 0.1),
-                    border: Border.all(
-                        color: context.color.textLightColor
-                            .withValues(alpha: 0.18)),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(start: 12),
-                        child: SvgPicture.asset(
-                          AppIcons.createAddIcon,
-                          height: 74,
-                          width: 62,
-                        ),
-                      ),
-                      const SizedBox(width: 20),
-                      Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CustomText(
-                              "${"featureYourAdsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
-                              color: context.color.textDefaultColor
-                                  .withValues(alpha: 0.7),
-                              fontSize: context.font.large,
-                            ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () {
-                                context
-                                    .read<FetchUserPackageLimitCubit>()
-                                    .fetchUserPackageLimit(
-                                        packageType: "advertisement");
-                              },
-                              child: Container(
-                                height: 33,
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 18, vertical: 8),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
-                                  color: context.color.territoryColor,
-                                ),
-                                child: CustomText(
-                                  "createFeaturedAd".translate(context),
-                                  color: context.color.secondaryColor,
-                                  fontSize: context.font.small,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 12),
+                child: SvgPicture.asset(
+                  AppIcons.createAddIcon,
+                  height: 74,
+                  width: 62,
                 ),
-                secondChild: SizedBox.shrink(),
               ),
-            ),
-          );
-        }),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CustomText(
+                      "${"featureYourAdsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.7),
+                      fontSize: context.font.large,
+                    ),
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: () {
+                        // BFS Payment Integration for Featured Ad
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BfsPaymentScreen(
+                              itemId: model.id!.toString(),
+                              price:
+                                  0.0, // Price will be fetched from AR response
+                              packageName:
+                                  "createFeaturedAd".translate(context),
+                            ),
+                          ),
+                        ).then((result) {
+                          if (result == true) {
+                            HelperUtils.showSnackBarMessage(
+                                context, "paymentSuccessMsg".translate(context),
+                                type: MessageType.success);
+                            // Refresh the screen details
+                            Navigator.pop(context, "refresh");
+                          }
+                        });
+                      },
+                      child: Container(
+                        height: 33,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: context.color.territoryColor,
+                        ),
+                        child: CustomText(
+                          "createFeaturedAd".translate(context),
+                          color: context.color.secondaryColor,
+                          fontSize: context.font.small,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        secondChild: SizedBox.shrink(),
       );
     } else {
       return SizedBox.shrink();
@@ -2606,9 +2560,8 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   }
 
   void navigateToSellerProfile() {
-    Navigator.pushNamed(context, Routes.sellerProfileScreen, arguments: {
-      "sellerId":model.user!.id
-    });
+    Navigator.pushNamed(context, Routes.sellerProfileScreen,
+        arguments: {"sellerId": model.user!.id});
   }
 
   Widget setSellerDetails() {

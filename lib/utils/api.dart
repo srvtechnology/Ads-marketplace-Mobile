@@ -110,6 +110,12 @@ class Api {
   static String renewItemApi = "renew-item";
   static String bankTransferUpdateApi = "bank-transfer-update";
 
+  // BFS Payment Gateway Endpoints
+  static String bfsArApi = "bfs/featured/ar";
+  static String bfsAeApi = "bfs/ae";
+  static String bfsDrApi = "bfs/featured/dr-section";
+  static String bfsAsApi = "bfs/as";
+
   static String sendMessageApi = "send-message";
   static String getChatListApi = "chat-list";
   static String itemOfferApi = "item-offer";

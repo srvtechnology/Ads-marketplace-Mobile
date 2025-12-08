@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_ads_listing_subscription_packages_cubit.dart';
 import 'package:eClassify/data/cubits/subscription/fetch_featured_subscription_packages_cubit.dart';
@@ -7,7 +5,6 @@ import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/get_api_keys_cubit.dart';
 import 'package:eClassify/data/model/subscription_package_model.dart';
 import 'package:eClassify/data/model/system_settings_model.dart';
-import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/screens/subscription/widget/featured_ads_subscription_plan_item.dart';
 import 'package:eClassify/ui/screens/subscription/widget/item_listing_subscription_plans_item.dart';
 
@@ -19,12 +16,10 @@ import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/payment/gateaways/inapp_purchase_manager.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 
 class SubscriptionPackageListScreen extends StatefulWidget {
   const SubscriptionPackageListScreen({super.key});
@@ -67,7 +62,6 @@ class _SubscriptionPackageListScreenState
   List<String> listingAdsProducts = [];
   List<SubscriptionPackageModel> iapFeaturedAdsProducts = [];
   List<String> featuredAdsProducts = [];
-  final InAppPurchaseManager _inAppPurchaseManager = InAppPurchaseManager();
 
   late final bool isFreeAdListingEnabled;
 
@@ -80,10 +74,7 @@ class _SubscriptionPackageListScreenState
     }
     context.read<FetchAdsListingSubscriptionPackagesCubit>().fetchPackages();
     context.read<FetchFeaturedSubscriptionPackagesCubit>().fetchPackages();
-    if (Platform.isIOS) {
-      InAppPurchaseManager.getPending();
-      _inAppPurchaseManager.listenIAP(context);
-    }
+
     isFreeAdListingEnabled = context
             .read<FetchSystemSettingsCubit>()
             .getSetting(SystemSetting.freeAdListing) ==
@@ -101,9 +92,7 @@ class _SubscriptionPackageListScreenState
     if (_tabController != null) {
       _tabController?.removeListener(_handleTabSelection);
     }
-    if (Platform.isIOS) {
-      _inAppPurchaseManager.dispose();
-    }
+
     super.dispose();
   }
 
@@ -130,14 +119,7 @@ class _SubscriptionPackageListScreenState
         showBackButton: true,
         title: "subsctiptionPlane".translate(context),
         bottomHeight: isFreeAdListingEnabled ? 0 : 49,
-        actions: [
-          if (Platform.isIOS)
-            CupertinoButton(
-                child: Text("restore".translate(context)),
-                onPressed: () async {
-                  await InAppPurchase.instance.restorePurchases();
-                })
-        ],
+        actions: [],
         bottom: isFreeAdListingEnabled
             ? null
             : [
@@ -185,43 +167,15 @@ class _SubscriptionPackageListScreenState
                 ),
               ],
       ),
-      body: BlocListener<GetApiKeysCubit, GetApiKeysState>(
-        listener: (context, state) {
-          if (state is GetApiKeysSuccess) {
-            AppSettings.stripeCurrency = state.stripeCurrency ?? "";
-            AppSettings.stripePublishableKey = state.stripePublishableKey ?? "";
-            AppSettings.stripeStatus = state.stripeStatus;
-            AppSettings.payStackCurrency = state.payStackCurrency ?? "";
-            AppSettings.payStackKey = state.payStackApiKey ?? "";
-            AppSettings.payStackStatus = state.payStackStatus;
-            AppSettings.razorpayKey = state.razorPayApiKey ?? "";
-            AppSettings.razorpayStatus = state.razorPayStatus;
-            AppSettings.phonePeCurrency = state.phonePeCurrency ?? "";
-            AppSettings.phonePeKey = state.phonePeKey ?? "";
-            AppSettings.phonePeStatus = state.phonePeStatus;
-            AppSettings.flutterwaveKey = state.flutterWaveKey ?? "";
-            AppSettings.flutterwaveCurrency = state.flutterWaveCurrency ?? "";
-            AppSettings.flutterwaveStatus = state.flutterWaveStatus;
-            AppSettings.phonePeCurrency = state.phonePeCurrency ?? "";
-            AppSettings.bankAccountNumber = state.bankAccountNumber ?? "";
-            AppSettings.bankAccountHolderName = state.bankAccountHolder??"";
-            AppSettings.bankIfscSwiftCode = state.bankIfscSwiftCode ?? "";
-            AppSettings.bankName = state.bankName ?? "";
-            AppSettings.bankTransferStatus = state.bankTransferStatus;
-
-            AppSettings.updatePaymentGateways();
-          }
-        },
-        child: isFreeAdListingEnabled
-            ? featuredAds()
-            : TabBarView(
-                controller: _tabController!,
-                children: [
-                  adsListing(),
-                  featuredAds(),
-                ],
-              ),
-      ),
+      body: isFreeAdListingEnabled
+          ? featuredAds()
+          : TabBarView(
+              controller: _tabController!,
+              children: [
+                adsListing(),
+                featuredAds(),
+              ],
+            ),
     );
   }
 
@@ -276,7 +230,6 @@ class _SubscriptionPackageListScreenState
                       itemIndex: currentIndex,
                       index: index,
                       model: state.subscriptionPackages[index],
-                      inAppPurchaseManager: _inAppPurchaseManager,
                     );
                   },
                   itemCount: state.subscriptionPackages.length);
@@ -330,7 +283,6 @@ class _SubscriptionPackageListScreenState
 
               return FeaturedAdsSubscriptionPlansItem(
                 modelList: state.subscriptionPackages,
-                inAppPurchaseManager: _inAppPurchaseManager,
               );
             }
 

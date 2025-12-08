@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:eClassify/data/cubits/subscription/assign_free_package_cubit.dart';
-import 'package:eClassify/data/cubits/subscription/get_payment_intent_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/subscription_package_model.dart';
-import 'package:eClassify/settings.dart';
-import 'package:eClassify/ui/screens/subscription/payment_gatways.dart';
+import 'package:eClassify/ui/screens/payment/bfs_payment_screen.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
@@ -13,9 +9,6 @@ import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/extensions/lib/currency_formatter.dart';
 import 'package:eClassify/utils/helper_utils.dart';
-import 'package:eClassify/utils/payment/gateaways/inapp_purchase_manager.dart';
-import 'package:eClassify/utils/payment/gateaways/payment_webview.dart';
-import 'package:eClassify/utils/payment/gateaways/stripe_service.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,14 +17,12 @@ import 'package:intl/intl.dart' as intl;
 class ItemListingSubscriptionPlansItem extends StatefulWidget {
   final int itemIndex, index;
   final SubscriptionPackageModel model;
-  final InAppPurchaseManager inAppPurchaseManager;
 
   const ItemListingSubscriptionPlansItem({
     super.key,
     required this.itemIndex,
     required this.index,
     required this.model,
-    required this.inAppPurchaseManager,
   });
 
   @override
@@ -41,19 +32,9 @@ class ItemListingSubscriptionPlansItem extends StatefulWidget {
 
 class _ItemListingSubscriptionPlansItemState
     extends State<ItemListingSubscriptionPlansItem> {
-  String? _selectedGateway;
-
   @override
   void initState() {
     super.initState();
-    if (Platform.isAndroid) {
-      if (AppSettings.stripeStatus == 1) {
-        StripeService.initStripe(
-          AppSettings.stripePublishableKey,
-          "test",
-        );
-      }
-    }
   }
 
   @override
@@ -68,269 +49,164 @@ class _ItemListingSubscriptionPlansItemState
             BlocProvider(
               create: (context) => AssignFreePackageCubit(),
             ),
-            BlocProvider(
-              create: (context) => GetPaymentIntentCubit(),
-            ),
           ],
           child: Builder(builder: (context) {
-            return BlocListener<GetPaymentIntentCubit, GetPaymentIntentState>(
+            return BlocListener<AssignFreePackageCubit, AssignFreePackageState>(
               listener: (context, state) {
-                if (state is GetPaymentIntentInSuccess) {
+                if (state is AssignFreePackageInSuccess) {
                   Widgets.hideLoder(context);
-
-                  if (_selectedGateway == "stripe") {
-                    PaymentGateways.stripe(context,
-                        price: widget.model.finalPrice!.toDouble(),
-                        packageId: widget.model.id!,
-                        paymentIntent: state.paymentIntent);
-                  } else if (_selectedGateway == "paystack") {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => PaymentWebView(
-                        authorizationUrl:
-                            state.paymentIntent["payment_gateway_response"]
-                                ["data"]["authorization_url"],
-                        reference:
-                            state.paymentIntent["payment_gateway_response"]
-                                ["data"]["reference"],
-                        onSuccess: (reference) {
-                          HelperUtils.showSnackBarMessage(
-                              context,
-                              "paymentSuccessfullyCompleted"
-                                  .translate(context));
-                          // Handle successful payment
-                        },
-                        onFailed: (reference) {
-                          HelperUtils.showSnackBarMessage(
-                              context, "purchaseFailed".translate(context));
-                          // Handle failed payment
-                        },
-                        onCancel: () {
-                          HelperUtils.showSnackBarMessage(context,
-                              "subscriptionsCancelled".translate(context));
-                        },
-                      ),
-                    ));
-                  } else if (_selectedGateway == "phonepe") {
-                    PaymentGateways.phonepeCheckSum(
-                        context: context,
-                        getData:
-                            state.paymentIntent["payment_gateway_response"]);
-                  } else if (_selectedGateway == "razorpay") {
-                    PaymentGateways.razorpay(
-                      orderId: state.paymentIntent["id"].toString(),
-                      context: context,
-                      packageId: widget.model.id!,
-                      price: widget.model.finalPrice!.toDouble(),
-                    );
-                  } else if (_selectedGateway == "flutterwave") {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => PaymentWebView(
-                        authorizationUrl:
-                            state.paymentIntent["payment_gateway_response"]
-                                ["data"]["link"],
-                        onSuccess: (reference) {
-                          HelperUtils.showSnackBarMessage(
-                              context,
-                              "paymentSuccessfullyCompleted"
-                                  .translate(context));
-                          // Handle successful payment
-                        },
-                        onFailed: (reference) {
-                          HelperUtils.showSnackBarMessage(
-                              context, "purchaseFailed".translate(context));
-                          // Handle failed payment
-                        },
-                        onCancel: () {
-                          HelperUtils.showSnackBarMessage(context,
-                              "subscriptionsCancelled".translate(context));
-                        },
-                      ),
-                    ));
-                  }
+                  HelperUtils.showSnackBarMessage(
+                      context, state.responseMessage);
+                  Navigator.pop(context);
                 }
-
-                if (state is GetPaymentIntentInProgress) {
-                  Widgets.showLoader(context);
-                }
-
-                if (state is GetPaymentIntentFailure) {
+                if (state is AssignFreePackageFailure) {
                   Widgets.hideLoder(context);
                   HelperUtils.showSnackBarMessage(
                       context, state.error.toString());
                 }
+                if (state is AssignFreePackageInProgress) {
+                  Widgets.showLoader(context);
+                }
               },
-              child:
-                  BlocListener<AssignFreePackageCubit, AssignFreePackageState>(
-                listener: (context, state) {
-                  if (state is AssignFreePackageInSuccess) {
-                    Widgets.hideLoder(context);
-                    HelperUtils.showSnackBarMessage(
-                        context, state.responseMessage);
-                    Navigator.pop(context);
-                  }
-                  if (state is AssignFreePackageFailure) {
-                    Widgets.hideLoder(context);
-                    HelperUtils.showSnackBarMessage(
-                        context, state.error.toString());
-                  }
-                  if (state is AssignFreePackageInProgress) {
-                    Widgets.showLoader(context);
-                  }
-                },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      top: (widget.index == widget.itemIndex) ? 40 : 70,
-                      bottom: (widget.index == widget.itemIndex) ? 100 : 120),
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      if (widget.model.isActive!)
-                        ClipPath(
-                          clipper: CapShapeClipper(),
-                          child: Container(
-                            alignment: Alignment.center,
-                            color: context.color.territoryColor,
-                            width: MediaQuery.of(context).size.width / 1.6,
-                            height: 33,
-                            padding: EdgeInsets.only(top: 3),
-                            child: CustomText(
-                                'activePlanLbl'.translate(context),
-                                color: context.color.secondaryColor,
-                                textAlign: TextAlign.center,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15),
-                          ),
-                        ),
-                      Card(
-                        color: context.color.secondaryColor,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            side: BorderSide(
-                                color: widget.model.isActive!
-                                    ? context.color.territoryColor
-                                    : context.color.secondaryColor,
-                                width: 1.5)),
-                        elevation: 0,
-                        margin: EdgeInsets.fromLTRB(14, 33, 14, 0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start, //temp
-                          children: [
-                            SizedBox(height: 50),
-                            ClipPath(
-                              clipper: HexagonClipper(),
-                              child: Container(
-                                width: 100,
-                                height: 110,
-                                padding: EdgeInsets.all(30),
-                                color: context.color.primaryColor,
-                                child: UiUtils.imageType(widget.model.icon!,
-                                    fit: BoxFit.contain),
-                              ),
-                            ),
-                            SizedBox(height: 18),
-                            widget.model.isActive! &&
-                                    widget.model.finalPrice! > 0
-                                ? activeAdsData()
-                                : adsData(),
-                            const Spacer(),
-                            CustomText(
-                              widget.model.finalPrice! > 0
-                                  ? widget.model.finalPrice!.currencyFormat
-                                  : "free".translate(context),
-                              fontSize: context.font.xxLarge,
-                              fontWeight: FontWeight.bold,
-                              color: context.color.textDefaultColor,
-                            ),
-                            if (widget.model.discount! > 0)
-                              Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    CustomText(
-                                      "${widget.model.discount}%\t${"OFF".translate(context)}",
-                                      color: context.color.forthColor,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    SizedBox(width: 5),
-                                    Text(
-                                      " ${Constant.currencySymbol}${widget.model.price.toString()}",
-                                      style: const TextStyle(
-                                          decoration:
-                                              TextDecoration.lineThrough),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            UiUtils.buildButton(context, onPressed: () {
-                              UiUtils.checkUser(
-                                  onNotGuest: () {
-                                    if (!widget.model.isActive!) {
-                                      if (widget.model.finalPrice! > 0) {
-                                        if (Platform.isIOS) {
-                                          widget.inAppPurchaseManager.buy(
-                                              widget.model.iosProductId!,
-                                              widget.model.id!.toString());
-                                        } else {
-                                          paymentGatewayBottomSheet()
-                                              .then((value) {
-                                            if (_selectedGateway ==
-                                                'bankTransfer') {
-                                              fetchBankDetailsAndShowDialog(
-                                                  context, widget.model.id!);
-                                            } else {
-                                              context
-                                                  .read<GetPaymentIntentCubit>()
-                                                  .getPaymentIntent(
-                                                      paymentMethod: _selectedGateway ==
-                                                              "stripe"
-                                                          ? "Stripe"
-                                                          : _selectedGateway ==
-                                                                  "paystack"
-                                                              ? "Paystack"
-                                                              : _selectedGateway ==
-                                                                      "razorpay"
-                                                                  ? "Razorpay"
-                                                                  : _selectedGateway ==
-                                                                          "phonepe"
-                                                                      ? "PhonePe"
-                                                                      : "FlutterWave",
-                                                      packageId:
-                                                          widget.model.id!);
-                                            }
-                                          });
-                                        }
-                                      } else {
-                                        context
-                                            .read<AssignFreePackageCubit>()
-                                            .assignFreePackage(
-                                                packageId: widget.model.id!);
-                                      }
-                                    }
-                                  },
-                                  context: context);
-                            },
-                                radius: 10,
-                                height: 46,
-                                fontSize: context.font.large,
-                                buttonColor: widget.model.isActive!
-                                    ? context.color.textLightColor
-                                        .withValues(alpha: 0.01)
-                                    : context.color.territoryColor,
-                                textColor: widget.model.isActive!
-                                    ? context.color.textDefaultColor
-                                        .withValues(alpha: 0.5)
-                                    : context.color.secondaryColor,
-                                buttonTitle: widget.model.isActive ?? false
-                                    ? "purchased".translate(context)
-                                    : "purchaseThisPackage".translate(context),
-                                outerPadding: const EdgeInsets.all(20))
-                          ],
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: (widget.index == widget.itemIndex) ? 40 : 70,
+                    bottom: (widget.index == widget.itemIndex) ? 100 : 120),
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    if (widget.model.isActive!)
+                      ClipPath(
+                        clipper: CapShapeClipper(),
+                        child: Container(
+                          alignment: Alignment.center,
+                          color: context.color.territoryColor,
+                          width: MediaQuery.of(context).size.width / 1.6,
+                          height: 33,
+                          padding: EdgeInsets.only(top: 3),
+                          child: CustomText('activePlanLbl'.translate(context),
+                              color: context.color.secondaryColor,
+                              textAlign: TextAlign.center,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 15),
                         ),
                       ),
-                    ],
-                  ),
+                    Card(
+                      color: context.color.secondaryColor,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15.0),
+                          side: BorderSide(
+                              color: widget.model.isActive!
+                                  ? context.color.territoryColor
+                                  : context.color.secondaryColor,
+                              width: 1.5)),
+                      elevation: 0,
+                      margin: EdgeInsets.fromLTRB(14, 33, 14, 0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 50),
+                          ClipPath(
+                            clipper: HexagonClipper(),
+                            child: Container(
+                              width: 100,
+                              height: 110,
+                              padding: EdgeInsets.all(30),
+                              color: context.color.primaryColor,
+                              child: UiUtils.imageType(widget.model.icon!,
+                                  fit: BoxFit.contain),
+                            ),
+                          ),
+                          SizedBox(height: 18),
+                          widget.model.isActive! && widget.model.finalPrice! > 0
+                              ? activeAdsData()
+                              : adsData(),
+                          const Spacer(),
+                          CustomText(
+                            widget.model.finalPrice! > 0
+                                ? widget.model.finalPrice!.currencyFormat
+                                : "free".translate(context),
+                            fontSize: context.font.xxLarge,
+                            fontWeight: FontWeight.bold,
+                            color: context.color.textDefaultColor,
+                          ),
+                          if (widget.model.discount! > 0)
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomText(
+                                    "${widget.model.discount}%\t${"OFF".translate(context)}",
+                                    color: context.color.forthColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    " ${Constant.currencySymbol}${widget.model.price.toString()}",
+                                    style: const TextStyle(
+                                        decoration: TextDecoration.lineThrough),
+                                  )
+                                ],
+                              ),
+                            ),
+                          UiUtils.buildButton(context, onPressed: () {
+                            UiUtils.checkUser(
+                                onNotGuest: () {
+                                  if (!widget.model.isActive!) {
+                                    if (widget.model.finalPrice! > 0) {
+                                      // BFS Payment
+                                      Navigator.of(context)
+                                          .push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              BfsPaymentScreen(
+                                            itemId: widget.model.id.toString(),
+                                            packageName:
+                                                widget.model.name ?? '',
+                                            price: widget.model.finalPrice!
+                                                .toDouble(),
+                                          ),
+                                        ),
+                                      )
+                                          .then((value) {
+                                        if (value == true) {
+                                          HelperUtils.showSnackBarMessage(
+                                              context, "Payment Successful",
+                                              type: MessageType.success);
+                                          // Refresh logic if needed or pop
+                                        }
+                                      });
+                                    } else {
+                                      context
+                                          .read<AssignFreePackageCubit>()
+                                          .assignFreePackage(
+                                              packageId: widget.model.id!);
+                                    }
+                                  }
+                                },
+                                context: context);
+                          },
+                              radius: 10,
+                              height: 46,
+                              fontSize: context.font.large,
+                              buttonColor: widget.model.isActive!
+                                  ? context.color.textLightColor
+                                      .withValues(alpha: 0.01)
+                                  : context.color.territoryColor,
+                              textColor: widget.model.isActive!
+                                  ? context.color.textDefaultColor
+                                      .withValues(alpha: 0.5)
+                                  : context.color.secondaryColor,
+                              buttonTitle: widget.model.isActive ?? false
+                                  ? "purchased".translate(context)
+                                  : "purchaseThisPackage".translate(context),
+                              outerPadding: const EdgeInsets.all(20))
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -494,262 +370,6 @@ class _ItemListingSubscriptionPlansItemState
       ),
     );
   }
-
-  Future<void> fetchBankDetailsAndShowDialog(
-      BuildContext context, int packageId) async {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        title: CustomText(
-          'bankAccountDetails'.translate(context),
-          fontWeight: FontWeight.bold,
-        ),
-        content: Builder(builder: (context) {
-          return BlocListener<GetPaymentIntentCubit, GetPaymentIntentState>(
-            listener: (context, state) {
-              if (state is GetPaymentIntentInSuccess) {
-                Navigator.pop(context);
-                Widgets.hideLoder(context);
-                HelperUtils.showSnackBarMessage(
-                    context, state.message.toString());
-              }
-
-              if (state is GetPaymentIntentInProgress) {
-                Widgets.showLoader(context);
-              }
-
-              if (state is GetPaymentIntentFailure) {
-                Navigator.pop(context);
-                Widgets.hideLoder(context);
-                HelperUtils.showSnackBarMessage(
-                    context, state.error.toString());
-              }
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  'pleaseTransferAmountToFollowingBank'.translate(context),
-                  fontSize: 14,
-                ),
-                const SizedBox(height: 16),
-                _buildDetailField('accountHolder'.translate(context),
-                    AppSettings.bankAccountHolderName),
-                _buildDetailField('accountNumber'.translate(context),
-                    AppSettings.bankAccountNumber),
-                _buildDetailField(
-                    'bankName'.translate(context), AppSettings.bankName),
-                _buildDetailField('swiftIfscCode'.translate(context),
-                    AppSettings.bankIfscSwiftCode),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    UiUtils.buildButton(context,
-                        height: 42,
-                        radius: 8,
-                        fontSize: 14,
-                        width: context.screenWidth / 4,
-                        showElevation: false, onPressed: () {
-                      Navigator.pop(context);
-                    },
-                        buttonTitle: "cancelLbl".translate(context),
-                        buttonColor: context.color.textDefaultColor,
-                        textColor: context.color.secondaryColor),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(start: 8.0),
-                        child: UiUtils.buildButton(context,
-                            height: 42,
-                            radius: 8,
-                            fontSize: 14,
-                            showElevation: false,
-                            width: context.screenWidth / 4, onPressed: () {
-                          context
-                              .read<GetPaymentIntentCubit>()
-                              .getPaymentIntent(
-                                  paymentMethod: "bankTransfer",
-                                  packageId: packageId);
-                        },
-                            buttonTitle: "confirmPayment".translate(context),
-                            buttonColor: context.color.territoryColor,
-                            textColor: context.color.secondaryColor),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildDetailField(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CustomText(label,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: context.color.textDefaultColor),
-          const SizedBox(height: 4),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: context.color.backgroundColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: CustomText(value,
-                fontSize: 14, color: context.color.textDefaultColor),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> paymentGatewayBottomSheet() async {
-    List<PaymentGateway> enabledGateways =
-        AppSettings.getEnabledPaymentGateways();
-
-    if (enabledGateways.isEmpty) {
-      return;
-    }
-
-    String? selectedGateway = await showModalBottomSheet<String>(
-      context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(18.0),
-          topRight: Radius.circular(18.0),
-        ),
-      ),
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        String? _localSelectedGateway = _selectedGateway;
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.85,
-              ),
-              decoration: BoxDecoration(
-                color: context.color.secondaryColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(18),
-                  topRight: Radius.circular(18),
-                ),
-              ),
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(top: 12.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(3),
-                          color: context.color.textDefaultColor
-                              .withValues(alpha: 0.1),
-                        ),
-                        height: 6,
-                        width: 60,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0, bottom: 5),
-                    child: CustomText(
-                      'selectPaymentMethod'.translate(context),
-                      color: context.color.textDefaultColor,
-                      fontWeight: FontWeight.bold,
-                      fontSize: context.font.larger,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    padding: EdgeInsets.only(top: 10),
-                    itemCount: enabledGateways.length,
-                    physics: const BouncingScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return PaymentMethodTile(
-                        gateway: enabledGateways[index],
-                        isSelected: _localSelectedGateway ==
-                            enabledGateways[index].type,
-                        onSelect: (String? value) {
-                          Navigator.pop(context, value);
-                          setState(() {
-                            _localSelectedGateway = value;
-                          }); // Return the selected value
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-
-    if (selectedGateway != null) {
-      setState(() {
-        _selectedGateway = selectedGateway;
-      });
-    }
-  }
-}
-
-class PaymentMethodTile extends StatelessWidget {
-  final PaymentGateway gateway;
-  final bool isSelected;
-  final ValueChanged<String?> onSelect;
-
-  PaymentMethodTile({
-    required this.gateway,
-    required this.isSelected,
-    required this.onSelect,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: UiUtils.getSvg(gatewayIcon(gateway.type),
-          width: 23, height: 23, fit: BoxFit.contain),
-      title: CustomText(gateway.name),
-      trailing: isSelected
-          ? Icon(Icons.check_circle, color: context.color.territoryColor)
-          : Icon(Icons.radio_button_unchecked,
-              color: context.color.textDefaultColor.withValues(alpha: 0.5)),
-      onTap: () => onSelect(gateway.type),
-    );
-  }
-
-  String gatewayIcon(String type) {
-    switch (type) {
-      case 'stripe':
-        return AppIcons.stripeIcon;
-      case 'paystack':
-        return AppIcons.paystackIcon;
-      case 'razorpay':
-        return AppIcons.razorpayIcon;
-      case 'phonepe':
-        return AppIcons.phonePeIcon;
-      case 'flutterwave':
-        return AppIcons.flutterwaveIcon;
-      case 'bankTransfer':
-        return AppIcons.bankTransferIcon;
-      default:
-        return "";
-    }
-  }
 }
 
 class HexagonClipper extends CustomClipper<Path> {
@@ -798,14 +418,13 @@ class CapShapeClipper extends CustomClipper<Path> {
         size.height,
       )
       ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
       ..close();
 
     return path;
   }
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) {
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return false;
   }
 }
