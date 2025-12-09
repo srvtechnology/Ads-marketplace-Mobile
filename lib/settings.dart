@@ -49,7 +49,7 @@ class AppSettings {
   static const int otpResendSecond = 60;
   static const int otpTimeOutSecond = 60;
 
-  static const String defaultCountryCode = "91";
+  static const String defaultCountryCode = "975";
   static const bool disableCountrySelection = false;
 
   static const String successLoadingLottieFile = "loading_success.json";

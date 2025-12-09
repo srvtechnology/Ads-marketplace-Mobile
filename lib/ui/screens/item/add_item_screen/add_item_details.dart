@@ -348,34 +348,6 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       SizedBox(
                         height: 15,
                       ),
-                      CustomText(
-                          "${"itemSlug".translate(context)}\t(${"englishOnlyLbl".translate(context)})"),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      CustomTextFormField(
-                        controller: adSlugController,
-                        onChange: (value) {
-                          String slug = generateSlug(value);
-                          adSlugController.value = TextEditingValue(
-                            text: slug,
-                            selection: TextSelection.fromPosition(
-                              TextPosition(offset: slug.length),
-                            ),
-                          );
-                        },
-                        // controller: _itemNameController,
-                        validator: CustomTextFieldValidator.slug,
-                        action: TextInputAction.next,
-                        hintText: "itemSlugHere".translate(context),
-                        hintTextStyle: TextStyle(
-                            color: context.color.textDefaultColor
-                                .withValues(alpha: 0.5),
-                            fontSize: context.font.large),
-                      ),
-                      SizedBox(
-                        height: 15,
-                      ),
                       CustomText("descriptionLbl".translate(context)),
                       SizedBox(
                         height: 15,

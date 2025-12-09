@@ -1,4 +1,3 @@
-
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
 import 'package:eClassify/data/model/system_settings_model.dart';
@@ -22,7 +21,6 @@ class Constant {
   static String isGoogleBannerAdsEnabled = "";
   static String isGoogleInterstitialAdsEnabled = "";
   static String isGoogleNativeAdsEnabled = "1";
-
 
   static String bannerAdIdAndroid = '';
   static String bannerAdIdIOS = "";
@@ -61,25 +59,20 @@ class Constant {
 
   static const String defaultCountryCode = AppSettings.defaultCountryCode;
 
-
-
   static const int maxCategoryLength =
       AppSettings.maxCategoryShowLengthInHomeScreen;
-
 
   static const String loadingSuccessLottieFile =
       AppSettings.successLoadingLottieFile;
   static const String successItemLottieFile =
       AppSettings.successCheckLottieFile;
-  static const String progressLottieFileWhite = AppSettings
-      .progressLottieFileWhite;
+  static const String progressLottieFileWhite =
+      AppSettings.progressLottieFileWhite;
 
   static const String maintenanceModeLottieFile =
       AppSettings.maintenanceModeLottieFile;
 
-
-  static const bool useLottieProgress = AppSettings
-      .useLottieProgress;
+  static const bool useLottieProgress = AppSettings.useLottieProgress;
 
   static const String notificationChannel = AppSettings.notificationChannel;
   static int uploadImageQuality = AppSettings.uploadImageQuality;
@@ -153,11 +146,9 @@ class Constant {
     SystemSetting.autoApproveEditedItem: "auto_approve_edited_item",
   };
 
-
   static int minChatMessages = 35;
 
   static bool showExperimentals = true;
-
 
   static bool isUpdateAvailable = false;
   static String newVersionNumber = "";
@@ -165,7 +156,7 @@ class Constant {
 
   //Demo mode settings
   static bool isDemoModeOn = false;
-  static String demoCountryCode = "91";
+  static String demoCountryCode = "975";
   static String demoMobileNumber = "9876598765";
   static String demoModeOTP = "123456";
 

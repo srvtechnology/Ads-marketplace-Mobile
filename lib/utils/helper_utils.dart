@@ -93,7 +93,6 @@ class HelperUtils {
     return int.parse(plain);
   }
 
-
   static String nativeDeepLinkUrl(String type, String value) {
     return "https://${AppSettings.shareNavigationWebUrl}/$type/$value?share=true";
   }
@@ -129,10 +128,12 @@ class HelperUtils {
               onTap: () async {
                 String deepLink = nativeDeepLinkUrl(type, slug);
                 final box = context.findRenderObject() as RenderBox?;
-                String text = "${"shareDetailsMsg".translate(context)}:\n$deepLink.";
+                String text =
+                    "${"shareDetailsMsg".translate(context)}:\n$deepLink.";
                 await Share.share(
                   text,
-                  sharePositionOrigin: box!.localToGlobal(Offset.zero) & box.size,
+                  sharePositionOrigin:
+                      box!.localToGlobal(Offset.zero) & box.size,
                 );
               },
             ),
@@ -141,7 +142,6 @@ class HelperUtils {
       },
     );
   }
-
 
   static void unfocus() {
     FocusManager.instance.primaryFocus?.unfocus();
