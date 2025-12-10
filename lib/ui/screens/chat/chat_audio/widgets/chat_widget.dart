@@ -14,6 +14,7 @@ import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
+import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -45,6 +46,8 @@ class ChatMessage extends StatefulWidget {
   final String updatedAt;
   final String? messageType;
   final bool? isSentNow;
+  final String? type;
+  final double? amount;
 
   const ChatMessage(
       {super.key,
@@ -57,7 +60,9 @@ class ChatMessage extends StatefulWidget {
       required this.createdAt,
       required this.updatedAt,
       this.messageType,
-      this.isSentNow});
+      this.isSentNow,
+      this.type,
+      this.amount});
 
   Map toJson() {
     Map data = {};
@@ -73,6 +78,8 @@ class ChatMessage extends StatefulWidget {
     data['updated_at'] = this.updatedAt;
     data['is_sent_now'] = this.isSentNow;
     data['message_type'] = this.messageType;
+    data['type'] = this.type;
+    data['amount'] = this.amount;
     return data;
   }
 
@@ -88,7 +95,9 @@ class ChatMessage extends StatefulWidget {
         createdAt: json['created_at'],
         updatedAt: json['updated_at'],
         isSentNow: json['is_sent_now'],
-        messageType: json['message_type']);
+        messageType: json['message_type'],
+        type: json['type'],
+        amount: json['amount']);
     return chat;
   }
 
@@ -115,6 +124,8 @@ class ChatMessageState extends State<ChatMessage>
               message: widget.message!,
               itemOfferId: widget.itemOfferId,
               audio: widget.audio,
+              type: widget.type ?? "N",
+              amount: widget.amount,
             );
       }
       sentMessages.add(widget.key);
@@ -123,6 +134,35 @@ class ChatMessageState extends State<ChatMessage>
     }
 
     super.initState();
+  }
+
+  bool get _isOffer {
+    return widget.type == "O" ||
+        (widget.message?.startsWith("Offered:") ?? false);
+  }
+
+  String get _offerDisplayAmount {
+    if (widget.type == "O") {
+      return (Constant.currencyPositionIsLeft
+              ? "${Constant.currencySymbol} "
+              : "") +
+          (widget.amount?.toStringAsFixed(0) ?? '0') +
+          (Constant.currencyPositionIsLeft
+              ? ""
+              : " ${Constant.currencySymbol}");
+    }
+    String raw = widget.message!.substring("Offered:".length).trim();
+    if (raw.startsWith(Constant.currencySymbol)) {
+      raw = raw.substring(Constant.currencySymbol.length).trim();
+    } else if (raw.endsWith(Constant.currencySymbol)) {
+      raw =
+          raw.substring(0, raw.length - Constant.currencySymbol.length).trim();
+    }
+    return (Constant.currencyPositionIsLeft
+            ? "${Constant.currencySymbol} "
+            : "") +
+        raw +
+        (Constant.currencyPositionIsLeft ? "" : " ${Constant.currencySymbol}");
   }
 
   String _emptyTextIfAttachmentHasNoCustomText() {
@@ -240,131 +280,180 @@ class ChatMessageState extends State<ChatMessage>
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Container(
-                        child: widget.audio != ""
-                            ? RecordMessage(
-                                url: widget.audio ?? "",
-                                isSentByMe: widget.senderId.toString() ==
-                                    HiveUtils.getUserId(),
-                              )
-                            : Column(
+                        child: _isOffer
+                            ? Column(
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (widget.file != "")
-                                    AttachmentMessage(url: widget.file!),
-
-                                  //This is preview builder for image
-                                  ValueListenableBuilder(
-                                      valueListenable: _linkAddNotifier,
-                                      builder: (context, dynamic value, c) {
-                                        if (value == null) {
-                                          return const SizedBox.shrink();
-                                        }
-
-                                        return FutureBuilder(
-                                          future: AnyLinkPreview.getMetadata(
-                                              link: value),
-                                          builder: (context,
-                                              AsyncSnapshot snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.done) {
-                                              if (snapshot.data == null) {
-                                                return const SizedBox.shrink();
-                                              }
-                                              return LinkPreviw(
-                                                snapshot: snapshot,
-                                                link: value,
-                                              );
-                                            }
-                                            return const SizedBox.shrink();
-                                          },
-                                        );
-                                      }),
-                                  SelectableText.rich(
-                                    TextSpan(
-                                      style: TextStyle(
-                                          color: (isDark &&
-                                                  widget.senderId.toString() !=
-                                                      HiveUtils.getUserId())
-                                              ? context.color.buttonColor
-                                              : context.color.textDefaultColor),
-                                      children: _replaceLink().map((data) {
-                                        //This will add link to msg
-                                        if (_isLink(data)) {
-                                          //This will notify priview object that it has link
-                                          _linkAddNotifier.value = data;
-                                          _linkAddNotifier.notifyListeners();
-
-                                          return TextSpan(
-                                              text: data,
-                                              recognizer: TapGestureRecognizer()
-                                                ..onTap = () async {
-                                                  await launchUrl(
-                                                      Uri.parse(data));
-                                                },
-                                              style: TextStyle(
-                                                  decoration:
-                                                      TextDecoration.underline,
-                                                  color: Colors.blue[800]));
-                                        }
-                                        //This will make text bold
-                                        return TextSpan(
-                                          text: "",
-                                          children:
-                                              _matchAstric(data).map((text) {
-                                            if (text
-                                                    .toString()
-                                                    .startsWith("*") &&
-                                                text.toString().endsWith("*")) {
-                                              return TextSpan(
-                                                  text:
-                                                      text.replaceAll("*", ""),
-                                                  style: TextStyle(
-                                                      color: (isDark &&
-                                                              widget.senderId
-                                                                      .toString() !=
-                                                                  HiveUtils
-                                                                      .getUserId())
-                                                          ? context
-                                                              .color.buttonColor
-                                                          : context.color
-                                                              .textDefaultColor,
-                                                      fontWeight:
-                                                          FontWeight.w800));
-                                            }
-
-                                            return TextSpan(
-                                                text: text,
-                                                style: TextStyle(
-                                                    color: (isDark &&
-                                                            widget.senderId
-                                                                    .toString() !=
-                                                                HiveUtils
-                                                                    .getUserId())
-                                                        ? context
-                                                            .color.buttonColor
-                                                        : context.color
-                                                            .textDefaultColor));
-                                          }).toList(),
-                                          style: TextStyle(
-                                              color: widget.senderId
-                                                          .toString() ==
-                                                      HiveUtils.getUserId()
-                                                  ? context.color.secondaryColor
-                                                  : context
-                                                      .color.textColorDark),
-                                        );
-                                      }).toList(),
-                                    ),
-                                    style: TextStyle(
-                                        color: (isDark &&
-                                                widget.senderId.toString() !=
-                                                    HiveUtils.getUserId())
-                                            ? context.color.buttonColor
-                                            : context.color.textDefaultColor),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.local_offer,
+                                          color: context.color.territoryColor,
+                                          size: 16),
+                                      const SizedBox(width: 4),
+                                      CustomText(
+                                        "Offer",
+                                        color: context.color.territoryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: context.font.small,
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 4),
+                                  CustomText(
+                                    _offerDisplayAmount,
+                                    color: context.color.textColorDark,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: context.font.large,
+                                  ),
+                                  if (widget.message != null &&
+                                      widget.message!.isNotEmpty &&
+                                      !widget.message!.startsWith("Offered:"))
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: CustomText(widget.message!),
+                                    )
                                 ],
-                              ),
+                              )
+                            : widget.audio != ""
+                                ? RecordMessage(
+                                    url: widget.audio ?? "",
+                                    isSentByMe: widget.senderId.toString() ==
+                                        HiveUtils.getUserId(),
+                                  )
+                                : Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (widget.file != "")
+                                        AttachmentMessage(url: widget.file!),
+
+                                      //This is preview builder for image
+                                      ValueListenableBuilder(
+                                          valueListenable: _linkAddNotifier,
+                                          builder: (context, dynamic value, c) {
+                                            if (value == null) {
+                                              return const SizedBox.shrink();
+                                            }
+
+                                            return FutureBuilder(
+                                              future:
+                                                  AnyLinkPreview.getMetadata(
+                                                      link: value),
+                                              builder: (context,
+                                                  AsyncSnapshot snapshot) {
+                                                if (snapshot.connectionState ==
+                                                    ConnectionState.done) {
+                                                  if (snapshot.data == null) {
+                                                    return const SizedBox
+                                                        .shrink();
+                                                  }
+                                                  return LinkPreviw(
+                                                    snapshot: snapshot,
+                                                    link: value,
+                                                  );
+                                                }
+                                                return const SizedBox.shrink();
+                                              },
+                                            );
+                                          }),
+                                      SelectableText.rich(
+                                        TextSpan(
+                                          style: TextStyle(
+                                              color: (isDark &&
+                                                      widget.senderId
+                                                              .toString() !=
+                                                          HiveUtils.getUserId())
+                                                  ? context.color.buttonColor
+                                                  : context
+                                                      .color.textDefaultColor),
+                                          children: _replaceLink().map((data) {
+                                            //This will add link to msg
+                                            if (_isLink(data)) {
+                                              //This will notify priview object that it has link
+                                              _linkAddNotifier.value = data;
+                                              _linkAddNotifier
+                                                  .notifyListeners();
+
+                                              return TextSpan(
+                                                  text: data,
+                                                  recognizer:
+                                                      TapGestureRecognizer()
+                                                        ..onTap = () async {
+                                                          await launchUrl(
+                                                              Uri.parse(data));
+                                                        },
+                                                  style: TextStyle(
+                                                      decoration: TextDecoration
+                                                          .underline,
+                                                      color: Colors.blue[800]));
+                                            }
+                                            //This will make text bold
+                                            return TextSpan(
+                                              text: "",
+                                              children: _matchAstric(data)
+                                                  .map((text) {
+                                                if (text
+                                                        .toString()
+                                                        .startsWith("*") &&
+                                                    text
+                                                        .toString()
+                                                        .endsWith("*")) {
+                                                  return TextSpan(
+                                                      text: text.replaceAll(
+                                                          "*", ""),
+                                                      style: TextStyle(
+                                                          color: (isDark &&
+                                                                  widget.senderId
+                                                                          .toString() !=
+                                                                      HiveUtils
+                                                                          .getUserId())
+                                                              ? context.color
+                                                                  .buttonColor
+                                                              : context.color
+                                                                  .textDefaultColor,
+                                                          fontWeight:
+                                                              FontWeight.w800));
+                                                }
+
+                                                return TextSpan(
+                                                    text: text,
+                                                    style: TextStyle(
+                                                        color: (isDark &&
+                                                                widget
+                                                                        .senderId
+                                                                        .toString() !=
+                                                                    HiveUtils
+                                                                        .getUserId())
+                                                            ? context.color
+                                                                .buttonColor
+                                                            : context.color
+                                                                .textDefaultColor));
+                                              }).toList(),
+                                              style: TextStyle(
+                                                  color: widget.senderId
+                                                              .toString() ==
+                                                          HiveUtils.getUserId()
+                                                      ? context
+                                                          .color.secondaryColor
+                                                      : context
+                                                          .color.textColorDark),
+                                            );
+                                          }).toList(),
+                                        ),
+                                        style: TextStyle(
+                                            color: (isDark &&
+                                                    widget.senderId
+                                                            .toString() !=
+                                                        HiveUtils.getUserId())
+                                                ? context.color.buttonColor
+                                                : context
+                                                    .color.textDefaultColor),
+                                      ),
+                                    ],
+                                  ),
                       ),
                     ),
                     if (widget.senderId.toString() != HiveUtils.getUserId() &&

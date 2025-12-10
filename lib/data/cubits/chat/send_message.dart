@@ -1,5 +1,3 @@
-
-
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -36,6 +34,8 @@ class SendMessageCubit extends Cubit<SendMessageState> {
   void send(
       {required int itemOfferId,
       required String message,
+      required String type,
+      double? amount,
       dynamic audio,
       dynamic attachment}) async {
     try {
@@ -43,15 +43,15 @@ class SendMessageCubit extends Cubit<SendMessageState> {
       MultipartFile? audioFile;
       MultipartFile? attachmentFile;
 
-      if (audio != "") {
+      if (audio != null && audio != "") {
         audioFile = await MultipartFile.fromFile(
           audio,
           contentType: MediaType('audio', 'wav'),
           filename: 'audio.wav',
         );
       }
-      if (attachment != "") {
-        attachmentFile = await MultipartFile.fromFile(attachment!);
+      if (attachment != null && attachment != "") {
+        attachmentFile = await MultipartFile.fromFile(attachment);
       }
 
       var message0 = message;
@@ -59,6 +59,8 @@ class SendMessageCubit extends Cubit<SendMessageState> {
       var result = await _chatRepostiory.sendMessageApi(
           message: message0,
           itemOfferId: itemOfferId,
+          type: type,
+          amount: amount,
           attachment: attachmentFile,
           audio: audioFile);
 

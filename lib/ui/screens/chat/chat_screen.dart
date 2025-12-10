@@ -117,6 +117,8 @@ class _ChatScreenState extends State<ChatScreen>
       },
     );
   bool isLoading = false;
+  bool isChatTab = true;
+  TextEditingController offerController = TextEditingController();
 
   @override
   void initState() {
@@ -383,8 +385,7 @@ class _ChatScreenState extends State<ChatScreen>
                       color: context.color.secondaryColor,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child:
-                            AttachmentMessage(url: messageAttachment!.path!),
+                        child: AttachmentMessage(url: messageAttachment!.path!),
                       ),
                     ),
                   ],
@@ -427,14 +428,12 @@ class _ChatScreenState extends State<ChatScreen>
                                                 .unblockUser(
                                                     int.parse(widget.userId));
                                             HelperUtils.showSnackBarMessage(
-                                                context,
-                                                unblockState.message);
+                                                context, unblockState.message);
                                           } else if (unblockState
                                               is UnblockUserFail) {
                                             HelperUtils.showSnackBarMessage(
                                                 context,
-                                                unblockState.error
-                                                    .toString());
+                                                unblockState.error.toString());
                                           }
                                         },
                                         child: Container(
@@ -446,8 +445,7 @@ class _ChatScreenState extends State<ChatScreen>
                                             child: CustomText(
                                               "youBlockedThisContact"
                                                   .translate(context),
-                                              color: context
-                                                  .color.textColorDark
+                                              color: context.color.textColorDark
                                                   .withValues(alpha: 0.7),
                                             ),
                                             onTap: () async {
@@ -455,9 +453,8 @@ class _ChatScreenState extends State<ChatScreen>
                                                   .showBlurredDialoge(
                                                 context,
                                                 dialoge: BlurredDialogBox(
-                                                  acceptButtonName:
-                                                      "unBlockLbl"
-                                                          .translate(context),
+                                                  acceptButtonName: "unBlockLbl"
+                                                      .translate(context),
                                                   content: CustomText(
                                                     "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
                                                         .translate(context),
@@ -468,12 +465,10 @@ class _ChatScreenState extends State<ChatScreen>
                                                 Future.delayed(Duration.zero,
                                                     () {
                                                   context
-                                                      .read<
-                                                          UnblockUserCubit>()
+                                                      .read<UnblockUserCubit>()
                                                       .unBlockUser(
-                                                        blockUserId:
-                                                            int.parse(widget
-                                                                .userId),
+                                                        blockUserId: int.parse(
+                                                            widget.userId),
                                                       );
                                                 });
                                               }
@@ -497,131 +492,269 @@ class _ChatScreenState extends State<ChatScreen>
                                           fontSize: context.font.large,
                                         ))
                                     : Column(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          SizedBox(
-                                            height: 8,
+                                          SizedBox(height: 10),
+                                          Row(
+                                            children: [
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      isChatTab = true;
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 12),
+                                                    decoration: BoxDecoration(
+                                                      border: Border(
+                                                        bottom: BorderSide(
+                                                          color: isChatTab
+                                                              ? context.color
+                                                                  .territoryColor
+                                                              : Colors
+                                                                  .transparent,
+                                                          width: 2,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    child: Center(
+                                                      child: CustomText(
+                                                        "Chat",
+                                                        fontWeight: isChatTab
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                        color: isChatTab
+                                                            ? context.color
+                                                                .territoryColor
+                                                            : context.color
+                                                                .textLightColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      isChatTab = false;
+                                                      if (offerController
+                                                          .text.isEmpty) {
+                                                        offerController.text =
+                                                            widget.itemPrice
+                                                                .toStringAsFixed(
+                                                                    0);
+                                                      }
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            vertical: 12),
+                                                    decoration: BoxDecoration(
+                                                      border: Border(
+                                                        bottom: BorderSide(
+                                                          color: !isChatTab
+                                                              ? context.color
+                                                                  .territoryColor
+                                                              : Colors
+                                                                  .transparent,
+                                                          width: 2,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    child: Center(
+                                                      child: CustomText(
+                                                        "Make Offer",
+                                                        fontWeight: !isChatTab
+                                                            ? FontWeight.bold
+                                                            : FontWeight.normal,
+                                                        color: !isChatTab
+                                                            ? context.color
+                                                                .territoryColor
+                                                            : context.color
+                                                                .textLightColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                          if (!isBlocked)
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: TextField(
-                                                    controller: controller,
-                                                    cursorColor: context
-                                                        .color.territoryColor,
-                                                    onTap: () {
-                                                      showDeleteButton.value =
-                                                          false;
-                                                    },
-                                                    textInputAction:
-                                                        TextInputAction
-                                                            .newline,
-                                                    minLines: 1,
-                                                    maxLines: null,
-                                                    decoration:
-                                                        InputDecoration(
-                                                      suffixIconColor: context
-                                                          .color
-                                                          .textLightColor,
-                                                      suffixIcon: IconButton(
-                                                        onPressed: () async {
-                                                          try {
-                                                            if (messageAttachment ==
-                                                                null) {
-                                                              setState(() {
-                                                                isLoading =
-                                                                    true;
-                                                              });
+                                          if (isChatTab) ...[
+                                            SizedBox(height: 10),
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              padding: EdgeInsets.symmetric(
+                                                  horizontal: 10),
+                                              child: Row(
+                                                children: [
+                                                  "Is it available?",
+                                                  "What's the condition?",
+                                                  "Can I see more photos?",
+                                                  "I'm interested!"
+                                                ].map((text) {
+                                                  return Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            right: 8.0),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        controller.text = text;
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                horizontal: 12,
+                                                                vertical: 6),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: context.color
+                                                              .secondaryColor,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(20),
+                                                          border: Border.all(
+                                                              color: context
+                                                                  .color
+                                                                  .borderColor),
+                                                        ),
+                                                        child: CustomText(text,
+                                                            fontSize: context
+                                                                .font.smaller),
+                                                      ),
+                                                    ),
+                                                  );
+                                                }).toList(),
+                                              ),
+                                            ),
+                                            SizedBox(height: 10),
+                                            if (!isBlocked)
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 8.0),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: TextField(
+                                                        controller: controller,
+                                                        cursorColor: context
+                                                            .color
+                                                            .territoryColor,
+                                                        onTap: () {
+                                                          showDeleteButton
+                                                              .value = false;
+                                                        },
+                                                        textInputAction:
+                                                            TextInputAction
+                                                                .newline,
+                                                        minLines: 1,
+                                                        maxLines: null,
+                                                        decoration:
+                                                            InputDecoration(
+                                                          suffixIconColor: context
+                                                              .color
+                                                              .textLightColor,
+                                                          suffixIcon:
+                                                              IconButton(
+                                                            onPressed:
+                                                                () async {
+                                                              try {
+                                                                if (messageAttachment ==
+                                                                    null) {
+                                                                  setState(() {
+                                                                    isLoading =
+                                                                        true;
+                                                                  });
 
-                                                              final FilePickerResult?
-                                                                  pickedAttachment =
-                                                                  await FilePicker
-                                                                      .platform
-                                                                      .pickFiles(
-                                                                allowMultiple:
-                                                                    false,
-                                                                type: FileType
-                                                                    .custom,
-                                                                allowCompression: true,
+                                                                  final FilePickerResult?
+                                                                      pickedAttachment =
+                                                                      await FilePicker
+                                                                          .platform
+                                                                          .pickFiles(
+                                                                    allowMultiple:
+                                                                        false,
+                                                                    type: FileType
+                                                                        .custom,
+                                                                    allowCompression:
+                                                                        true,
+                                                                    allowedExtensions: [
+                                                                      'jpg',
+                                                                      'jpeg',
+                                                                      'png'
+                                                                    ],
+                                                                  );
 
-                                                                allowedExtensions: [
-                                                                  'jpg',
-                                                                  'jpeg',
-                                                                  'png'
-                                                                ],
-                                                              );
+                                                                  if (pickedAttachment !=
+                                                                          null &&
+                                                                      pickedAttachment
+                                                                          .files
+                                                                          .isNotEmpty) {
+                                                                    final file =
+                                                                        pickedAttachment
+                                                                            .files
+                                                                            .first;
 
+                                                                    if (file.size >
+                                                                        2 *
+                                                                            1024 *
+                                                                            1024) {
+                                                                      if (mounted) {
+                                                                        HelperUtils
+                                                                            .showSnackBarMessage(
+                                                                          context,
+                                                                          "File size should be less than 5MB",
+                                                                        );
+                                                                      }
+                                                                      return;
+                                                                    }
 
-
-
-                                                              if (pickedAttachment !=
-                                                                      null &&
-                                                                  pickedAttachment
-                                                                      .files
-                                                                      .isNotEmpty) {
-                                                                final file =
-                                                                    pickedAttachment
-                                                                        .files
-                                                                        .first;
-
-
-                                                                if (file.size >
-                                                                    2 *
-                                                                        1024 *
-                                                                        1024) {
-                                                                  if (mounted) {
-                                                                    HelperUtils
-                                                                        .showSnackBarMessage(
-                                                                      context,
-                                                                      "File size should be less than 5MB",
-                                                                    );
+                                                                    if (mounted) {
+                                                                      setState(
+                                                                          () {
+                                                                        messageAttachment =
+                                                                            file;
+                                                                        showRecordButton =
+                                                                            false;
+                                                                      });
+                                                                    }
                                                                   }
-                                                                  return;
+                                                                } else {
+                                                                  if (mounted) {
+                                                                    setState(
+                                                                        () {
+                                                                      messageAttachment =
+                                                                          null;
+                                                                      showRecordButton =
+                                                                          true;
+                                                                    });
+                                                                  }
                                                                 }
-
+                                                              } catch (e) {
                                                                 if (mounted) {
-                                                                  setState(
-                                                                      () {
-                                                                    messageAttachment =
-                                                                        file;
-                                                                    showRecordButton =
+                                                                  HelperUtils
+                                                                      .showSnackBarMessage(
+                                                                    context,
+                                                                    "Failed to pick file: ${e.toString()}",
+                                                                  );
+                                                                }
+                                                              } finally {
+                                                                if (mounted) {
+                                                                  setState(() {
+                                                                    isLoading =
                                                                         false;
                                                                   });
                                                                 }
                                                               }
-                                                            } else {
-                                                              if (mounted) {
-                                                                setState(() {
-                                                                  messageAttachment =
-                                                                      null;
-                                                                  showRecordButton =
-                                                                      true;
-                                                                });
-                                                              }
-                                                            }
-                                                          } catch (e) {
-                                                            if (mounted) {
-                                                              HelperUtils
-                                                                  .showSnackBarMessage(
-                                                                context,
-                                                                "Failed to pick file: ${e.toString()}",
-                                                              );
-                                                            }
-                                                          } finally {
-                                                            if (mounted) {
-                                                              setState(() {
-                                                                isLoading =
-                                                                    false;
-                                                              });
-                                                            }
-                                                          }
-                                                        },
-                                                        icon:
-                                                            messageAttachment !=
+                                                            },
+                                                            icon: messageAttachment !=
                                                                     null
                                                                 ? const Icon(
-                                                                    Icons
-                                                                        .close)
+                                                                    Icons.close)
                                                                 : Transform
                                                                     .rotate(
                                                                     angle:
@@ -633,149 +766,367 @@ class _ChatScreenState extends State<ChatScreen>
                                                                           .attachment,
                                                                     ),
                                                                   ),
-                                                      ),
-                                                      contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                              vertical: 6,
-                                                              horizontal: 8),
-                                                      border: OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20),
-                                                          borderSide: BorderSide(
-                                                              color: context
-                                                                  .color
-                                                                  .territoryColor)),
-                                                      focusedBorder: OutlineInputBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      20),
-                                                          borderSide: BorderSide(
-                                                              color: context
-                                                                  .color
-                                                                  .territoryColor)),
-                                                      hintText: "writeHere"
-                                                          .translate(context),
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(
-                                                  width: 9.5,
-                                                ),
-                                                if (showRecordButton)
-                                                  RecordButton(
-                                                    controller:
-                                                        _recordButtonAnimation,
-                                                    callback: (path) {
-                                                      //This is adding Chat widget in stream with BlocProvider , because we will need to do api process to store chat message to server, when it will be added to list it's initState method will be called
-                                                      ChatMessageHandler.add(
-                                                        BlocProvider(
-                                                          create: (context) =>
-                                                              SendMessageCubit(),
-                                                          child: ChatMessage(
-                                                              key: ValueKey(DateTime
-                                                                      .now()
-                                                                  .toString()
-                                                                  .toString()),
-                                                              message:
-                                                                  controller
-                                                                      .text,
-                                                              senderId: int.parse(
-                                                                  HiveUtils
-                                                                      .getUserId()!),
-                                                              createdAt: DateTime
-                                                                      .now()
-                                                                  .toString(),
-                                                              isSentNow: true,
-                                                              audio: path,
-                                                              itemOfferId: widget
-                                                                  .itemOfferId,
-                                                              file: "",
-                                                              updatedAt: DateTime
-                                                                      .now()
-                                                                  .toString()),
+                                                          ),
+                                                          contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical: 6,
+                                                                  horizontal:
+                                                                      8),
+                                                          border: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                              borderSide: BorderSide(
+                                                                  color: context
+                                                                      .color
+                                                                      .territoryColor)),
+                                                          focusedBorder: OutlineInputBorder(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                              borderSide: BorderSide(
+                                                                  color: context
+                                                                      .color
+                                                                      .territoryColor)),
+                                                          hintText: "writeHere"
+                                                              .translate(
+                                                                  context),
                                                         ),
-                                                      );
-                                                      totalMessageCount++;
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      width: 9.5,
+                                                    ),
+                                                    if (showRecordButton)
+                                                      RecordButton(
+                                                        controller:
+                                                            _recordButtonAnimation,
+                                                        callback: (path) {
+                                                          ChatMessageHandler
+                                                              .add(
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  SendMessageCubit(),
+                                                              child: ChatMessage(
+                                                                  key: ValueKey(DateTime
+                                                                          .now()
+                                                                      .toString()
+                                                                      .toString()),
+                                                                  message:
+                                                                      controller
+                                                                          .text,
+                                                                  senderId: int.parse(
+                                                                      HiveUtils
+                                                                          .getUserId()!),
+                                                                  createdAt: DateTime
+                                                                          .now()
+                                                                      .toString(),
+                                                                  isSentNow:
+                                                                      true,
+                                                                  audio: path,
+                                                                  type: "N",
+                                                                  itemOfferId:
+                                                                      widget
+                                                                          .itemOfferId,
+                                                                  file: "",
+                                                                  updatedAt: DateTime
+                                                                          .now()
+                                                                      .toString()),
+                                                            ),
+                                                          );
+                                                          totalMessageCount++;
 
-                                                      setState(() {});
-                                                    },
-                                                    isSending: false,
-                                                  ),
-                                                if (!showRecordButton)
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      showDeleteButton.value =
-                                                          false;
-                                                      //if file is selected then user can send message without text
-                                                      if (controller.text
-                                                              .trim()
-                                                              .isEmpty &&
-                                                          messageAttachment ==
-                                                              null) return;
-                                                      //This is adding Chat widget in stream with BlocProvider , because we will need to do api process to store chat message to server, when it will be added to list it's initState method will be called
+                                                          setState(() {});
+                                                        },
+                                                        isSending: false,
+                                                      ),
+                                                    if (!showRecordButton)
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          showDeleteButton
+                                                              .value = false;
+                                                          if (controller.text
+                                                                  .trim()
+                                                                  .isEmpty &&
+                                                              messageAttachment ==
+                                                                  null) return;
 
-                                                      ChatMessageHandler.add(
-                                                        BlocProvider(
-                                                          key: ValueKey(
-                                                              DateTime.now()
-                                                                  .toString()),
-                                                          create: (context) =>
-                                                              SendMessageCubit(),
-                                                          child: ChatMessage(
-                                                            key: ValueKey(
-                                                                DateTime.now()
-                                                                    .toString()),
-                                                            message:
-                                                                controller
-                                                                    .text,
-                                                            senderId: int.parse(
-                                                                HiveUtils
-                                                                    .getUserId()!),
-                                                            createdAt: DateTime
-                                                                    .now()
-                                                                .toString(),
-                                                            isSentNow: true,
-                                                            updatedAt: DateTime
-                                                                    .now()
-                                                                .toString(),
-                                                            audio: "",
-                                                            file: messageAttachment !=
-                                                                    null
-                                                                ? messageAttachment
-                                                                    ?.path
-                                                                : "",
-                                                            itemOfferId: widget
-                                                                .itemOfferId,
+                                                          ChatMessageHandler
+                                                              .add(
+                                                            BlocProvider(
+                                                              key: ValueKey(
+                                                                  DateTime.now()
+                                                                      .toString()),
+                                                              create: (context) =>
+                                                                  SendMessageCubit(),
+                                                              child:
+                                                                  ChatMessage(
+                                                                key: ValueKey(
+                                                                    DateTime.now()
+                                                                        .toString()),
+                                                                message:
+                                                                    controller
+                                                                        .text,
+                                                                senderId: int.parse(
+                                                                    HiveUtils
+                                                                        .getUserId()!),
+                                                                createdAt: DateTime
+                                                                        .now()
+                                                                    .toString(),
+                                                                isSentNow: true,
+                                                                updatedAt: DateTime
+                                                                        .now()
+                                                                    .toString(),
+                                                                audio: "",
+                                                                type: "N",
+                                                                file: messageAttachment !=
+                                                                        null
+                                                                    ? messageAttachment
+                                                                        ?.path
+                                                                    : "",
+                                                                itemOfferId: widget
+                                                                    .itemOfferId,
+                                                              ),
+                                                            ),
+                                                          );
+
+                                                          totalMessageCount++;
+                                                          controller.text = "";
+                                                          messageAttachment =
+                                                              null;
+                                                          setState(() {});
+                                                        },
+                                                        child: CircleAvatar(
+                                                          radius: 20,
+                                                          backgroundColor: context
+                                                              .color
+                                                              .territoryColor,
+                                                          child: Icon(
+                                                            Icons.send,
+                                                            color: context.color
+                                                                .buttonColor,
                                                           ),
                                                         ),
-                                                      );
-
-                                                      totalMessageCount++;
-                                                      controller.text = "";
-                                                      messageAttachment =
-                                                          null;
-                                                      setState(() {});
-                                                    },
-                                                    child: CircleAvatar(
-                                                      radius: 20,
-                                                      backgroundColor: context
-                                                          .color
-                                                          .territoryColor,
-                                                      child: Icon(
-                                                        Icons.send,
-                                                        color: context.color
-                                                            .buttonColor,
+                                                      )
+                                                  ],
+                                                ),
+                                              ),
+                                          ] else ...[
+                                            if (!isBlocked)
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(16.0),
+                                                child: SingleChildScrollView(
+                                                  child: Column(
+                                                    children: [
+                                                      if (MediaQuery.of(context)
+                                                              .viewInsets
+                                                              .bottom ==
+                                                          0) ...[
+                                                        Container(
+                                                          padding:
+                                                              EdgeInsets.all(
+                                                                  10),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: Colors.green
+                                                                .withOpacity(
+                                                                    0.1),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: [
+                                                              Icon(
+                                                                  Icons
+                                                                      .check_circle,
+                                                                  color: Colors
+                                                                      .green,
+                                                                  size: 16),
+                                                              SizedBox(
+                                                                  width: 8),
+                                                              CustomText(
+                                                                "Very good offer! High chances of seller's reply",
+                                                                color: Colors
+                                                                    .green,
+                                                                fontSize:
+                                                                    context.font
+                                                                        .small,
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 20),
+                                                      ],
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          CustomText(
+                                                            Constant
+                                                                .currencySymbol,
+                                                            fontSize: 28,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            color: context.color
+                                                                .textColorDark,
+                                                          ),
+                                                          SizedBox(width: 8),
+                                                          IntrinsicWidth(
+                                                            child: TextField(
+                                                              controller:
+                                                                  offerController,
+                                                              keyboardType:
+                                                                  TextInputType
+                                                                      .number,
+                                                              style: TextStyle(
+                                                                  fontSize: 28,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold,
+                                                                  color: context
+                                                                      .color
+                                                                      .textColorDark),
+                                                              decoration:
+                                                                  InputDecoration(
+                                                                border:
+                                                                    InputBorder
+                                                                        .none,
+                                                                hintText: "0",
+                                                                hintStyle: TextStyle(
+                                                                    color: context
+                                                                        .color
+                                                                        .textLightColor),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ),
-                                                  )
-                                              ],
-                                            ),
+                                                      SizedBox(height: 20),
+                                                      Wrap(
+                                                        spacing: 12,
+                                                        children: [
+                                                          0.90,
+                                                          0.95,
+                                                          1.0
+                                                        ].map((percent) {
+                                                          return InkWell(
+                                                            onTap: () {
+                                                              offerController
+                                                                  .text = (widget
+                                                                          .itemPrice *
+                                                                      percent)
+                                                                  .toStringAsFixed(
+                                                                      0);
+                                                            },
+                                                            child: Container(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          12,
+                                                                      vertical:
+                                                                          6),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: context
+                                                                    .color
+                                                                    .secondaryColor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                border: Border.all(
+                                                                    color: context
+                                                                        .color
+                                                                        .borderColor),
+                                                              ),
+                                                              child: CustomText(
+                                                                  percent == 1.0
+                                                                      ? "Original Price"
+                                                                      : "${((percent - 1) * 100).toStringAsFixed(0)}%",
+                                                                  fontSize:
+                                                                      context
+                                                                          .font
+                                                                          .small),
+                                                            ),
+                                                          );
+                                                        }).toList(),
+                                                      ),
+                                                      SizedBox(height: 20),
+                                                      SizedBox(
+                                                        width: double.infinity,
+                                                        child:
+                                                            UiUtils.buildButton(
+                                                                context,
+                                                                onPressed: () {
+                                                          if (offerController
+                                                              .text
+                                                              .isEmpty) return;
+                                                          double amount =
+                                                              double.tryParse(
+                                                                      offerController
+                                                                          .text) ??
+                                                                  0;
+
+                                                          // Logic to send Offer
+                                                          ChatMessageHandler
+                                                              .add(
+                                                            BlocProvider(
+                                                              create: (context) =>
+                                                                  SendMessageCubit(),
+                                                              child: ChatMessage(
+                                                                  key: ValueKey(DateTime
+                                                                          .now()
+                                                                      .toString()
+                                                                      .toString()),
+                                                                  message:
+                                                                      "Offered: ${Constant.currencySymbol} $amount",
+                                                                  type: "O",
+                                                                  amount:
+                                                                      amount,
+                                                                  senderId: int
+                                                                      .parse(HiveUtils
+                                                                          .getUserId()!),
+                                                                  createdAt: DateTime
+                                                                          .now()
+                                                                      .toString(),
+                                                                  isSentNow:
+                                                                      true,
+                                                                  itemOfferId:
+                                                                      widget
+                                                                          .itemOfferId,
+                                                                  updatedAt: DateTime
+                                                                          .now()
+                                                                      .toString()),
+                                                            ),
+                                                          );
+                                                          totalMessageCount++;
+
+                                                          isChatTab = true;
+                                                          setState(() {});
+                                                        },
+                                                                buttonTitle:
+                                                                    "Send Offer"),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                          ]
                                         ],
-                                      ),
+                                      )
                               ],
                             );
                           });
@@ -935,9 +1286,7 @@ class _ChatScreenState extends State<ChatScreen>
                       listener: (context, blockState) {
                         if (blockState is BlockUserSuccess) {
                           // Add the blocked user to the list
-                          context
-                              .read<BlockedUsersListCubit>()
-                              .addBlockedUser(
+                          context.read<BlockedUsersListCubit>().addBlockedUser(
                                 BlockedUserModel(
                                     id: int.parse(widget.userId),
                                     name: widget.userName,
@@ -1006,8 +1355,7 @@ class _ChatScreenState extends State<ChatScreen>
                                             title:
                                                 "${"blockLbl".translate(context)}\t${widget.userName}?",
                                             content: CustomText(
-                                              "blockWarning"
-                                                  .translate(context),
+                                              "blockWarning".translate(context),
                                             ),
                                           ),
                                         );
@@ -1016,8 +1364,8 @@ class _ChatScreenState extends State<ChatScreen>
                                             context
                                                 .read<BlockUserCubit>()
                                                 .blockUser(
-                                                  blockUserId: int.parse(
-                                                      widget.userId),
+                                                  blockUserId:
+                                                      int.parse(widget.userId),
                                                 );
                                           });
                                         }
@@ -1185,8 +1533,8 @@ class _ChatScreenState extends State<ChatScreen>
 
                                 if (state is LoadChatMessagesSuccess &&
                                     state.isLoadingMore) {
-                                  loadingMoreWidget = CustomText(
-                                      "loading".translate(context));
+                                  loadingMoreWidget =
+                                      CustomText("loading".translate(context));
                                 }
 
                                 if (snapshot.connectionState ==
@@ -1221,12 +1569,10 @@ class _ChatScreenState extends State<ChatScreen>
                                                   snapshot.data![index];
 
                                               return Column(
-                                                mainAxisSize:
-                                                    MainAxisSize.min,
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   if (index ==
-                                                      snapshot.data!.length -
-                                                          1)
+                                                      snapshot.data!.length - 1)
                                                     offerWidget(),
                                                   chat
                                                 ],

@@ -37,9 +37,9 @@ class ChatRepository {
 
   Future<DataOutput<ChatMessage>> getMessagesApi(
       {required int page, required int itemOfferId}) async {
-    Map<String, dynamic> response = await Api.get(
+    Map<String, dynamic> response = await Api.post(
       url: Api.chatMessagesApi,
-      queryParameters: {
+      parameter: {
         "item_offer_id": itemOfferId,
         "page": page,
       },
@@ -74,11 +74,18 @@ class ChatRepository {
   Future<Map<String, dynamic>> sendMessageApi(
       {required int itemOfferId,
       required String message,
+      required String type,
+      double? amount,
       MultipartFile? audio,
       MultipartFile? attachment}) async {
     Map<String, dynamic> parameters = {
       "item_offer_id": itemOfferId,
+      "type": type,
     };
+
+    if (amount != null) {
+      parameters['amount'] = amount;
+    }
 
     if (attachment != null) {
       parameters['file'] = attachment;
@@ -90,7 +97,6 @@ class ChatRepository {
     if (message != "") {
       parameters['message'] = message;
     }
-
 
     Map<String, dynamic> map =
         await Api.post(url: Api.sendMessageApi, parameter: parameters);
