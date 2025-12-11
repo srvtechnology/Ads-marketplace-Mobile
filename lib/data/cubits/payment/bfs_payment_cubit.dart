@@ -30,15 +30,27 @@ class BfsPaymentFailure extends BfsPaymentState {
 
 class BfsPaymentCubit extends Cubit<BfsPaymentState> {
   final BfsPaymentRepository _repository;
+  BfsPaymentType? _paymentType;
 
   BfsPaymentCubit(this._repository) : super(BfsPaymentInitial());
 
-  Future<void> initiatePayment(
-      {required String itemId, required String email}) async {
+  Future<void> initiatePayment({
+    required BfsPaymentType paymentType,
+    String? itemId,
+    String? offerId,
+    required String email,
+    double? amount,
+  }) async {
     emit(BfsPaymentLoading());
+    _paymentType = paymentType; // Store for later use
     try {
-      final response =
-          await _repository.initiatePayment(itemId: itemId, email: email);
+      final response = await _repository.initiatePayment(
+        paymentType: paymentType,
+        itemId: itemId,
+        offerId: offerId,
+        email: email,
+        amount: amount,
+      );
       emit(BfsPaymentArSuccess(response));
     } catch (e) {
       emit(BfsPaymentFailure(e.toString()));
@@ -70,7 +82,11 @@ class BfsPaymentCubit extends Cubit<BfsPaymentState> {
   Future<void> submitOtp({required String orderNo, required String otp}) async {
     emit(BfsPaymentLoading());
     try {
-      final response = await _repository.submitOtp(orderNo: orderNo, otp: otp);
+      final response = await _repository.submitOtp(
+        orderNo: orderNo,
+        otp: otp,
+        paymentType: _paymentType ?? BfsPaymentType.featuredAd,
+      );
       if (response.success) {
         emit(BfsPaymentDrSuccess(response));
       } else if (response.isPending) {
@@ -98,7 +114,11 @@ class BfsPaymentCubit extends Cubit<BfsPaymentState> {
 
     try {
       // Re-call DR endpoint with the same order_no and otp
-      final response = await _repository.submitOtp(orderNo: orderNo, otp: otp);
+      final response = await _repository.submitOtp(
+        orderNo: orderNo,
+        otp: otp,
+        paymentType: _paymentType ?? BfsPaymentType.featuredAd,
+      );
 
       if (response.success) {
         emit(BfsPaymentDrSuccess(response));

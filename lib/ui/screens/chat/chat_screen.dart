@@ -11,6 +11,7 @@ import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/load_chat_messages.dart';
 import 'package:eClassify/data/cubits/chat/send_message.dart';
+import 'package:eClassify/data/cubits/chat/change_offer_status_cubit.dart';
 import 'package:eClassify/data/cubits/chat/unblock_user_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/chat/chat_user_model.dart';
@@ -176,6 +177,48 @@ class _ChatScreenState extends State<ChatScreen>
     'animated_webp',
   ];
 
+  // Helper method to check if item is disabled based on status
+  bool _isItemDisabled(BuildContext context) {
+    // Check widget status
+    if (widget.status == "review" ||
+        widget.status == "rejected" ||
+        widget.status == "sold out" ||
+        widget.status == "inactive" ||
+        widget.status == "soft rejected" ||
+        widget.status == "permanent rejected") {
+      return true;
+    }
+
+    // Check dynamic status from API
+    final chatState = context.read<LoadChatMessagesCubit>().state;
+    if (chatState is LoadChatMessagesSuccess) {
+      final dynamicStatus =
+          chatState.itemStatus?['status']?.toString().toLowerCase();
+      if (dynamicStatus == "review" ||
+          dynamicStatus == "rejected" ||
+          dynamicStatus == "sold out" ||
+          dynamicStatus == "inactive" ||
+          dynamicStatus == "soft rejected" ||
+          dynamicStatus == "permanent rejected") {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  // Helper method to get display status
+  String _getDisplayStatus(BuildContext context) {
+    final chatState = context.read<LoadChatMessagesCubit>().state;
+    if (chatState is LoadChatMessagesSuccess) {
+      final dynamicStatus = chatState.itemStatus?['status'];
+      if (dynamicStatus != null) {
+        return dynamicStatus;
+      }
+    }
+    return widget.status ?? "";
+  }
+
   void ratingsAlertDialog() async {
     await showDialog(
       context: context,
@@ -327,494 +370,562 @@ class _ChatScreenState extends State<ChatScreen>
         ChatMessageHandler.flushMessages();
         return;
       },
-      child: Scaffold(
-        backgroundColor: context.color.backgroundColor,
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {},
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (messageAttachment != null) ...[
-                  if (supportedImageTypes.contains(attachmentMIME)) ...[
-                    Container(
-                      decoration: BoxDecoration(
-                          color: context.color.secondaryColor,
-                          border: Border.all(
-                              color: context.color.borderColor, width: 1.5)),
-                      child: Row(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: SizedBox(
-                                height: 100,
-                                width: 100,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    UiUtils.showFullScreenImage(context,
-                                        provider: FileImage(File(
-                                          messageAttachment?.path ?? "",
-                                        )));
-                                  },
-                                  child: Image.file(
-                                    File(
-                                      messageAttachment?.path ?? "",
+      child: BlocProvider(
+        create: (context) => ChangeOfferStatusCubit(),
+        child: Scaffold(
+          backgroundColor: context.color.backgroundColor,
+          bottomNavigationBar: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {},
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (messageAttachment != null) ...[
+                    if (supportedImageTypes.contains(attachmentMIME)) ...[
+                      Container(
+                        decoration: BoxDecoration(
+                            color: context.color.secondaryColor,
+                            border: Border.all(
+                                color: context.color.borderColor, width: 1.5)),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: SizedBox(
+                                  height: 100,
+                                  width: 100,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      UiUtils.showFullScreenImage(context,
+                                          provider: FileImage(File(
+                                            messageAttachment?.path ?? "",
+                                          )));
+                                    },
+                                    child: Image.file(
+                                      File(
+                                        messageAttachment?.path ?? "",
+                                      ),
+                                      fit: BoxFit.cover,
                                     ),
-                                    fit: BoxFit.cover,
-                                  ),
-                                )),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              CustomText(messageAttachment?.name ?? ""),
-                              CustomText(HelperUtils.getFileSizeString(
-                                bytes: messageAttachment!.size,
-                              ).toString()),
-                            ],
-                          )
-                        ],
+                                  )),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomText(messageAttachment?.name ?? ""),
+                                CustomText(HelperUtils.getFileSizeString(
+                                  bytes: messageAttachment!.size,
+                                ).toString()),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ] else ...[
+                      Container(
+                        color: context.color.secondaryColor,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child:
+                              AttachmentMessage(url: messageAttachment!.path!),
+                        ),
                       ),
-                    )
-                  ] else ...[
-                    Container(
-                      color: context.color.secondaryColor,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: AttachmentMessage(url: messageAttachment!.path!),
-                      ),
+                    ],
+                    const SizedBox(
+                      height: 10,
                     ),
                   ],
-                  const SizedBox(
-                    height: 10,
-                  ),
-                ],
-                BottomAppBar(
-                  padding: const EdgeInsetsDirectional.all(10),
-                  elevation: 5,
-                  color: context.color.secondaryColor,
-                  child: Directionality(
-                    textDirection: Directionality.of(context),
-                    child: BlocProvider(
-                        create: (context) => UnblockUserCubit(),
-                        child: Builder(builder: (context) {
-                          bool isBlocked = context
-                              .read<BlockedUsersListCubit>()
-                              .isUserBlocked(int.parse(widget.userId));
-                          return BlocConsumer<BlockedUsersListCubit,
-                                  BlockedUsersListState>(
-                              listener: (context, state) {
-                            if (state is BlockedUsersListSuccess) {
-                              isBlocked = context
-                                  .read<BlockedUsersListCubit>()
-                                  .isUserBlocked(int.parse(widget.userId));
-                            }
-                          }, builder: (context, blockedUsersListState) {
-                            return Column(
-                              children: [
-                                isBlocked
-                                    ? BlocListener<UnblockUserCubit,
-                                            UnblockUserState>(
-                                        listener: (context, unblockState) {
-                                          if (unblockState
-                                              is UnblockUserSuccess) {
-                                            // Remove the unblocked user from the list
-                                            context
-                                                .read<BlockedUsersListCubit>()
-                                                .unblockUser(
-                                                    int.parse(widget.userId));
-                                            HelperUtils.showSnackBarMessage(
-                                                context, unblockState.message);
-                                          } else if (unblockState
-                                              is UnblockUserFail) {
-                                            HelperUtils.showSnackBarMessage(
-                                                context,
-                                                unblockState.error.toString());
-                                          }
-                                        },
-                                        child: Container(
+                  BottomAppBar(
+                    padding: const EdgeInsetsDirectional.all(10),
+                    elevation: 5,
+                    color: context.color.secondaryColor,
+                    child: Directionality(
+                      textDirection: Directionality.of(context),
+                      child: BlocProvider(
+                          create: (context) => UnblockUserCubit(),
+                          child: Builder(builder: (context) {
+                            bool isBlocked = context
+                                .read<BlockedUsersListCubit>()
+                                .isUserBlocked(int.parse(widget.userId));
+                            return BlocConsumer<BlockedUsersListCubit,
+                                    BlockedUsersListState>(
+                                listener: (context, state) {
+                              if (state is BlockedUsersListSuccess) {
+                                isBlocked = context
+                                    .read<BlockedUsersListCubit>()
+                                    .isUserBlocked(int.parse(widget.userId));
+                              }
+                            }, builder: (context, blockedUsersListState) {
+                              return Column(
+                                children: [
+                                  isBlocked
+                                      ? BlocListener<UnblockUserCubit,
+                                              UnblockUserState>(
+                                          listener: (context, unblockState) {
+                                            if (unblockState
+                                                is UnblockUserSuccess) {
+                                              // Remove the unblocked user from the list
+                                              context
+                                                  .read<BlockedUsersListCubit>()
+                                                  .unblockUser(
+                                                      int.parse(widget.userId));
+                                              HelperUtils.showSnackBarMessage(
+                                                  context,
+                                                  unblockState.message);
+                                            } else if (unblockState
+                                                is UnblockUserFail) {
+                                              HelperUtils.showSnackBarMessage(
+                                                  context,
+                                                  unblockState.error
+                                                      .toString());
+                                            }
+                                          },
+                                          child: Container(
+                                            height: 40,
+                                            width: double.maxFinite,
+                                            color: context.color.secondaryColor,
+                                            alignment: Alignment.center,
+                                            child: InkWell(
+                                              child: CustomText(
+                                                "youBlockedThisContact"
+                                                    .translate(context),
+                                                color: context
+                                                    .color.textColorDark
+                                                    .withValues(alpha: 0.7),
+                                              ),
+                                              onTap: () async {
+                                                var unBlock = await UiUtils
+                                                    .showBlurredDialoge(
+                                                  context,
+                                                  dialoge: BlurredDialogBox(
+                                                    acceptButtonName:
+                                                        "unBlockLbl"
+                                                            .translate(context),
+                                                    content: CustomText(
+                                                      "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
+                                                          .translate(context),
+                                                    ),
+                                                  ),
+                                                );
+                                                if (unBlock == true) {
+                                                  Future.delayed(Duration.zero,
+                                                      () {
+                                                    context
+                                                        .read<
+                                                            UnblockUserCubit>()
+                                                        .unBlockUser(
+                                                          blockUserId:
+                                                              int.parse(widget
+                                                                  .userId),
+                                                        );
+                                                  });
+                                                }
+                                              },
+                                            ),
+                                          ))
+                                      : SizedBox(),
+                                  _isItemDisabled(context)
+                                      ? Container(
                                           height: 40,
                                           width: double.maxFinite,
                                           color: context.color.secondaryColor,
                                           alignment: Alignment.center,
-                                          child: InkWell(
-                                            child: CustomText(
-                                              "youBlockedThisContact"
-                                                  .translate(context),
-                                              color: context.color.textColorDark
-                                                  .withValues(alpha: 0.7),
-                                            ),
-                                            onTap: () async {
-                                              var unBlock = await UiUtils
-                                                  .showBlurredDialoge(
-                                                context,
-                                                dialoge: BlurredDialogBox(
-                                                  acceptButtonName: "unBlockLbl"
-                                                      .translate(context),
-                                                  content: CustomText(
-                                                    "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
-                                                        .translate(context),
-                                                  ),
-                                                ),
-                                              );
-                                              if (unBlock == true) {
-                                                Future.delayed(Duration.zero,
-                                                    () {
-                                                  context
-                                                      .read<UnblockUserCubit>()
-                                                      .unBlockUser(
-                                                        blockUserId: int.parse(
-                                                            widget.userId),
-                                                      );
-                                                });
-                                              }
-                                            },
-                                          ),
-                                        ))
-                                    : SizedBox(),
-                                widget.status == "review" ||
-                                        widget.status == "rejected" ||
-                                        widget.status == "sold out" ||
-                                        widget.status == "inactive" ||
-                                        widget.status == "soft rejected" ||
-                                        widget.status == "permanent rejected"
-                                    ? Container(
-                                        height: 40,
-                                        width: double.maxFinite,
-                                        color: context.color.secondaryColor,
-                                        alignment: Alignment.center,
-                                        child: CustomText(
-                                          "${"thisItemIs".translate(context)} ${widget.status}",
-                                          fontSize: context.font.large,
-                                        ))
-                                    : Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          SizedBox(height: 10),
-                                          Row(
-                                            children: [
-                                              Expanded(
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      isChatTab = true;
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 12),
-                                                    decoration: BoxDecoration(
-                                                      border: Border(
-                                                        bottom: BorderSide(
+                                          child: CustomText(
+                                            "${"thisItemIs".translate(context)} ${_getDisplayStatus(context)}",
+                                            fontSize: context.font.large,
+                                          ))
+                                      : Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            SizedBox(height: 10),
+                                            Row(
+                                              children: [
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        isChatTab = true;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 12),
+                                                      decoration: BoxDecoration(
+                                                        border: Border(
+                                                          bottom: BorderSide(
+                                                            color: isChatTab
+                                                                ? context.color
+                                                                    .territoryColor
+                                                                : Colors
+                                                                    .transparent,
+                                                            width: 2,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: Center(
+                                                        child: CustomText(
+                                                          "Chat",
+                                                          fontWeight: isChatTab
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
                                                           color: isChatTab
                                                               ? context.color
                                                                   .territoryColor
-                                                              : Colors
-                                                                  .transparent,
-                                                          width: 2,
+                                                              : context.color
+                                                                  .textLightColor,
                                                         ),
-                                                      ),
-                                                    ),
-                                                    child: Center(
-                                                      child: CustomText(
-                                                        "Chat",
-                                                        fontWeight: isChatTab
-                                                            ? FontWeight.bold
-                                                            : FontWeight.normal,
-                                                        color: isChatTab
-                                                            ? context.color
-                                                                .territoryColor
-                                                            : context.color
-                                                                .textLightColor,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              Expanded(
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      isChatTab = false;
-                                                      if (offerController
-                                                          .text.isEmpty) {
-                                                        offerController.text =
-                                                            widget.itemPrice
-                                                                .toStringAsFixed(
-                                                                    0);
-                                                      }
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    padding:
-                                                        EdgeInsets.symmetric(
-                                                            vertical: 12),
-                                                    decoration: BoxDecoration(
-                                                      border: Border(
-                                                        bottom: BorderSide(
+                                                Expanded(
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      setState(() {
+                                                        isChatTab = false;
+                                                        if (offerController
+                                                            .text.isEmpty) {
+                                                          offerController.text =
+                                                              widget.itemPrice
+                                                                  .toStringAsFixed(
+                                                                      0);
+                                                        }
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          EdgeInsets.symmetric(
+                                                              vertical: 12),
+                                                      decoration: BoxDecoration(
+                                                        border: Border(
+                                                          bottom: BorderSide(
+                                                            color: !isChatTab
+                                                                ? context.color
+                                                                    .territoryColor
+                                                                : Colors
+                                                                    .transparent,
+                                                            width: 2,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      child: Center(
+                                                        child: CustomText(
+                                                          "Make Offer",
+                                                          fontWeight: !isChatTab
+                                                              ? FontWeight.bold
+                                                              : FontWeight
+                                                                  .normal,
                                                           color: !isChatTab
                                                               ? context.color
                                                                   .territoryColor
-                                                              : Colors
-                                                                  .transparent,
-                                                          width: 2,
+                                                              : context.color
+                                                                  .textLightColor,
                                                         ),
-                                                      ),
-                                                    ),
-                                                    child: Center(
-                                                      child: CustomText(
-                                                        "Make Offer",
-                                                        fontWeight: !isChatTab
-                                                            ? FontWeight.bold
-                                                            : FontWeight.normal,
-                                                        color: !isChatTab
-                                                            ? context.color
-                                                                .territoryColor
-                                                            : context.color
-                                                                .textLightColor,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                          if (isChatTab) ...[
-                                            SizedBox(height: 10),
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 10),
-                                              child: Row(
-                                                children: [
-                                                  "Is it available?",
-                                                  "What's the condition?",
-                                                  "Can I see more photos?",
-                                                  "I'm interested!"
-                                                ].map((text) {
-                                                  return Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            right: 8.0),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        controller.text = text;
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal: 12,
-                                                                vertical: 6),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: context.color
-                                                              .secondaryColor,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(20),
-                                                          border: Border.all(
-                                                              color: context
-                                                                  .color
-                                                                  .borderColor),
-                                                        ),
-                                                        child: CustomText(text,
-                                                            fontSize: context
-                                                                .font.smaller),
-                                                      ),
-                                                    ),
-                                                  );
-                                                }).toList(),
-                                              ),
+                                              ],
                                             ),
-                                            SizedBox(height: 10),
-                                            if (!isBlocked)
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 8.0),
+                                            if (isChatTab) ...[
+                                              SizedBox(height: 10),
+                                              SingleChildScrollView(
+                                                scrollDirection:
+                                                    Axis.horizontal,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 10),
                                                 child: Row(
                                                   children: [
-                                                    Expanded(
-                                                      child: TextField(
-                                                        controller: controller,
-                                                        cursorColor: context
-                                                            .color
-                                                            .territoryColor,
+                                                    "Is it available?",
+                                                    "What's the condition?",
+                                                    "Can I see more photos?",
+                                                    "I'm interested!"
+                                                  ].map((text) {
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              right: 8.0),
+                                                      child: InkWell(
                                                         onTap: () {
-                                                          showDeleteButton
-                                                              .value = false;
+                                                          controller.text =
+                                                              text;
                                                         },
-                                                        textInputAction:
-                                                            TextInputAction
-                                                                .newline,
-                                                        minLines: 1,
-                                                        maxLines: null,
-                                                        decoration:
-                                                            InputDecoration(
-                                                          suffixIconColor: context
+                                                        child: Container(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      12,
+                                                                  vertical: 6),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: context.color
+                                                                .secondaryColor,
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        20),
+                                                            border: Border.all(
+                                                                color: context
+                                                                    .color
+                                                                    .borderColor),
+                                                          ),
+                                                          child: CustomText(
+                                                              text,
+                                                              fontSize: context
+                                                                  .font
+                                                                  .smaller),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }).toList(),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10),
+                                              if (!isBlocked)
+                                                Padding(
+                                                  padding: const EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 8.0),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: TextField(
+                                                          controller:
+                                                              controller,
+                                                          cursorColor: context
                                                               .color
-                                                              .textLightColor,
-                                                          suffixIcon:
-                                                              IconButton(
-                                                            onPressed:
-                                                                () async {
-                                                              try {
-                                                                if (messageAttachment ==
-                                                                    null) {
-                                                                  setState(() {
-                                                                    isLoading =
-                                                                        true;
-                                                                  });
+                                                              .territoryColor,
+                                                          onTap: () {
+                                                            showDeleteButton
+                                                                .value = false;
+                                                          },
+                                                          textInputAction:
+                                                              TextInputAction
+                                                                  .newline,
+                                                          minLines: 1,
+                                                          maxLines: null,
+                                                          decoration:
+                                                              InputDecoration(
+                                                            suffixIconColor: context
+                                                                .color
+                                                                .textLightColor,
+                                                            suffixIcon:
+                                                                IconButton(
+                                                              onPressed:
+                                                                  () async {
+                                                                try {
+                                                                  if (messageAttachment ==
+                                                                      null) {
+                                                                    setState(
+                                                                        () {
+                                                                      isLoading =
+                                                                          true;
+                                                                    });
 
-                                                                  final FilePickerResult?
-                                                                      pickedAttachment =
-                                                                      await FilePicker
-                                                                          .platform
-                                                                          .pickFiles(
-                                                                    allowMultiple:
-                                                                        false,
-                                                                    type: FileType
-                                                                        .custom,
-                                                                    allowCompression:
-                                                                        true,
-                                                                    allowedExtensions: [
-                                                                      'jpg',
-                                                                      'jpeg',
-                                                                      'png'
-                                                                    ],
-                                                                  );
+                                                                    final FilePickerResult?
+                                                                        pickedAttachment =
+                                                                        await FilePicker
+                                                                            .platform
+                                                                            .pickFiles(
+                                                                      allowMultiple:
+                                                                          false,
+                                                                      type: FileType
+                                                                          .custom,
+                                                                      allowCompression:
+                                                                          true,
+                                                                      allowedExtensions: [
+                                                                        'jpg',
+                                                                        'jpeg',
+                                                                        'png'
+                                                                      ],
+                                                                    );
 
-                                                                  if (pickedAttachment !=
-                                                                          null &&
-                                                                      pickedAttachment
-                                                                          .files
-                                                                          .isNotEmpty) {
-                                                                    final file =
+                                                                    if (pickedAttachment !=
+                                                                            null &&
                                                                         pickedAttachment
                                                                             .files
-                                                                            .first;
+                                                                            .isNotEmpty) {
+                                                                      final file = pickedAttachment
+                                                                          .files
+                                                                          .first;
 
-                                                                    if (file.size >
-                                                                        2 *
-                                                                            1024 *
-                                                                            1024) {
-                                                                      if (mounted) {
-                                                                        HelperUtils
-                                                                            .showSnackBarMessage(
-                                                                          context,
-                                                                          "File size should be less than 5MB",
-                                                                        );
+                                                                      if (file.size >
+                                                                          2 *
+                                                                              1024 *
+                                                                              1024) {
+                                                                        if (mounted) {
+                                                                          HelperUtils
+                                                                              .showSnackBarMessage(
+                                                                            context,
+                                                                            "File size should be less than 5MB",
+                                                                          );
+                                                                        }
+                                                                        return;
                                                                       }
-                                                                      return;
-                                                                    }
 
+                                                                      if (mounted) {
+                                                                        setState(
+                                                                            () {
+                                                                          messageAttachment =
+                                                                              file;
+                                                                          showRecordButton =
+                                                                              false;
+                                                                        });
+                                                                      }
+                                                                    }
+                                                                  } else {
                                                                     if (mounted) {
                                                                       setState(
                                                                           () {
                                                                         messageAttachment =
-                                                                            file;
+                                                                            null;
                                                                         showRecordButton =
-                                                                            false;
+                                                                            true;
                                                                       });
                                                                     }
                                                                   }
-                                                                } else {
+                                                                } catch (e) {
+                                                                  if (mounted) {
+                                                                    HelperUtils
+                                                                        .showSnackBarMessage(
+                                                                      context,
+                                                                      "Failed to pick file: ${e.toString()}",
+                                                                    );
+                                                                  }
+                                                                } finally {
                                                                   if (mounted) {
                                                                     setState(
                                                                         () {
-                                                                      messageAttachment =
-                                                                          null;
-                                                                      showRecordButton =
-                                                                          true;
+                                                                      isLoading =
+                                                                          false;
                                                                     });
                                                                   }
                                                                 }
-                                                              } catch (e) {
-                                                                if (mounted) {
-                                                                  HelperUtils
-                                                                      .showSnackBarMessage(
-                                                                    context,
-                                                                    "Failed to pick file: ${e.toString()}",
-                                                                  );
-                                                                }
-                                                              } finally {
-                                                                if (mounted) {
-                                                                  setState(() {
-                                                                    isLoading =
-                                                                        false;
-                                                                  });
-                                                                }
-                                                              }
-                                                            },
-                                                            icon: messageAttachment !=
-                                                                    null
-                                                                ? const Icon(
-                                                                    Icons.close)
-                                                                : Transform
-                                                                    .rotate(
-                                                                    angle:
-                                                                        -3.14 /
-                                                                            5.0,
-                                                                    child:
-                                                                        const Icon(
+                                                              },
+                                                              icon: messageAttachment !=
+                                                                      null
+                                                                  ? const Icon(
                                                                       Icons
-                                                                          .attachment,
+                                                                          .close)
+                                                                  : Transform
+                                                                      .rotate(
+                                                                      angle:
+                                                                          -3.14 /
+                                                                              5.0,
+                                                                      child:
+                                                                          const Icon(
+                                                                        Icons
+                                                                            .attachment,
+                                                                      ),
                                                                     ),
-                                                                  ),
+                                                            ),
+                                                            contentPadding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical: 6,
+                                                                    horizontal:
+                                                                        8),
+                                                            border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                borderSide: BorderSide(
+                                                                    color: context
+                                                                        .color
+                                                                        .territoryColor)),
+                                                            focusedBorder: OutlineInputBorder(
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                borderSide: BorderSide(
+                                                                    color: context
+                                                                        .color
+                                                                        .territoryColor)),
+                                                            hintText: "writeHere"
+                                                                .translate(
+                                                                    context),
                                                           ),
-                                                          contentPadding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                  vertical: 6,
-                                                                  horizontal:
-                                                                      8),
-                                                          border: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20),
-                                                              borderSide: BorderSide(
-                                                                  color: context
-                                                                      .color
-                                                                      .territoryColor)),
-                                                          focusedBorder: OutlineInputBorder(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          20),
-                                                              borderSide: BorderSide(
-                                                                  color: context
-                                                                      .color
-                                                                      .territoryColor)),
-                                                          hintText: "writeHere"
-                                                              .translate(
-                                                                  context),
                                                         ),
                                                       ),
-                                                    ),
-                                                    const SizedBox(
-                                                      width: 9.5,
-                                                    ),
-                                                    if (showRecordButton)
-                                                      RecordButton(
-                                                        controller:
-                                                            _recordButtonAnimation,
-                                                        callback: (path) {
-                                                          ChatMessageHandler
-                                                              .add(
-                                                            BlocProvider(
-                                                              create: (context) =>
-                                                                  SendMessageCubit(),
-                                                              child: ChatMessage(
-                                                                  key: ValueKey(DateTime
-                                                                          .now()
-                                                                      .toString()
-                                                                      .toString()),
+                                                      const SizedBox(
+                                                        width: 9.5,
+                                                      ),
+                                                      if (showRecordButton)
+                                                        RecordButton(
+                                                          controller:
+                                                              _recordButtonAnimation,
+                                                          callback: (path) {
+                                                            ChatMessageHandler
+                                                                .add(
+                                                              BlocProvider(
+                                                                create: (context) =>
+                                                                    SendMessageCubit(),
+                                                                child: ChatMessage(
+                                                                    key: ValueKey(DateTime
+                                                                            .now()
+                                                                        .toString()
+                                                                        .toString()),
+                                                                    message:
+                                                                        controller
+                                                                            .text,
+                                                                    senderId: int
+                                                                        .parse(HiveUtils
+                                                                            .getUserId()!),
+                                                                    createdAt: DateTime
+                                                                            .now()
+                                                                        .toString(),
+                                                                    isSentNow:
+                                                                        true,
+                                                                    audio: path,
+                                                                    type: "N",
+                                                                    itemOfferId:
+                                                                        widget
+                                                                            .itemOfferId,
+                                                                    file: "",
+                                                                    updatedAt: DateTime
+                                                                            .now()
+                                                                        .toString()),
+                                                              ),
+                                                            );
+                                                            totalMessageCount++;
+
+                                                            setState(() {});
+                                                          },
+                                                          isSending: false,
+                                                        ),
+                                                      if (!showRecordButton)
+                                                        GestureDetector(
+                                                          onTap: () {
+                                                            showDeleteButton
+                                                                .value = false;
+                                                            if (controller.text
+                                                                    .trim()
+                                                                    .isEmpty &&
+                                                                messageAttachment ==
+                                                                    null)
+                                                              return;
+
+                                                            ChatMessageHandler
+                                                                .add(
+                                                              BlocProvider(
+                                                                key: ValueKey(
+                                                                    DateTime.now()
+                                                                        .toString()),
+                                                                create: (context) =>
+                                                                    SendMessageCubit(),
+                                                                child:
+                                                                    ChatMessage(
+                                                                  key: ValueKey(
+                                                                      DateTime.now()
+                                                                          .toString()),
                                                                   message:
                                                                       controller
                                                                           .text,
@@ -826,544 +937,537 @@ class _ChatScreenState extends State<ChatScreen>
                                                                       .toString(),
                                                                   isSentNow:
                                                                       true,
-                                                                  audio: path,
-                                                                  type: "N",
-                                                                  itemOfferId:
-                                                                      widget
-                                                                          .itemOfferId,
-                                                                  file: "",
                                                                   updatedAt: DateTime
-                                                                          .now()
-                                                                      .toString()),
-                                                            ),
-                                                          );
-                                                          totalMessageCount++;
-
-                                                          setState(() {});
-                                                        },
-                                                        isSending: false,
-                                                      ),
-                                                    if (!showRecordButton)
-                                                      GestureDetector(
-                                                        onTap: () {
-                                                          showDeleteButton
-                                                              .value = false;
-                                                          if (controller.text
-                                                                  .trim()
-                                                                  .isEmpty &&
-                                                              messageAttachment ==
-                                                                  null) return;
-
-                                                          ChatMessageHandler
-                                                              .add(
-                                                            BlocProvider(
-                                                              key: ValueKey(
-                                                                  DateTime.now()
-                                                                      .toString()),
-                                                              create: (context) =>
-                                                                  SendMessageCubit(),
-                                                              child:
-                                                                  ChatMessage(
-                                                                key: ValueKey(
-                                                                    DateTime.now()
-                                                                        .toString()),
-                                                                message:
-                                                                    controller
-                                                                        .text,
-                                                                senderId: int.parse(
-                                                                    HiveUtils
-                                                                        .getUserId()!),
-                                                                createdAt: DateTime
-                                                                        .now()
-                                                                    .toString(),
-                                                                isSentNow: true,
-                                                                updatedAt: DateTime
-                                                                        .now()
-                                                                    .toString(),
-                                                                audio: "",
-                                                                type: "N",
-                                                                file: messageAttachment !=
-                                                                        null
-                                                                    ? messageAttachment
-                                                                        ?.path
-                                                                    : "",
-                                                                itemOfferId: widget
-                                                                    .itemOfferId,
-                                                              ),
-                                                            ),
-                                                          );
-
-                                                          totalMessageCount++;
-                                                          controller.text = "";
-                                                          messageAttachment =
-                                                              null;
-                                                          setState(() {});
-                                                        },
-                                                        child: CircleAvatar(
-                                                          radius: 20,
-                                                          backgroundColor: context
-                                                              .color
-                                                              .territoryColor,
-                                                          child: Icon(
-                                                            Icons.send,
-                                                            color: context.color
-                                                                .buttonColor,
-                                                          ),
-                                                        ),
-                                                      )
-                                                  ],
-                                                ),
-                                              ),
-                                          ] else ...[
-                                            if (!isBlocked)
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.all(16.0),
-                                                child: SingleChildScrollView(
-                                                  child: Column(
-                                                    children: [
-                                                      if (MediaQuery.of(context)
-                                                              .viewInsets
-                                                              .bottom ==
-                                                          0) ...[
-                                                        Container(
-                                                          padding:
-                                                              EdgeInsets.all(
-                                                                  10),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: Colors.green
-                                                                .withOpacity(
-                                                                    0.1),
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        8),
-                                                          ),
-                                                          child: Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: [
-                                                              Icon(
-                                                                  Icons
-                                                                      .check_circle,
-                                                                  color: Colors
-                                                                      .green,
-                                                                  size: 16),
-                                                              SizedBox(
-                                                                  width: 8),
-                                                              CustomText(
-                                                                "Very good offer! High chances of seller's reply",
-                                                                color: Colors
-                                                                    .green,
-                                                                fontSize:
-                                                                    context.font
-                                                                        .small,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                        SizedBox(height: 20),
-                                                      ],
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          CustomText(
-                                                            Constant
-                                                                .currencySymbol,
-                                                            fontSize: 28,
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            color: context.color
-                                                                .textColorDark,
-                                                          ),
-                                                          SizedBox(width: 8),
-                                                          IntrinsicWidth(
-                                                            child: TextField(
-                                                              controller:
-                                                                  offerController,
-                                                              keyboardType:
-                                                                  TextInputType
-                                                                      .number,
-                                                              style: TextStyle(
-                                                                  fontSize: 28,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: context
-                                                                      .color
-                                                                      .textColorDark),
-                                                              decoration:
-                                                                  InputDecoration(
-                                                                border:
-                                                                    InputBorder
-                                                                        .none,
-                                                                hintText: "0",
-                                                                hintStyle: TextStyle(
-                                                                    color: context
-                                                                        .color
-                                                                        .textLightColor),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      SizedBox(height: 20),
-                                                      Wrap(
-                                                        spacing: 12,
-                                                        children: [
-                                                          0.90,
-                                                          0.95,
-                                                          1.0
-                                                        ].map((percent) {
-                                                          return InkWell(
-                                                            onTap: () {
-                                                              offerController
-                                                                  .text = (widget
-                                                                          .itemPrice *
-                                                                      percent)
-                                                                  .toStringAsFixed(
-                                                                      0);
-                                                            },
-                                                            child: Container(
-                                                              padding: EdgeInsets
-                                                                  .symmetric(
-                                                                      horizontal:
-                                                                          12,
-                                                                      vertical:
-                                                                          6),
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: context
-                                                                    .color
-                                                                    .secondaryColor,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            20),
-                                                                border: Border.all(
-                                                                    color: context
-                                                                        .color
-                                                                        .borderColor),
-                                                              ),
-                                                              child: CustomText(
-                                                                  percent == 1.0
-                                                                      ? "Original Price"
-                                                                      : "${((percent - 1) * 100).toStringAsFixed(0)}%",
-                                                                  fontSize:
-                                                                      context
-                                                                          .font
-                                                                          .small),
-                                                            ),
-                                                          );
-                                                        }).toList(),
-                                                      ),
-                                                      SizedBox(height: 20),
-                                                      SizedBox(
-                                                        width: double.infinity,
-                                                        child:
-                                                            UiUtils.buildButton(
-                                                                context,
-                                                                onPressed: () {
-                                                          if (offerController
-                                                              .text
-                                                              .isEmpty) return;
-                                                          double amount =
-                                                              double.tryParse(
-                                                                      offerController
-                                                                          .text) ??
-                                                                  0;
-
-                                                          // Logic to send Offer
-                                                          ChatMessageHandler
-                                                              .add(
-                                                            BlocProvider(
-                                                              create: (context) =>
-                                                                  SendMessageCubit(),
-                                                              child: ChatMessage(
-                                                                  key: ValueKey(DateTime
-                                                                          .now()
-                                                                      .toString()
-                                                                      .toString()),
-                                                                  message:
-                                                                      "Offered: ${Constant.currencySymbol} $amount",
-                                                                  type: "O",
-                                                                  amount:
-                                                                      amount,
-                                                                  senderId: int
-                                                                      .parse(HiveUtils
-                                                                          .getUserId()!),
-                                                                  createdAt: DateTime
                                                                           .now()
                                                                       .toString(),
-                                                                  isSentNow:
-                                                                      true,
+                                                                  audio: "",
+                                                                  type: "N",
+                                                                  file: messageAttachment !=
+                                                                          null
+                                                                      ? messageAttachment
+                                                                          ?.path
+                                                                      : "",
                                                                   itemOfferId:
                                                                       widget
                                                                           .itemOfferId,
-                                                                  updatedAt: DateTime
-                                                                          .now()
-                                                                      .toString()),
-                                                            ),
-                                                          );
-                                                          totalMessageCount++;
+                                                                ),
+                                                              ),
+                                                            );
 
-                                                          isChatTab = true;
-                                                          setState(() {});
-                                                        },
-                                                                buttonTitle:
-                                                                    "Send Offer"),
-                                                      )
+                                                            totalMessageCount++;
+                                                            controller.text =
+                                                                "";
+                                                            messageAttachment =
+                                                                null;
+                                                            setState(() {});
+                                                          },
+                                                          child: CircleAvatar(
+                                                            radius: 20,
+                                                            backgroundColor: context
+                                                                .color
+                                                                .territoryColor,
+                                                            child: Icon(
+                                                              Icons.send,
+                                                              color: context
+                                                                  .color
+                                                                  .buttonColor,
+                                                            ),
+                                                          ),
+                                                        )
                                                     ],
                                                   ),
                                                 ),
-                                              )
-                                          ]
-                                        ],
-                                      )
-                              ],
-                            );
-                          });
-                        })),
+                                            ] else ...[
+                                              if (!isBlocked)
+                                                Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: SingleChildScrollView(
+                                                    child: Column(
+                                                      children: [
+                                                        if (MediaQuery.of(
+                                                                    context)
+                                                                .viewInsets
+                                                                .bottom ==
+                                                            0) ...[
+                                                          Container(
+                                                            padding:
+                                                                EdgeInsets.all(
+                                                                    10),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: Colors
+                                                                  .green
+                                                                  .withOpacity(
+                                                                      0.1),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          8),
+                                                            ),
+                                                            child: Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Icon(
+                                                                    Icons
+                                                                        .check_circle,
+                                                                    color: Colors
+                                                                        .green,
+                                                                    size: 16),
+                                                                SizedBox(
+                                                                    width: 8),
+                                                                CustomText(
+                                                                  "Very good offer! High chances of seller's reply",
+                                                                  color: Colors
+                                                                      .green,
+                                                                  fontSize:
+                                                                      context
+                                                                          .font
+                                                                          .small,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          SizedBox(height: 20),
+                                                        ],
+                                                        Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .center,
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .center,
+                                                          children: [
+                                                            CustomText(
+                                                              Constant
+                                                                  .currencySymbol,
+                                                              fontSize: 28,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                              color: context
+                                                                  .color
+                                                                  .textColorDark,
+                                                            ),
+                                                            SizedBox(width: 8),
+                                                            IntrinsicWidth(
+                                                              child: TextField(
+                                                                controller:
+                                                                    offerController,
+                                                                keyboardType:
+                                                                    TextInputType
+                                                                        .number,
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        28,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: context
+                                                                        .color
+                                                                        .textColorDark),
+                                                                decoration:
+                                                                    InputDecoration(
+                                                                  border:
+                                                                      InputBorder
+                                                                          .none,
+                                                                  hintText: "0",
+                                                                  hintStyle: TextStyle(
+                                                                      color: context
+                                                                          .color
+                                                                          .textLightColor),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 20),
+                                                        Wrap(
+                                                          spacing: 12,
+                                                          children: [
+                                                            0.90,
+                                                            0.95,
+                                                            1.0
+                                                          ].map((percent) {
+                                                            return InkWell(
+                                                              onTap: () {
+                                                                offerController
+                                                                    .text = (widget
+                                                                            .itemPrice *
+                                                                        percent)
+                                                                    .toStringAsFixed(
+                                                                        0);
+                                                              },
+                                                              child: Container(
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            12,
+                                                                        vertical:
+                                                                            6),
+                                                                decoration:
+                                                                    BoxDecoration(
+                                                                  color: context
+                                                                      .color
+                                                                      .secondaryColor,
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20),
+                                                                  border: Border.all(
+                                                                      color: context
+                                                                          .color
+                                                                          .borderColor),
+                                                                ),
+                                                                child: CustomText(
+                                                                    percent ==
+                                                                            1.0
+                                                                        ? "Original Price"
+                                                                        : "${((percent - 1) * 100).toStringAsFixed(0)}%",
+                                                                    fontSize: context
+                                                                        .font
+                                                                        .small),
+                                                              ),
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                        SizedBox(height: 20),
+                                                        SizedBox(
+                                                          width:
+                                                              double.infinity,
+                                                          child: UiUtils
+                                                              .buildButton(
+                                                                  context,
+                                                                  onPressed:
+                                                                      () {
+                                                            if (offerController
+                                                                .text.isEmpty)
+                                                              return;
+                                                            double amount =
+                                                                double.tryParse(
+                                                                        offerController
+                                                                            .text) ??
+                                                                    0;
+
+                                                            // Logic to send Offer
+                                                            ChatMessageHandler
+                                                                .add(
+                                                              BlocProvider(
+                                                                create: (context) =>
+                                                                    SendMessageCubit(),
+                                                                child: ChatMessage(
+                                                                    key: ValueKey(DateTime
+                                                                            .now()
+                                                                        .toString()
+                                                                        .toString()),
+                                                                    message:
+                                                                        "Offered: ${Constant.currencySymbol} $amount",
+                                                                    type: "O",
+                                                                    amount:
+                                                                        amount,
+                                                                    senderId: int
+                                                                        .parse(HiveUtils
+                                                                            .getUserId()!),
+                                                                    createdAt: DateTime
+                                                                            .now()
+                                                                        .toString(),
+                                                                    isSentNow:
+                                                                        true,
+                                                                    itemOfferId:
+                                                                        widget
+                                                                            .itemOfferId,
+                                                                    updatedAt: DateTime
+                                                                            .now()
+                                                                        .toString()),
+                                                              ),
+                                                            );
+                                                            totalMessageCount++;
+
+                                                            isChatTab = true;
+                                                            setState(() {});
+                                                          },
+                                                                  buttonTitle:
+                                                                      "Send Offer"),
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                )
+                                            ]
+                                          ],
+                                        )
+                                ],
+                              );
+                            });
+                          })),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        appBar: AppBar(
-          centerTitle: false,
-          automaticallyImplyLeading: false,
-          leading: Material(
-            clipBehavior: Clip.antiAlias,
-            color: Colors.transparent,
-            type: MaterialType.circle,
-            child: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Padding(
-                    padding: EdgeInsetsDirectional.only(start: 15),
-                    child: Directionality(
-                      textDirection: Directionality.of(context),
-                      child: RotatedBox(
-                        quarterTurns:
-                            Directionality.of(context) == TextDirection.rtl
-                                ? 2
-                                : -4,
-                        child: UiUtils.getSvg(AppIcons.arrowLeft,
-                            fit: BoxFit.none,
-                            color: context.color.textDefaultColor),
-                      ),
-                    ))),
-          ),
-          backgroundColor: context.color.secondaryColor,
-          elevation: 0,
-          iconTheme: IconThemeData(color: context.color.territoryColor),
-          bottom: PreferredSize(
-            preferredSize: Size.fromHeight(70),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Divider(
-                  color: context.color.textLightColor.withValues(alpha: 0.2),
-                  thickness: 1,
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 25, vertical: 0),
-                  color: context.color.secondaryColor,
-                  height: 63,
-                  child: Row(
-                    children: [
-                      FittedBox(
-                        fit: BoxFit.none,
-                        child: GestureDetector(
-                          onTap: () async {
-                            try {
-                              Widgets.showLoader(context);
+          appBar: AppBar(
+            centerTitle: false,
+            automaticallyImplyLeading: false,
+            leading: Material(
+              clipBehavior: Clip.antiAlias,
+              color: Colors.transparent,
+              type: MaterialType.circle,
+              child: InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Padding(
+                      padding: EdgeInsetsDirectional.only(start: 15),
+                      child: Directionality(
+                        textDirection: Directionality.of(context),
+                        child: RotatedBox(
+                          quarterTurns:
+                              Directionality.of(context) == TextDirection.rtl
+                                  ? 2
+                                  : -4,
+                          child: UiUtils.getSvg(AppIcons.arrowLeft,
+                              fit: BoxFit.none,
+                              color: context.color.textDefaultColor),
+                        ),
+                      ))),
+            ),
+            backgroundColor: context.color.secondaryColor,
+            elevation: 0,
+            iconTheme: IconThemeData(color: context.color.territoryColor),
+            bottom: PreferredSize(
+              preferredSize: Size.fromHeight(70),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Divider(
+                    color: context.color.textLightColor.withValues(alpha: 0.2),
+                    thickness: 1,
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 25, vertical: 0),
+                    color: context.color.secondaryColor,
+                    height: 63,
+                    child: Row(
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.none,
+                          child: GestureDetector(
+                            onTap: () async {
+                              try {
+                                Widgets.showLoader(context);
 
-                              DataOutput<ItemModel> dataOutput =
-                                  await ItemRepository().fetchItemFromItemId(
-                                      int.parse(widget.itemId));
+                                DataOutput<ItemModel> dataOutput =
+                                    await ItemRepository().fetchItemFromItemId(
+                                        int.parse(widget.itemId));
 
-                              Future.delayed(
-                                Duration.zero,
-                                () {
-                                  Widgets.hideLoder(context);
-                                  Navigator.pushNamed(
-                                      context, Routes.adDetailsScreen,
-                                      arguments: {
-                                        "model": dataOutput.modelList[0],
-                                      });
-                                },
-                              );
-                            } catch (e) {
-                              Widgets.hideLoder(context);
-                            }
-                          },
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: SizedBox(
-                              width: 47,
-                              height: 47,
-                              child: UiUtils.getImage(
-                                widget.itemImage,
-                                fit: BoxFit.cover,
+                                Future.delayed(
+                                  Duration.zero,
+                                  () {
+                                    Widgets.hideLoder(context);
+                                    Navigator.pushNamed(
+                                        context, Routes.adDetailsScreen,
+                                        arguments: {
+                                          "model": dataOutput.modelList[0],
+                                        });
+                                  },
+                                );
+                              } catch (e) {
+                                Widgets.hideLoder(context);
+                              }
+                            },
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: SizedBox(
+                                width: 47,
+                                height: 47,
+                                child: UiUtils.getImage(
+                                  widget.itemImage,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                      ),
 
-                      SizedBox(width: 10),
-                      // Adding horizontal space between items
-                      Expanded(
-                        child: Container(
-                          color: context.color.secondaryColor,
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  widget.itemTitle,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  softWrap: true,
-                                  style: TextStyle(
-                                      color: context.color.textDefaultColor,
-                                      fontSize: context.font.large),
+                        SizedBox(width: 10),
+                        // Adding horizontal space between items
+                        Expanded(
+                          child: Container(
+                            color: context.color.secondaryColor,
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    widget.itemTitle,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    softWrap: true,
+                                    style: TextStyle(
+                                        color: context.color.textDefaultColor,
+                                        fontSize: context.font.large),
+                                  ),
                                 ),
-                              ),
-                              Padding(
-                                padding:
-                                    EdgeInsetsDirectional.only(start: 15.0),
-                                child: CustomText(
-                                  widget.itemPrice.currencyFormat,
-                                  // Replace with your item price
-                                  color: context.color.textDefaultColor,
-                                  fontSize: context.font.large,
-                                  fontWeight: FontWeight.bold,
+                                Padding(
+                                  padding:
+                                      EdgeInsetsDirectional.only(start: 15.0),
+                                  child: CustomText(
+                                    widget.itemPrice.currencyFormat,
+                                    // Replace with your item price
+                                    color: context.color.textDefaultColor,
+                                    fontSize: context.font.large,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          actions: [
-            MultiBlocProvider(
-              providers: [
-                BlocProvider(create: (context) => UnblockUserCubit()),
-                BlocProvider(create: (context) => BlockUserCubit()),
-              ],
-              child: Builder(builder: (context) {
-                bool isBlocked = context
-                    .read<BlockedUsersListCubit>()
-                    .isUserBlocked(int.parse(widget.userId));
-                return BlocConsumer<BlockedUsersListCubit,
-                    BlockedUsersListState>(
-                  listener: (context, state) {
-                    if (state is BlockedUsersListSuccess) {
-                      isBlocked = context
-                          .read<BlockedUsersListCubit>()
-                          .isUserBlocked(int.parse(widget.userId));
-                    }
-                  },
-                  builder: (context, blockedUsersListState) {
-                    return BlocListener<BlockUserCubit, BlockUserState>(
-                      listener: (context, blockState) {
-                        if (blockState is BlockUserSuccess) {
-                          // Add the blocked user to the list
-                          context.read<BlockedUsersListCubit>().addBlockedUser(
-                                BlockedUserModel(
-                                    id: int.parse(widget.userId),
-                                    name: widget.userName,
-                                    profile: widget.profilePicture
-                                    // Add other necessary user data
-                                    ),
-                              );
-                          HelperUtils.showSnackBarMessage(
-                              context, blockState.message);
-                        } else if (blockState is BlockUserFail) {
-                          HelperUtils.showSnackBarMessage(
-                              context, blockState.error.toString());
-                        }
-                      },
-                      child: BlocListener<UnblockUserCubit, UnblockUserState>(
-                        listener: (context, unblockState) {
-                          if (unblockState is UnblockUserSuccess) {
-                            // Remove the unblocked user from the list
+            actions: [
+              MultiBlocProvider(
+                providers: [
+                  BlocProvider(create: (context) => UnblockUserCubit()),
+                  BlocProvider(create: (context) => BlockUserCubit()),
+                ],
+                child: Builder(builder: (context) {
+                  bool isBlocked = context
+                      .read<BlockedUsersListCubit>()
+                      .isUserBlocked(int.parse(widget.userId));
+                  return BlocConsumer<BlockedUsersListCubit,
+                      BlockedUsersListState>(
+                    listener: (context, state) {
+                      if (state is BlockedUsersListSuccess) {
+                        isBlocked = context
+                            .read<BlockedUsersListCubit>()
+                            .isUserBlocked(int.parse(widget.userId));
+                      }
+                    },
+                    builder: (context, blockedUsersListState) {
+                      return BlocListener<BlockUserCubit, BlockUserState>(
+                        listener: (context, blockState) {
+                          if (blockState is BlockUserSuccess) {
+                            // Add the blocked user to the list
                             context
                                 .read<BlockedUsersListCubit>()
-                                .unblockUser(int.parse(widget.userId));
+                                .addBlockedUser(
+                                  BlockedUserModel(
+                                      id: int.parse(widget.userId),
+                                      name: widget.userName,
+                                      profile: widget.profilePicture
+                                      // Add other necessary user data
+                                      ),
+                                );
                             HelperUtils.showSnackBarMessage(
-                                context, unblockState.message);
-                          } else if (unblockState is UnblockUserFail) {
+                                context, blockState.message);
+                          } else if (blockState is BlockUserFail) {
                             HelperUtils.showSnackBarMessage(
-                                context, unblockState.error.toString());
+                                context, blockState.error.toString());
                           }
                         },
-                        child: Padding(
-                          padding: EdgeInsetsDirectional.only(end: 30.0),
-                          child: Container(
-                            height: 24,
-                            width: 24,
-                            alignment: AlignmentDirectional.center,
-                            child: PopupMenuButton(
-                              color: context.color.secondaryColor,
-                              offset: Offset(-12, 15),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.only(
-                                  bottomLeft: Radius.circular(17),
-                                  bottomRight: Radius.circular(17),
-                                  topLeft: Radius.circular(17),
-                                  topRight: Radius.circular(0),
+                        child: BlocListener<UnblockUserCubit, UnblockUserState>(
+                          listener: (context, unblockState) {
+                            if (unblockState is UnblockUserSuccess) {
+                              // Remove the unblocked user from the list
+                              context
+                                  .read<BlockedUsersListCubit>()
+                                  .unblockUser(int.parse(widget.userId));
+                              HelperUtils.showSnackBarMessage(
+                                  context, unblockState.message);
+                            } else if (unblockState is UnblockUserFail) {
+                              HelperUtils.showSnackBarMessage(
+                                  context, unblockState.error.toString());
+                            }
+                          },
+                          child: Padding(
+                            padding: EdgeInsetsDirectional.only(end: 30.0),
+                            child: Container(
+                              height: 24,
+                              width: 24,
+                              alignment: AlignmentDirectional.center,
+                              child: PopupMenuButton(
+                                color: context.color.secondaryColor,
+                                offset: Offset(-12, 15),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(17),
+                                    bottomRight: Radius.circular(17),
+                                    topLeft: Radius.circular(17),
+                                    topRight: Radius.circular(0),
+                                  ),
                                 ),
-                              ),
-                              child: SvgPicture.asset(
-                                AppIcons.more,
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
-                                colorFilter: ColorFilter.mode(
-                                  context.color.textDefaultColor,
-                                  BlendMode.srcIn,
+                                child: SvgPicture.asset(
+                                  AppIcons.more,
+                                  width: 20,
+                                  height: 20,
+                                  fit: BoxFit.contain,
+                                  colorFilter: ColorFilter.mode(
+                                    context.color.textDefaultColor,
+                                    BlendMode.srcIn,
+                                  ),
                                 ),
-                              ),
-                              itemBuilder: (context) => [
-                                if (!isBlocked)
-                                  PopupMenuItem(
+                                itemBuilder: (context) => [
+                                  if (!isBlocked)
+                                    PopupMenuItem(
+                                        onTap: () async {
+                                          var block =
+                                              await UiUtils.showBlurredDialoge(
+                                            context,
+                                            dialoge: BlurredDialogBox(
+                                              acceptButtonName:
+                                                  "blockLbl".translate(context),
+                                              title:
+                                                  "${"blockLbl".translate(context)}\t${widget.userName}?",
+                                              content: CustomText(
+                                                "blockWarning"
+                                                    .translate(context),
+                                              ),
+                                            ),
+                                          );
+                                          if (block == true) {
+                                            Future.delayed(Duration.zero, () {
+                                              context
+                                                  .read<BlockUserCubit>()
+                                                  .blockUser(
+                                                    blockUserId: int.parse(
+                                                        widget.userId),
+                                                  );
+                                            });
+                                          }
+                                        },
+                                        child: CustomText(
+                                          "blockLbl".translate(context),
+                                          color: context.color.textColorDark,
+                                        ))
+                                  else
+                                    PopupMenuItem(
                                       onTap: () async {
-                                        var block =
+                                        var unBlock =
                                             await UiUtils.showBlurredDialoge(
                                           context,
                                           dialoge: BlurredDialogBox(
                                             acceptButtonName:
-                                                "blockLbl".translate(context),
-                                            title:
-                                                "${"blockLbl".translate(context)}\t${widget.userName}?",
+                                                "unBlockLbl".translate(context),
                                             content: CustomText(
-                                              "blockWarning".translate(context),
+                                              "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
+                                                  .translate(context),
                                             ),
                                           ),
                                         );
-                                        if (block == true) {
+                                        if (unBlock == true) {
                                           Future.delayed(Duration.zero, () {
                                             context
-                                                .read<BlockUserCubit>()
-                                                .blockUser(
+                                                .read<UnblockUserCubit>()
+                                                .unBlockUser(
                                                   blockUserId:
                                                       int.parse(widget.userId),
                                                 );
@@ -1371,233 +1475,206 @@ class _ChatScreenState extends State<ChatScreen>
                                         }
                                       },
                                       child: CustomText(
-                                        "blockLbl".translate(context),
+                                        "unBlockLbl".translate(context),
                                         color: context.color.textColorDark,
-                                      ))
-                                else
-                                  PopupMenuItem(
-                                    onTap: () async {
-                                      var unBlock =
-                                          await UiUtils.showBlurredDialoge(
-                                        context,
-                                        dialoge: BlurredDialogBox(
-                                          acceptButtonName:
-                                              "unBlockLbl".translate(context),
-                                          content: CustomText(
-                                            "${"unBlockLbl".translate(context)}\t${widget.userName}\t${"toSendMessage".translate(context)}"
-                                                .translate(context),
-                                          ),
-                                        ),
-                                      );
-                                      if (unBlock == true) {
-                                        Future.delayed(Duration.zero, () {
-                                          context
-                                              .read<UnblockUserCubit>()
-                                              .unBlockUser(
-                                                blockUserId:
-                                                    int.parse(widget.userId),
-                                              );
-                                        });
-                                      }
-                                    },
-                                    child: CustomText(
-                                      "unBlockLbl".translate(context),
-                                      color: context.color.textColorDark,
+                                      ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  },
-                );
-              }),
-            )
-          ],
-          title: FittedBox(
-            fit: BoxFit.none,
-            child: Row(
-              children: [
-                widget.profilePicture == ""
-                    ? CircleAvatar(
-                        backgroundColor: context.color.territoryColor,
-                        child: SvgPicture.asset(
-                          AppIcons.profile,
-                          colorFilter: ColorFilter.mode(
-                              context.color.buttonColor, BlendMode.srcIn),
-                        ),
-                      )
-                    : GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            TransparantRoute(
-                              barrierDismiss: true,
-                              builder: (context) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    color: const Color.fromARGB(69, 0, 0, 0),
-                                  ),
-                                );
-                              },
-                            ),
-                          );
-                        },
-                        child: CustomImageHeroAnimation(
-                          type: CImageType.Network,
-                          image: widget.profilePicture,
-                          child: CircleAvatar(
-                            backgroundImage: CachedNetworkImageProvider(
-                              widget.profilePicture,
+                      );
+                    },
+                  );
+                }),
+              )
+            ],
+            title: FittedBox(
+              fit: BoxFit.none,
+              child: Row(
+                children: [
+                  widget.profilePicture == ""
+                      ? CircleAvatar(
+                          backgroundColor: context.color.territoryColor,
+                          child: SvgPicture.asset(
+                            AppIcons.profile,
+                            colorFilter: ColorFilter.mode(
+                                context.color.buttonColor, BlendMode.srcIn),
+                          ),
+                        )
+                      : GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              TransparantRoute(
+                                barrierDismiss: true,
+                                builder: (context) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      color: const Color.fromARGB(69, 0, 0, 0),
+                                    ),
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: CustomImageHeroAnimation(
+                            type: CImageType.Network,
+                            image: widget.profilePicture,
+                            child: CircleAvatar(
+                              backgroundImage: CachedNetworkImageProvider(
+                                widget.profilePicture,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                const SizedBox(
-                  width: 10,
-                ),
-                SizedBox(
-                    width: context.screenWidth * 0.35,
-                    child: CustomText(
-                      widget.userName,
-                      color: context.color.textColorDark,
-                      fontSize: context.font.normal,
-                    )),
-              ],
+                  const SizedBox(
+                    width: 10,
+                  ),
+                  SizedBox(
+                      width: context.screenWidth * 0.35,
+                      child: CustomText(
+                        widget.userName,
+                        color: context.color.textColorDark,
+                        fontSize: context.font.normal,
+                      )),
+                ],
+              ),
             ),
           ),
-        ),
-        body: BlocProvider(
-          create: (context) => AddItemReviewCubit(),
-          child: Stack(
-            children: [
-              //Causing lag when transitioning
-              // SvgPicture.asset(
-              //   chatBackground,
-              //   height: MediaQuery.of(context).size.height,
-              //   fit: BoxFit.cover,
-              //   width: MediaQuery.of(context).size.width,
-              // ),
-              BlocListener<DeleteMessageCubit, DeleteMessageState>(
-                listener: (context, state) {
-                  if (state is DeleteMessageSuccess) {
-                    ChatMessageHandler.removeMessage(state.id);
-                    showDeleteButton.value = false;
-                  }
-                },
-                child: GestureDetector(
-                  onTap: () {
-                    showDeleteButton.value = false;
+          body: BlocProvider(
+            create: (context) => AddItemReviewCubit(),
+            child: Stack(
+              children: [
+                //Causing lag when transitioning
+                // SvgPicture.asset(
+                //   chatBackground,
+                //   height: MediaQuery.of(context).size.height,
+                //   fit: BoxFit.cover,
+                //   width: MediaQuery.of(context).size.width,
+                // ),
+                BlocListener<DeleteMessageCubit, DeleteMessageState>(
+                  listener: (context, state) {
+                    if (state is DeleteMessageSuccess) {
+                      ChatMessageHandler.removeMessage(state.id);
+                      showDeleteButton.value = false;
+                    }
                   },
-                  child: BlocConsumer<LoadChatMessagesCubit,
-                      LoadChatMessagesState>(
-                    listener: (context, state) {
-                      if (state is LoadChatMessagesSuccess) {
-                        ChatMessageHandler.loadMessages(
-                            state.messages, context);
-                        totalMessageCount = state.messages.length;
-                        isFetchedFirstTime = true;
-                        setState(() {});
-                        if (widget.isFromBuyerList != null) {
-                          if (widget.isFromBuyerList!) {
-                            context
-                                .read<GetBuyerChatListCubit>()
-                                .removeUnreadCount(widget.itemOfferId);
-                          } else {
-                            context
-                                .read<GetSellerChatListCubit>()
-                                .removeUnreadCount(widget.itemOfferId);
+                  child: GestureDetector(
+                    onTap: () {
+                      showDeleteButton.value = false;
+                    },
+                    child: BlocConsumer<LoadChatMessagesCubit,
+                        LoadChatMessagesState>(
+                      listener: (context, state) {
+                        if (state is LoadChatMessagesSuccess) {
+                          ChatMessageHandler.loadMessages(
+                              state.messages, context);
+                          totalMessageCount = state.messages.length;
+                          isFetchedFirstTime = true;
+                          setState(() {});
+                          if (widget.isFromBuyerList != null) {
+                            if (widget.isFromBuyerList!) {
+                              context
+                                  .read<GetBuyerChatListCubit>()
+                                  .removeUnreadCount(widget.itemOfferId);
+                            } else {
+                              context
+                                  .read<GetSellerChatListCubit>()
+                                  .removeUnreadCount(widget.itemOfferId);
+                            }
                           }
                         }
-                      }
-                    },
-                    builder: (context, state) {
-                      return Stack(
-                        children: [
-                          StreamBuilder<List<Widget>>(
-                              stream: ChatMessageHandler.getChatStream(),
-                              builder: (context,
-                                  AsyncSnapshot<List<Widget>> snapshot) {
-                                Widget? loadingMoreWidget;
-                                if (state is LoadChatMessagesSuccess) {
-                                  if (state.isLoadingMore) {
+                      },
+                      builder: (context, state) {
+                        return Stack(
+                          children: [
+                            StreamBuilder<List<Widget>>(
+                                stream: ChatMessageHandler.getChatStream(),
+                                builder: (context,
+                                    AsyncSnapshot<List<Widget>> snapshot) {
+                                  Widget? loadingMoreWidget;
+                                  if (state is LoadChatMessagesSuccess) {
+                                    if (state.isLoadingMore) {
+                                      loadingMoreWidget = CustomText(
+                                          "loading".translate(context));
+                                    }
+                                  }
+
+                                  if (state is LoadChatMessagesSuccess &&
+                                      state.isLoadingMore) {
                                     loadingMoreWidget = CustomText(
                                         "loading".translate(context));
                                   }
-                                }
 
-                                if (state is LoadChatMessagesSuccess &&
-                                    state.isLoadingMore) {
-                                  loadingMoreWidget =
-                                      CustomText("loading".translate(context));
-                                }
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.active ||
+                                      snapshot.connectionState ==
+                                          ConnectionState.done) {
+                                    if ((snapshot.data as List).isEmpty) {
+                                      return offerWidget();
+                                    }
 
-                                if (snapshot.connectionState ==
-                                        ConnectionState.active ||
-                                    snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                  if ((snapshot.data as List).isEmpty) {
-                                    return offerWidget();
-                                  }
+                                    if (snapshot.hasData) {
+                                      return Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          loadingMoreWidget ??
+                                              const SizedBox.shrink(),
+                                          Expanded(
+                                            child: ListView.builder(
+                                              key: ValueKey(
+                                                  'chat_list_${snapshot.data!.length}'),
+                                              reverse: true,
+                                              shrinkWrap: true,
+                                              physics:
+                                                  const AlwaysScrollableScrollPhysics(),
+                                              controller: _pageScrollController,
+                                              addAutomaticKeepAlives: true,
+                                              itemCount: snapshot.data!.length,
+                                              padding: const EdgeInsets.only(
+                                                  bottom: 10),
+                                              itemBuilder: (context, index) {
+                                                dynamic chat =
+                                                    snapshot.data![index];
 
-                                  if (snapshot.hasData) {
-                                    return Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        loadingMoreWidget ??
-                                            const SizedBox.shrink(),
-                                        Expanded(
-                                          child: ListView.builder(
-                                            key: ValueKey(
-                                                'chat_list_${snapshot.data!.length}'),
-                                            reverse: true,
-                                            shrinkWrap: true,
-                                            physics:
-                                                const AlwaysScrollableScrollPhysics(),
-                                            controller: _pageScrollController,
-                                            addAutomaticKeepAlives: true,
-                                            itemCount: snapshot.data!.length,
-                                            padding: const EdgeInsets.only(
-                                                bottom: 10),
-                                            itemBuilder: (context, index) {
-                                              dynamic chat =
-                                                  snapshot.data![index];
-
-                                              return Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (index ==
-                                                      snapshot.data!.length - 1)
-                                                    offerWidget(),
-                                                  chat
-                                                ],
-                                              );
-                                            },
+                                                return Column(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    if (index ==
+                                                        snapshot.data!.length -
+                                                            1)
+                                                      offerWidget(),
+                                                    chat
+                                                  ],
+                                                );
+                                              },
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    );
+                                        ],
+                                      );
+                                    }
                                   }
-                                }
 
-                                return offerWidget();
-                              }),
-                          if ((state is LoadChatMessagesInProgress))
-                            Center(
-                              child: UiUtils.progress(),
-                            )
-                        ],
-                      );
-                    },
+                                  return offerWidget();
+                                }),
+                            if ((state is LoadChatMessagesInProgress))
+                              Center(
+                                child: UiUtils.progress(),
+                              )
+                          ],
+                        );
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

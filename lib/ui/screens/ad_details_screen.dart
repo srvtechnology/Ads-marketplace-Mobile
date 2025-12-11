@@ -37,6 +37,7 @@ import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
 import 'package:eClassify/ui/screens/payment/bfs_payment_screen.dart';
+import 'package:eClassify/data/repositories/bfs_payment_repository.dart';
 import 'package:eClassify/ui/screens/subscription/widget/featured_ads_subscription_plan_item.dart';
 
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
@@ -701,6 +702,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => BfsPaymentScreen(
+                              paymentType: BfsPaymentType.featuredAd,
                               itemId: model.id!.toString(),
                               price:
                                   0.0, // Price will be fetched from AR response

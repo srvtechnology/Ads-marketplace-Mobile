@@ -13,13 +13,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
 
 class BfsPaymentScreen extends StatefulWidget {
-  final String itemId;
+  final BfsPaymentType paymentType;
+  final String? itemId;
+  final String? offerId;
   final double price;
   final String packageName;
 
   const BfsPaymentScreen({
     Key? key,
-    required this.itemId,
+    this.paymentType = BfsPaymentType.featuredAd,
+    this.itemId,
+    this.offerId,
     required this.price,
     required this.packageName,
   }) : super(key: key);
@@ -28,7 +32,9 @@ class BfsPaymentScreen extends StatefulWidget {
     Map arguments = routeSettings.arguments as Map;
     return MaterialPageRoute(
       builder: (_) => BfsPaymentScreen(
+        paymentType: arguments['paymentType'] ?? BfsPaymentType.featuredAd,
         itemId: arguments['itemId'],
+        offerId: arguments['offerId'],
         price: arguments['price'],
         packageName: arguments['packageName'],
       ),
@@ -76,8 +82,11 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
     return BlocProvider(
       create: (context) => BfsPaymentCubit(BfsPaymentRepository())
         ..initiatePayment(
+          paymentType: widget.paymentType,
           itemId: widget.itemId,
+          offerId: widget.offerId,
           email: HiveUtils.getUserDetails().email ?? "customer@gmail.com",
+          amount: widget.price,
         ),
       child: Scaffold(
         appBar: AppBar(

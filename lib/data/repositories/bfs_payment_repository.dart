@@ -1,18 +1,38 @@
 import 'package:eClassify/data/model/bfs_model.dart';
 import 'package:eClassify/utils/api.dart';
 
+enum BfsPaymentType {
+  featuredAd,
+  offer,
+}
+
 class BfsPaymentRepository {
   Future<BfsArResponse> initiatePayment({
-    required String itemId,
+    required BfsPaymentType paymentType,
+    String? itemId,
+    String? offerId,
     required String email,
+    double? amount,
   }) async {
-    final result = await Api.post(
-      url: Api.bfsArApi,
-      parameter: {
-        'item_id': itemId,
+    String url;
+    Map<String, dynamic> params;
+
+    if (paymentType == BfsPaymentType.featuredAd) {
+      url = Api.bfsArApi;
+      params = {
+        'item_id': itemId!,
         'email': email,
-      },
-    );
+      };
+    } else {
+      // Offer payment
+      url = Api.bfsOfferArApi;
+      params = {
+        'offer_id': int.tryParse(offerId!) ?? 0,
+        'amount': amount!.toInt(),
+      };
+    }
+
+    final result = await Api.post(url: url, parameter: params);
     return BfsArResponse.fromJson(result);
   }
 
@@ -35,9 +55,14 @@ class BfsPaymentRepository {
   Future<BfsDrResponse> submitOtp({
     required String orderNo,
     required String otp,
+    required BfsPaymentType paymentType,
   }) async {
+    String url = paymentType == BfsPaymentType.featuredAd
+        ? Api.bfsDrApi
+        : Api.bfsOfferDrApi;
+
     final result = await Api.post(
-      url: Api.bfsDrApi,
+      url: url,
       parameter: {
         'order_no': orderNo,
         'otp': otp,

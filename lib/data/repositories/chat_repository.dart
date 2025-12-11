@@ -45,7 +45,11 @@ class ChatRepository {
       },
     );
 
-    List<ChatMessage> modelList = (response['data']['data'] as List).map(
+    // Extract item status from response
+    Map<String, dynamic>? itemStatus = response['data']['item_status'];
+
+    List<ChatMessage> modelList =
+        (response['data']['chat']['data'] as List).map(
       (result) {
         int senderId = result['sender_id'];
         String? message = result['message'];
@@ -54,9 +58,15 @@ class ChatRepository {
         String createdAt = result['created_at'];
         int itemOfferId = result['item_offer_id'];
         int id = result['id'];
+        String? offerStatus = result['offer_status'];
+        String? type = result['type'];
+        double? amount = result['amount'] != null
+            ? double.tryParse(result['amount'].toString())
+            : null;
 
         return ChatMessage(
           key: ValueKey(id),
+          id: id,
           message: message ?? "",
           senderId: senderId,
           createdAt: createdAt,
@@ -64,11 +74,20 @@ class ChatRepository {
           audio: audio!,
           itemOfferId: itemOfferId,
           updatedAt: createdAt,
+          offerStatus: offerStatus,
+          type: type,
+          amount: amount,
         );
       },
     ).toList();
 
-    return DataOutput(total: response['total'] ?? 0, modelList: modelList);
+    return DataOutput(
+      total: response['data']['chat']['total'] ?? 0,
+      modelList: modelList,
+      extraData: itemStatus != null
+          ? ExtraData(data: itemStatus)
+          : null, // Wrap in ExtraData
+    );
   }
 
   Future<Map<String, dynamic>> sendMessageApi(
@@ -138,5 +157,24 @@ class ChatRepository {
     ).toList();
 
     return DataOutput(modelList: modelList, total: modelList.length);
+  }
+
+  Future<Map<String, dynamic>> changeOfferStatus({
+    required int chatId,
+    required int itemOfferId,
+    required String status, // 'A' or 'R'
+  }) async {
+    Map<String, dynamic> parameters = {
+      "chat_id": chatId,
+      "item_offer_id": itemOfferId,
+      "offer_status": status,
+    };
+
+    Map<String, dynamic> response = await Api.post(
+      url: Api.statusChangeOffer,
+      parameter: parameters,
+    );
+
+    return response;
   }
 }

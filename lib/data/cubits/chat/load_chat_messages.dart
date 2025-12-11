@@ -1,5 +1,3 @@
-
-
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/repositories/chat_repository.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
@@ -17,6 +15,7 @@ class LoadChatMessagesSuccess extends LoadChatMessagesState {
   int itemOfferId;
   int totalPage;
   bool isLoadingMore;
+  Map<String, dynamic>? itemStatus; // Added to store item status
 
   LoadChatMessagesSuccess({
     required this.messages,
@@ -24,6 +23,7 @@ class LoadChatMessagesSuccess extends LoadChatMessagesState {
     required this.itemOfferId,
     required this.totalPage,
     required this.isLoadingMore,
+    this.itemStatus,
   });
 
   LoadChatMessagesSuccess copyWith({
@@ -33,6 +33,7 @@ class LoadChatMessagesSuccess extends LoadChatMessagesState {
     int? itemOfferId,
     int? totalPage,
     bool? isLoadingMore,
+    Map<String, dynamic>? itemStatus,
   }) {
     return LoadChatMessagesSuccess(
       messages: messages ?? this.messages,
@@ -40,6 +41,7 @@ class LoadChatMessagesSuccess extends LoadChatMessagesState {
       itemOfferId: itemOfferId ?? this.itemOfferId,
       totalPage: totalPage ?? this.totalPage,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      itemStatus: itemStatus ?? this.itemStatus,
     );
   }
 
@@ -75,6 +77,7 @@ class LoadChatMessagesCubit extends Cubit<LoadChatMessagesState> {
         itemOfferId: itemOfferId,
         isLoadingMore: false,
         totalPage: result.total,
+        itemStatus: result.extraData?.data as Map<String, dynamic>?,
       ));
     } catch (e) {
       emit(LoadChatMessagesFailed(error: e.toString()));
@@ -104,6 +107,8 @@ class LoadChatMessagesCubit extends Cubit<LoadChatMessagesState> {
           itemOfferId: (state as LoadChatMessagesSuccess).itemOfferId,
           isLoadingMore: false,
           totalPage: result.total,
+          itemStatus: result.extraData?.data as Map<String, dynamic>? ??
+              messagesSuccessState.itemStatus,
         ));
       }
     } catch (e) {

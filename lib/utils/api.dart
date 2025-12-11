@@ -116,10 +116,15 @@ class Api {
   static String bfsDrApi = "bfs/featured/dr-section";
   static String bfsAsApi = "bfs/as";
 
+  // BFS Offer Payment Endpoints
+  static String bfsOfferArApi = "bfs/ar";
+  static String bfsOfferDrApi = "bfs/dr";
+
   static String sendMessageApi = "send-message";
   static String getChatListApi = "chat-list";
   static String itemOfferApi = "item-offer";
   static String chatMessagesApi = "chat-messages";
+  static String statusChangeOffer = "chat-messages/status-change-offer";
   static String blockUserApi = "block-user";
   static String unBlockUserApi = "unblock-user";
   static String blockedUsersListApi = "blocked-users";
