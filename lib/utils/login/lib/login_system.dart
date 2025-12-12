@@ -34,8 +34,8 @@ abstract class LoginSystem {
   ///This method will be called when initialize this
   void init() {}
 
-  ///Here will be implementation of the main login method, it will return usercredentials
-  Future<UserCredential?> login();
+  ///Here will be implementation of the main login method, it will return usercredentials or API response data
+  Future<dynamic> login();
 }
 
 ///From this we will be able to use this login . [this is for single authentication . if you use this you must have to create instance of every login system individually]
@@ -50,11 +50,11 @@ class MAuthentication {
   }
 
   ///this login call will execute login method of login system which is being assigned
-  Future<UserCredential?>? login() async {
+  Future<dynamic>? login() async {
     //assign payload to system from constructor
     system.payload = payload;
 
-    UserCredential? credential = await system.login();
+    dynamic credential = await system.login();
     //Return its response
     return credential;
   }
@@ -103,7 +103,7 @@ class MMultiAuthentication {
   }
 
   ///This method will called for login
-  Future<UserCredential?>? login() async {
+  Future<dynamic>? login() async {
     if (_selectedLoginSystem == "" || _selectedLoginSystem == null) {
       throw "Please select login system using setActive method";
     }
@@ -119,7 +119,7 @@ class MMultiAuthentication {
       }
     });
 
-    UserCredential? credential;
+    dynamic credential;
     if (selectedSystem != null) {
       credential = await selectedSystem?.login();
     }

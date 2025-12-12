@@ -352,35 +352,40 @@ class LoginScreenState extends State<LoginScreen> {
                       Widgets.hideLoder(context);
 
                       if (state.type == AuthenticationType.email) {
-                        if (state.credential.user!.emailVerified) {
-                          context.read<LoginCubit>().login(
-                              phoneNumber: state.credential.user!.phoneNumber,
-                              firebaseUserId: state.credential.user!.uid,
+                        // API-based email authentication
+                        var credential =
+                            state.credential as Map<String, dynamic>;
+
+                        // Check if this requires OTP verification (signup or unverified login)
+                        if (credential['success'] == true ||
+                            credential['email_verified'] == false) {
+                          // Show OTP verification screen
+                          // The UI will handle showing OTP input
+                          setState(() {
+                            isOtpSent = true;
+                          });
+                        } else if (credential['email_verified'] == true ||
+                            credential['token'] != null) {
+                          // Login successful with token
+                          context.read<LoginCubit>().loginWithTwilio(
+                              phoneNumber: '',
+                              firebaseUserId:
+                                  credential['id']?.toString() ?? '',
                               type: state.type.name,
-                              credential: state.credential,
-                              countryCode: null);
+                              credential: credential,
+                              countryCode: '');
                         }
                       } else if (state.type == AuthenticationType.phone) {
-                        if (Constant.otpServiceProvider == 'twilio') {
-                          context.read<LoginCubit>().loginWithTwilio(
-                              phoneNumber: (state.payload as PhoneLoginPayload)
-                                  .phoneNumber,
-                              firebaseUserId:
-                                  state.credential['id']?.toString() ?? '',
-                              type: state.type.name,
-                              credential: state.credential,
-                              countryCode:
-                                  "+${(state.payload as PhoneLoginPayload).countryCode}");
-                        } else {
-                          context.read<LoginCubit>().login(
-                              phoneNumber: (state.payload as PhoneLoginPayload)
-                                  .phoneNumber,
-                              firebaseUserId: state.credential.user!.uid,
-                              type: state.type.name,
-                              credential: state.credential,
-                              countryCode:
-                                  "+${(state.payload as PhoneLoginPayload).countryCode}");
-                        }
+                        // API-based phone authentication (including Twilio and custom OTP)
+                        context.read<LoginCubit>().loginWithTwilio(
+                            phoneNumber: (state.payload as PhoneLoginPayload)
+                                .phoneNumber,
+                            firebaseUserId:
+                                state.credential['id']?.toString() ?? '',
+                            type: state.type.name,
+                            credential: state.credential,
+                            countryCode:
+                                "+${(state.payload as PhoneLoginPayload).countryCode}");
                       } else {
                         context.read<LoginCubit>().login(
                             phoneNumber: state.credential.user!.phoneNumber,
@@ -894,6 +899,9 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Widget verifyOTPWidget() {
+    // Check if this is email or phone OTP
+    bool isEmailOtp = isLoginWithMobile.value == false;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18.0),
       child: Column(
@@ -929,7 +937,9 @@ class LoginScreenState extends State<LoginScreen> {
             height: 66,
           ),
           CustomText(
-            "signInWithMob".translate(context),
+            isEmailOtp
+                ? "verifyEmail".translate(context)
+                : "signInWithMob".translate(context),
             fontSize: context.font.extraLarge,
           ),
           const SizedBox(
@@ -938,7 +948,9 @@ class LoginScreenState extends State<LoginScreen> {
           Row(
             children: [
               CustomText(
-                "+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}",
+                isEmailOtp
+                    ? emailController.text
+                    : "+${phoneLoginPayload.countryCode}\\t${phoneLoginPayload.phoneNumber}",
                 fontSize: context.font.large,
               ),
               const SizedBox(
@@ -966,11 +978,25 @@ class LoginScreenState extends State<LoginScreen> {
             child: isResendEnabled
                 ? MaterialButton(
                     onPressed: () {
-                      context.read<AuthenticationCubit>().setData(
-                            payload: phoneLoginPayload,
-                            type: AuthenticationType.phone,
-                          );
-                      context.read<AuthenticationCubit>().verify();
+                      if (isEmailOtp) {
+                        // Resend email OTP - trigger email signup/login again
+                        context.read<AuthenticationCubit>().setData(
+                              payload: EmailLoginPayload(
+                                email: emailController.text,
+                                password: _passwordController.text,
+                                type: EmailLoginType.signup,
+                              ),
+                              type: AuthenticationType.email,
+                            );
+                        context.read<AuthenticationCubit>().authenticate();
+                      } else {
+                        // Resend phone OTP
+                        context.read<AuthenticationCubit>().setData(
+                              payload: phoneLoginPayload,
+                              type: AuthenticationType.phone,
+                            );
+                        context.read<AuthenticationCubit>().verify();
+                      }
                       startResendOtpTimer();
                     },
                     child: CustomText("resendOTP".translate(context),
@@ -991,7 +1017,21 @@ class LoginScreenState extends State<LoginScreen> {
                 HelperUtils.showSnackBarMessage(
                     context, "pleaseEnterSixDigits".translate(context));
               } else {
-                phoneLoginPayload.setOTP(otp!.trim());
+                if (isEmailOtp) {
+                  // Verify email OTP
+                  context.read<AuthenticationCubit>().setData(
+                        payload: EmailLoginPayload(
+                          email: emailController.text,
+                          password: _passwordController.text,
+                          type: EmailLoginType.verifyOtp,
+                          otp: otp!.trim(),
+                        ),
+                        type: AuthenticationType.email,
+                      );
+                } else {
+                  // Verify phone OTP
+                  phoneLoginPayload.setOTP(otp!.trim());
+                }
                 context.read<AuthenticationCubit>().authenticate();
               }
             },

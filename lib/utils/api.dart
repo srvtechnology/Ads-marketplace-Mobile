@@ -53,6 +53,15 @@ class Api {
   static const String verifyTwilioOtp = 'verify-otp';
   static const String otp = 'otp';
 
+  // Mobile OTP API
+  static const String mobileSignupApi = 'mobile-signup';
+  static const String mobileSignupVerifyOtpApi = 'mobile-signup-verify-otp';
+
+  // Email Authentication API
+  static const String emailSignupApi = 'email-signup';
+  static const String emailSignupVerifyOtpApi = 'email-signup-verify-otp';
+  static const String emailLoginApi = 'email-login';
+
   static const String _placeApiBaseUrl =
       "https://admin.thebhutanmarket.com/api/place/";
   static String placeApiKey = "key";

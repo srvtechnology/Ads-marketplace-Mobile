@@ -6,15 +6,27 @@ class MultiLoginPayload {
   MultiLoginPayload(this.payloads);
 }
 
-enum EmailLoginType { login, signup }
+enum EmailLoginType { login, signup, verifyOtp }
 
 class EmailLoginPayload extends LoginPayload {
   final String email;
   final String password;
   final EmailLoginType type;
+  String? otp;
 
   EmailLoginPayload(
-      {required this.email, required this.password, required this.type});
+      {required this.email,
+      required this.password,
+      required this.type,
+      this.otp});
+
+  void setOTP(String value) {
+    otp = value;
+  }
+
+  String? getOTP() {
+    return otp;
+  }
 }
 
 class GoogleLoginPayload extends LoginPayload {

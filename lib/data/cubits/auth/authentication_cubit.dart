@@ -67,7 +67,6 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   }
 
   void authenticate() async {
-
     if (type == null && payload == null) {
       return;
     }
@@ -89,16 +88,62 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         final credentials = twilio['data'];
 
         emit(AuthenticationSuccess(type!, credentials, payload!, token));
+      } else if (type == AuthenticationType.phone) {
+        // For API-based phone authentication
+        dynamic loginResult = await mMultiAuthentication.login();
+
+        if (loginResult == null) {
+          return;
+        } else if (loginResult is Map<String, dynamic>) {
+          // API-based phone authentication returns a Map
+          final token = loginResult['token']?.toString() ?? '';
+          final credentials = loginResult;
+
+          emit(AuthenticationSuccess(type!, credentials, payload!, token));
+        } else {
+          emit(
+              AuthenticationFail("Invalid response from phone authentication"));
+        }
+      } else if (type == AuthenticationType.email) {
+        // For API-based email authentication
+        dynamic loginResult = await mMultiAuthentication.login();
+
+        if (loginResult == null) {
+          return;
+        } else if (loginResult is Map<String, dynamic>) {
+          // API-based email authentication returns a Map
+
+          // Check if this is a signup response (needs OTP verification)
+          if (loginResult['success'] == true &&
+              loginResult['user_details'] != null) {
+            // Signup successful, needs OTP verification
+            emit(AuthenticationSuccess(type!, loginResult, payload!, null));
+          }
+          // Check if this is a login response that needs email verification
+          else if (loginResult['email_verified'] == false) {
+            // Email not verified, OTP sent
+            emit(AuthenticationSuccess(type!, loginResult, payload!, null));
+          }
+          // Check if this is a successful login with token
+          else if (loginResult['email_verified'] == true ||
+              loginResult['token'] != null) {
+            final token = loginResult['token']?.toString() ?? '';
+            emit(AuthenticationSuccess(type!, loginResult, payload!, token));
+          } else {
+            emit(AuthenticationFail(
+                "Invalid response from email authentication"));
+          }
+        } else {
+          emit(
+              AuthenticationFail("Invalid response from email authentication"));
+        }
       } else {
         UserCredential? credential = await mMultiAuthentication.login();
-
-
 
         if (credential == null) {
           return;
         } else {
           LoginPayload? payloadData = (payload);
-
 
           if (payloadData is EmailLoginPayload &&
               payloadData.type == EmailLoginType.login) {
@@ -107,11 +152,10 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
               // Handle the case when the user's email is not verified
               emit(AuthenticationFail("Please verify your email first."));
             } else {
-              emit(AuthenticationSuccess(type!, credential, payload!,null));
+              emit(AuthenticationSuccess(type!, credential, payload!, null));
             }
           } else {
-
-            emit(AuthenticationSuccess(type!, credential, payload!,null));
+            emit(AuthenticationSuccess(type!, credential, payload!, null));
           }
         }
       }
@@ -157,14 +201,12 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
   Future<Map<String, dynamic>> verifyTwilioOtp() async {
     final parameters = {
       'number':
-      "+${(payload as PhoneLoginPayload).countryCode}${(payload as PhoneLoginPayload).phoneNumber}",
+          "+${(payload as PhoneLoginPayload).countryCode}${(payload as PhoneLoginPayload).phoneNumber}",
       'otp': (payload as PhoneLoginPayload).getOTP(),
     };
 
-
     final response =
-    await Api.get(url: Api.verifyTwilioOtp, queryParameters: parameters);
-
+        await Api.get(url: Api.verifyTwilioOtp, queryParameters: parameters);
 
     return response;
   }

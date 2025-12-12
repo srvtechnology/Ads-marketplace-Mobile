@@ -3,28 +3,29 @@ import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/login/lib/login_status.dart';
 import 'package:eClassify/utils/login/lib/login_system.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:eClassify/data/repositories/auth_repository.dart';
 
 class PhoneLogin extends LoginSystem {
   String? verificationId;
   String? phoneNumber;
 
   @override
-  Future<UserCredential?> login() async {
+  Future<Map<String, dynamic>?> login() async {
     try {
       emit(MProgress());
-      // (state);
 
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-          verificationId: verificationId ?? "",
-          smsCode: (payload as PhoneLoginPayload).getOTP()!);
+      String phoneNumber = (payload as PhoneLoginPayload).phoneNumber;
+      String otp = (payload as PhoneLoginPayload).getOTP() ?? '';
 
-      UserCredential userCredential =
-      await firebaseAuth.signInWithCredential(credential);
+      // Call the API to verify OTP
+      Map<String, dynamic> response = await AuthRepository().verifyOTP(
+        phoneNumber: phoneNumber,
+        otp: otp,
+      );
 
       emit(MSuccess());
 
-      return userCredential;
+      return response;
     } catch (e) {
       emit(MFail(e));
     }
@@ -37,7 +38,7 @@ class PhoneLogin extends LoginSystem {
 
     if (Constant.otpServiceProvider == 'twilio') {
       try {
-        final twilio = await getTwilioOtp();
+        await getTwilioOtp();
         super.requestVerification();
       } on ApiException catch (e) {
         emit(MFail(e.errorMessage));
@@ -47,27 +48,23 @@ class PhoneLogin extends LoginSystem {
       return;
     }
 
-    await FirebaseAuth.instance
-        .verifyPhoneNumber(
-      timeout: Duration(
-        seconds: Constant.otpTimeOutSecond,
-      ),
-      phoneNumber:
-      "+${(payload as PhoneLoginPayload)
-          .countryCode}${(payload as PhoneLoginPayload).phoneNumber}",
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        emit(MFail(e));
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        super.requestVerification();
-        forceResendingToken = resendToken;
-        this.verificationId = verificationId;
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-      forceResendingToken: forceResendingToken,
-    )
-        .then((value) {});
+    try {
+      // Use the new API-based OTP sending
+      await AuthRepository().sendOTP(
+        phoneNumber: (payload as PhoneLoginPayload).phoneNumber,
+        countryCode: (payload as PhoneLoginPayload).countryCode,
+        onCodeSent: (String verificationId, Map<String, dynamic> userDetails) {
+          super.requestVerification();
+          this.verificationId = verificationId;
+          phoneNumber = (payload as PhoneLoginPayload).phoneNumber;
+        },
+        onError: (error) {
+          emit(MFail(error));
+        },
+      );
+    } catch (e) {
+      emit(MFail(e));
+    }
   }
 
   Future<Map<String, dynamic>> getTwilioOtp() async {
@@ -75,11 +72,10 @@ class PhoneLogin extends LoginSystem {
         (payload as PhoneLoginPayload).phoneNumber;
     final parameters = {
       'number':
-      "${(payload as PhoneLoginPayload)
-          .countryCode}${(payload as PhoneLoginPayload).phoneNumber}",
+          "${(payload as PhoneLoginPayload).countryCode}${(payload as PhoneLoginPayload).phoneNumber}",
     };
     final response =
-    await Api.get(url: Api.getTwilioOtp, queryParameters: parameters);
+        await Api.get(url: Api.getTwilioOtp, queryParameters: parameters);
 
     return response;
   }
