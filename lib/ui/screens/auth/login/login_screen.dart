@@ -364,6 +364,15 @@ class LoginScreenState extends State<LoginScreen> {
                           setState(() {
                             isOtpSent = true;
                           });
+
+                          // Start resend timer
+                          startResendOtpTimer();
+
+                          // Show success message
+                          if (credential['message'] != null) {
+                            HelperUtils.showSnackBarMessage(
+                                context, credential['message']);
+                          }
                         } else if (credential['email_verified'] == true ||
                             credential['token'] != null) {
                           // Login successful with token
