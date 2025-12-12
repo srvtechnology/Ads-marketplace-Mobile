@@ -13,7 +13,7 @@ import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   final String email;
@@ -212,36 +212,25 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     ),
                     const SizedBox(height: 32),
                     // OTP Input
-                    PinCodeTextField(
-                      appContext: context,
-                      length: 6,
-                      onChanged: (value) {
-                        otp = value;
-                      },
-                      onCompleted: (value) {
-                        otp = value;
-                      },
-                      keyboardType: TextInputType.number,
-                      animationType: AnimationType.fade,
-                      pinTheme: PinTheme(
-                        shape: PinCodeFieldShape.box,
-                        borderRadius: BorderRadius.circular(8),
-                        fieldHeight: 50,
-                        fieldWidth: 45,
-                        activeFillColor: context.color.secondaryColor,
-                        inactiveFillColor: context.color.secondaryColor,
-                        selectedFillColor: context.color.secondaryColor,
-                        activeColor: context.color.territoryColor,
-                        inactiveColor:
-                            context.color.textLightColor.withValues(alpha: 0.3),
-                        selectedColor: context.color.territoryColor,
-                      ),
-                      cursorColor: context.color.textColorDark,
-                      animationDuration: const Duration(milliseconds: 300),
-                      enableActiveFill: true,
-                      textStyle: TextStyle(
-                        fontSize: 20,
-                        color: context.color.textColorDark,
+                    Center(
+                      child: PinFieldAutoFill(
+                        decoration: UnderlineDecoration(
+                          textStyle: TextStyle(
+                            fontSize: 20,
+                            color: context.color.textColorDark,
+                          ),
+                          colorBuilder: FixedColorBuilder(
+                            context.color.territoryColor,
+                          ),
+                        ),
+                        currentCode: otp,
+                        codeLength: 6,
+                        onCodeChanged: (String? code) {
+                          otp = code ?? '';
+                        },
+                        onCodeSubmitted: (String code) {
+                          otp = code;
+                        },
                       ),
                     ),
                     const SizedBox(height: 16),
