@@ -573,5 +573,7 @@
   "resendOtpIn": "Resend OTP In",
   "settingsLbl": "Settings",
   "microphonePermissionIsDeniedEnableIt": "Microphone permission is denied. Please enable it in settings.",
-  "noChatFoundStartNewConversation": "No chat found. Start a new conversation"
+  "noChatFoundStartNewConversation": "No chat found. Start a new conversation",
+  "enterOtpSentToEmail": "Enter the 6-digit OTP sent to your email",
+  "verifyEmail": "Verify Email"
 }
