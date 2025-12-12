@@ -233,36 +233,31 @@ class LoginScreenState extends State<SignUpMainScreen> {
                         Widgets.hideLoder(context);
 
                         if (state.type == AuthenticationType.phone) {
-                          if (Constant.otpServiceProvider == 'twilio') {
-                            context.read<LoginCubit>().loginWithTwilio(
-                                phoneNumber:
-                                    (state.payload as PhoneLoginPayload)
-                                        .phoneNumber,
-                                firebaseUserId:
-                                    state.credential['id']?.toString() ?? '',
-                                type: state.type.name,
-                                credential: state.credential,
-                                countryCode:
-                                    "+${(state.payload as PhoneLoginPayload).countryCode}");
-                          } else {
-                            context.read<LoginCubit>().login(
-                                phoneNumber:
-                                    (state.payload as PhoneLoginPayload)
-                                        .phoneNumber,
-                                firebaseUserId: state.credential.user!.uid,
-                                type: state.type.name,
-                                credential: state.credential,
-                                countryCode:
-                                    "+${(state.payload as PhoneLoginPayload).countryCode}");
-                          }
+                          // API-based phone authentication
+                          context.read<LoginCubit>().loginWithTwilio(
+                              phoneNumber: (state.payload as PhoneLoginPayload)
+                                  .phoneNumber,
+                              firebaseUserId:
+                                  state.credential['id']?.toString() ?? '',
+                              type: state.type.name,
+                              credential: state.credential,
+                              countryCode:
+                                  "+${(state.payload as PhoneLoginPayload).countryCode}");
                         } else if (state.type == AuthenticationType.email) {
-                          if (state.credential.user!.emailVerified) {
-                            context.read<LoginCubit>().login(
-                                phoneNumber: state.credential.user!.phoneNumber,
-                                firebaseUserId: state.credential.user!.uid,
+                          // API-based email authentication
+                          var credential =
+                              state.credential as Map<String, dynamic>;
+
+                          // For signup, the response will have success=true or email_verified=false
+                          // In both cases, user should be redirected to OTP/complete profile
+                          if (credential['token'] != null) {
+                            context.read<LoginCubit>().loginWithTwilio(
+                                phoneNumber: '',
+                                firebaseUserId:
+                                    credential['id']?.toString() ?? '',
                                 type: state.type.name,
-                                credential: state.credential,
-                                countryCode: null);
+                                credential: credential,
+                                countryCode: '');
                           }
                         } else {
                           context.read<LoginCubit>().login(

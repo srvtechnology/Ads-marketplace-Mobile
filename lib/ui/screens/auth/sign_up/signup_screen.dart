@@ -17,7 +17,6 @@ import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,9 +75,12 @@ class _SignupScreenState extends CloudState<SignupScreen> {
             listener: (context, state) {
               if (state is AuthenticationSuccess) {
                 if (state.type == AuthenticationType.email) {
-                  if (!state.credential.user!.emailVerified) {
-                    FirebaseAuth.instance.currentUser?.sendEmailVerification();
+                  // API-based email signup
+                  var credential = state.credential as Map<String, dynamic>;
 
+                  // Check if signup was successful (needs OTP verification)
+                  if (credential['success'] == true ||
+                      credential['email_verified'] == false) {
                     Navigator.push<dynamic>(context, MaterialPageRoute(
                       builder: (context) {
                         return EmailVerificationScreen(
@@ -92,10 +94,8 @@ class _SignupScreenState extends CloudState<SignupScreen> {
               }
 
               if (state is AuthenticationFail) {
-                if (state.error is FirebaseAuthException) {
-                  HelperUtils.showSnackBarMessage(
-                      context, (state.error as FirebaseAuthException).message!);
-                }
+                HelperUtils.showSnackBarMessage(
+                    context, state.error.toString());
               }
             },
             builder: (context, state) {
