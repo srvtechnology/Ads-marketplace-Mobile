@@ -2,6 +2,7 @@ import 'package:eClassify/ui/screens/ad_details_screen.dart';
 import 'package:eClassify/ui/screens/advertisement/my_advertisment_screen.dart';
 import 'package:eClassify/ui/screens/auth/login/forgot_password.dart';
 import 'package:eClassify/ui/screens/auth/login/login_screen.dart';
+import 'package:eClassify/ui/screens/auth/login/reset_password_screen.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/mobile_signup_screen.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/signup_main_screen.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/signup_screen.dart';
@@ -62,6 +63,7 @@ class Routes {
   static const onboarding = 'onboarding';
   static const login = 'login';
   static const forgotPassword = 'forgotPassword';
+  static const resetPasswordScreen = 'resetPasswordScreen';
   static const signup = 'signup';
   static const signupMainScreen = 'signUpMainScreen';
   static const mobileSignUp = 'mobileSignUp';
@@ -195,6 +197,8 @@ class Routes {
         return LoginScreen.route(routeSettings);
       case forgotPassword:
         return ForgotPasswordScreen.route(routeSettings);
+      case resetPasswordScreen:
+        return ResetPasswordScreen.route(routeSettings);
       case signup:
         return SignupScreen.route(routeSettings);
       case signupMainScreen:

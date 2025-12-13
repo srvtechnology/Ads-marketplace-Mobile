@@ -1,14 +1,13 @@
 import 'dart:developer';
 
 import 'package:eClassify/app/routes.dart';
-
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
+import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
@@ -26,8 +25,68 @@ class ForgotPasswordScreen extends StatefulWidget {
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
+  bool _isLoading = false;
+
+  Future<void> _sendOTP() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await Api.post(
+        url: Api.forgetPasswordApi,
+        parameter: {
+          'type': 'E', // E for Email, P for Phone
+          'email_phone': _emailController.text.trim(),
+        },
+      );
+
+      log('Forgot Password Response: $response');
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response['success'] == true) {
+        // Success - navigate to reset password screen
+        HelperUtils.showSnackBarMessage(
+          context,
+          response['message'] ?? 'OTP sent successfully'.translate(context),
+          type: MessageType.success,
+        );
+
+        Navigator.pushNamed(
+          context,
+          Routes.resetPasswordScreen,
+          arguments: {
+            'email_phone': _emailController.text.trim(),
+            'type': 'E',
+          },
+        );
+      } else {
+        HelperUtils.showSnackBarMessage(
+          context,
+          response['message'] ?? 'Failed to send OTP'.translate(context),
+          type: MessageType.error,
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      log('Error sending OTP: $e');
+      HelperUtils.showSnackBarMessage(
+        context,
+        e.toString(),
+        type: MessageType.error,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +102,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top:25.0),
+                  padding: const EdgeInsets.only(top: 25.0),
                   child: Align(
                     alignment: AlignmentDirectional.bottomEnd,
                     child: FittedBox(
@@ -107,39 +166,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       log('build');
                       return UiUtils.buildButton(
                         context,
-                        disabled: _emailController.text.isEmpty,
+                        disabled: _emailController.text.isEmpty || _isLoading,
                         disabledColor: const Color.fromARGB(255, 104, 102, 106),
                         buttonTitle: "submitBtnLbl".translate(context),
                         radius: 8,
                         onPressed: () async {
                           FocusScope.of(context).unfocus(); //dismiss keyboard
-                          Future.delayed(const Duration(seconds: 1))
-                              .then((_) async {
-                            if (_formKey.currentState!.validate()) {
-                              try {
-                                await _auth
-                                    .sendPasswordResetEmail(
-                                        email: _emailController.text)
-                                    .then((value) {
-                                  HelperUtils.showSnackBarMessage(context,
-                                      "resetPasswordSuccess".translate(context),
-                                      type: MessageType.success);
-                                  Navigator.of(context).pushNamedAndRemoveUntil(
-                                      Routes.login, (route) => false);
-                                });
-                              } on FirebaseAuthException catch (e) {
-                                if (e.code == 'user-not-found') {
-                                  HelperUtils.showSnackBarMessage(context,
-                                      "userNotFound".translate(context),
-                                      type: MessageType.error);
-                                } else {
-                                  HelperUtils.showSnackBarMessage(
-                                      context, e.toString(),
-                                      type: MessageType.error);
-                                }
-                              }
-                            }
-                          });
+                          await _sendOTP();
                         },
                       );
                     }),

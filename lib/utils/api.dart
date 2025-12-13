@@ -62,6 +62,10 @@ class Api {
   static const String emailSignupVerifyOtpApi = 'email-signup-verify-otp';
   static const String emailLoginApi = 'email-login';
 
+  // Forgot Password API
+  static const String forgetPasswordApi = 'forget-password-api';
+  static const String setNewPasswordApi = 'set-new-password-api';
+
   static const String _placeApiBaseUrl =
       "https://admin.thebhutanmarket.com/api/place/";
   static String placeApiKey = "key";
