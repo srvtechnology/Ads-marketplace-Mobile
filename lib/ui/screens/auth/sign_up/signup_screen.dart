@@ -8,7 +8,7 @@ import 'package:eClassify/ui/screens/auth/sign_up/email_verification_screen.dart
 
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/api.dart';
+
 import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/cloud_state/cloud_state.dart';
 import 'package:eClassify/utils/constant.dart';
@@ -353,11 +353,11 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                   color: context.color.territoryColor,
                   fontSize: context.font.small,
                 ),
-                onTap: () => Navigator.pushNamed(
-                        context, Routes.profileSettings, arguments: {
-                      'title': "termsConditions".translate(context),
-                      'param': Api.termsAndConditions
-                    })),
+                onTap: () => Navigator.pushNamed(context, Routes.webViewScreen,
+                        arguments: {
+                          'title': "termsConditions".translate(context),
+                          'url': Constant.termsConditionsUrl
+                        })),
             const SizedBox(
               width: 5.0,
             ),
@@ -376,11 +376,11 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                   color: context.color.territoryColor,
                   fontSize: context.font.small,
                 ),
-                onTap: () => Navigator.pushNamed(
-                        context, Routes.profileSettings, arguments: {
-                      'title': "privacyPolicy".translate(context),
-                      'param': Api.privacyPolicy
-                    })),
+                onTap: () => Navigator.pushNamed(context, Routes.webViewScreen,
+                        arguments: {
+                          'title': "privacyPolicy".translate(context),
+                          'url': Constant.privacyPolicyUrl
+                        })),
           ]),
         ],
       ),
