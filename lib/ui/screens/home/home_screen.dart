@@ -152,8 +152,8 @@ class HomeScreenState extends State<HomeScreen>
             padding: EdgeInsetsDirectional.only(
                 start: sidePadding, end: sidePadding),
             child: Image.asset(
-              "assets/full-logo.png",
-              height: 28,
+              "assets/kora.png",
+              height: 50,
               alignment: Alignment.centerLeft,
             ),
             // TODO: Location feature commented out

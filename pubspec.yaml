@@ -85,6 +85,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.7
 
 
 
@@ -111,6 +112,7 @@ flutter:
     - assets/svg/Illustrators/
     - assets/svg/payment/
     - assets/
+    - assets/splash/
 
 
   fonts:
@@ -124,4 +126,27 @@ flutter:
         - asset: assets/fonts/Manrope-Medium.ttf
           weight: 500
         - asset: assets/fonts/Manrope-ExtraBold.ttf
-          weight: 800
+
+flutter_native_splash:
+  # Background color for all platforms (except Android 12+)
+  color: "#FFFFFF"
+  
+  # Image for pre-Android 12 devices
+  # Properly sized splash image (centered logo on 960x960 canvas)
+  image: assets/splash/splash_logo.png
+  
+  # Center the image
+  android_gravity: center
+  ios_content_mode: center
+  
+  # Fullscreen mode (hides status bar)
+  fullscreen: true
+  
+  # Android 12+ specific configuration
+  # Note: Android 12+ clips the splash to a circle
+  # With icon_background_color: image should be 960×960 px, fit within 640px diameter circle
+  android_12:
+    color: "#FFFFFF"
+    image: assets/splash/splash_logo.png
+    # Add icon background color for better contrast
+    icon_background_color: "#FFFFFF"

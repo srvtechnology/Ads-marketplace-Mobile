@@ -7,19 +7,12 @@ import 'package:eClassify/data/cubits/system/fetch_language_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/system/language_cubit.dart';
 import 'package:eClassify/data/model/system_settings_model.dart';
-import 'package:eClassify/settings.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
-import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/app_icon.dart';
 import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/custom_text.dart';
-import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_svg/svg.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({this.itemSlug, super.key, this.sellerId});
@@ -220,15 +213,12 @@ class SplashScreenState extends State<SplashScreen>
                       children: [
                         Align(
                           alignment: AlignmentDirectional.center,
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 10.0),
-                            child: SizedBox(
-                              width: 400,
-                              height: 300,
-                              child: Image.asset(
-                                AppIcons.splashplain,
-                                fit: BoxFit.contain,
-                              ),
+                          child: SizedBox(
+                            width: 250,
+                            height: 250,
+                            child: Image.asset(
+                              "assets/icon.png",
+                              fit: BoxFit.contain,
                             ),
                           ),
                         ),

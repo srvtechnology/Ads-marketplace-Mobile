@@ -27,7 +27,7 @@ class PaymentGateway {
 
 class AppSettings {
   /// Basic Settings
-  static const String applicationName = 'Tshong';
+  static const String applicationName = 'Kora';
   static const String packageName = 'com.eclassify.wrteam';
   static const String shareAppText = "Share this App";
 
