@@ -839,10 +839,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                     title: "termsConditions".translate(context),
                     svgImagePath: AppIcons.terms,
                     onTap: () {
-                      Navigator.pushNamed(context, Routes.profileSettings,
+                      Navigator.pushNamed(context, Routes.webViewScreen,
                           arguments: {
                             'title': "termsConditions".translate(context),
-                            'param': Api.termsAndConditions
+                            'url': Constant.termsConditionsUrl
                           });
                     },
                   ),
@@ -853,10 +853,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                     onTap: () {
                       Navigator.pushNamed(
                         context,
-                        Routes.profileSettings,
+                        Routes.webViewScreen,
                         arguments: {
                           'title': "privacyPolicy".translate(context),
-                          'param': Api.privacyPolicy
+                          'url': Constant.privacyPolicyUrl
                         },
                       );
                     },
@@ -885,17 +885,24 @@ class _ProfileScreenState extends State<ProfileScreen>
                       svgImagePath: AppIcons.delete,
                       onTap: () {
                         if (Constant.isDemoModeOn) {
-                          if (HiveUtils.getUserDetails().mobile !=
-                              null) if (Constant
-                                  .demoMobileNumber ==
-                              (HiveUtils.getUserDetails().mobile!.replaceFirst(
-                                  "+${HiveUtils.getCountryCode()}", ""))) {
-                            HelperUtils.showSnackBarMessage(context,
-                                "thisActionNotValidDemo".translate(context));
-                            return;
+                          if (HiveUtils.getUserDetails().mobile != null) {
+                            if (Constant.demoMobileNumber ==
+                                (HiveUtils.getUserDetails()
+                                    .mobile!
+                                    .replaceFirst(
+                                        "+${HiveUtils.getCountryCode()}",
+                                        ""))) {
+                              HelperUtils.showSnackBarMessage(context,
+                                  "thisActionNotValidDemo".translate(context));
+                              return;
+                            }
                           }
                         }
-                        deleteConfirmWidget();
+                        Navigator.pushNamed(context, Routes.webViewScreen,
+                            arguments: {
+                              'title': "deleteAccount".translate(context),
+                              'url': Constant.deleteAccountUrl
+                            });
                       },
                     ),
                   ],

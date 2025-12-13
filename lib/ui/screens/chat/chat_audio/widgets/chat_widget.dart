@@ -53,6 +53,7 @@ class ChatMessage extends StatefulWidget {
   final String? type;
   final double? amount;
   final String? offerStatus; // 'A', 'R', 'IP' from API
+  final String? itemStatus; // Item status like 'sold out', 'active', etc.
 
   const ChatMessage(
       {super.key,
@@ -68,7 +69,8 @@ class ChatMessage extends StatefulWidget {
       this.isSentNow,
       this.type,
       this.amount,
-      this.offerStatus});
+      this.offerStatus,
+      this.itemStatus});
 
   Map toJson() {
     Map data = {};
@@ -87,6 +89,7 @@ class ChatMessage extends StatefulWidget {
     data['type'] = this.type;
     data['amount'] = this.amount;
     data['offer_status'] = this.offerStatus;
+    data['item_status'] = this.itemStatus;
     return data;
   }
 
@@ -105,7 +108,8 @@ class ChatMessage extends StatefulWidget {
         messageType: json['message_type'],
         type: json['type'],
         amount: json['amount'],
-        offerStatus: json['offer_status']);
+        offerStatus: json['offer_status'],
+        itemStatus: json['item_status']);
     return chat;
   }
 
@@ -144,6 +148,19 @@ class ChatMessageState extends State<ChatMessage>
     }
 
     super.initState();
+  }
+
+  // Helper method to check if item is disabled
+  bool _isItemDisabled() {
+    if (widget.itemStatus == null) return false;
+
+    final status = widget.itemStatus!.toLowerCase();
+    return status == "sold out" ||
+        status == "review" ||
+        status == "rejected" ||
+        status == "inactive" ||
+        status == "soft rejected" ||
+        status == "permanent rejected";
   }
 
   bool get _isOffer {
@@ -519,71 +536,84 @@ class ChatMessageState extends State<ChatMessage>
                                             widget.offerStatus == 'A') ...[
                                           SizedBox(height: 8),
                                           InkWell(
-                                            onTap: () {
-                                              // Navigate to BFS payment screen for offer
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) =>
-                                                      BfsPaymentScreen(
-                                                    paymentType:
-                                                        BfsPaymentType.offer,
-                                                    offerId: widget.itemOfferId
-                                                        .toString(),
-                                                    price: widget.amount ??
-                                                        double.tryParse(
-                                                            _offerDisplayAmount
-                                                                .replaceAll(
-                                                                    RegExp(
-                                                                        r'[^\d.]'),
-                                                                    '')) ??
-                                                        0.0,
-                                                    packageName:
-                                                        "Offer Payment",
-                                                  ),
-                                                ),
-                                              ).then((result) {
-                                                if (result == true) {
-                                                  // Reload chat messages to show updated payment status
-                                                  final loadChatCubit =
-                                                      context.read<
-                                                          LoadChatMessagesCubit>();
-                                                  loadChatCubit.load(
-                                                    itemOfferId:
-                                                        widget.itemOfferId,
-                                                  );
+                                            onTap: _isItemDisabled()
+                                                ? null
+                                                : () {
+                                                    // Navigate to BFS payment screen for offer
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (_) =>
+                                                            BfsPaymentScreen(
+                                                          paymentType:
+                                                              BfsPaymentType
+                                                                  .offer,
+                                                          offerId: widget
+                                                              .itemOfferId
+                                                              .toString(),
+                                                          price: widget
+                                                                  .amount ??
+                                                              double.tryParse(
+                                                                  _offerDisplayAmount
+                                                                      .replaceAll(
+                                                                          RegExp(
+                                                                              r'[^\d.]'),
+                                                                          '')) ??
+                                                              0.0,
+                                                          packageName:
+                                                              "Offer Payment",
+                                                        ),
+                                                      ),
+                                                    ).then((result) {
+                                                      if (result == true) {
+                                                        // Reload chat messages to show updated payment status
+                                                        final loadChatCubit =
+                                                            context.read<
+                                                                LoadChatMessagesCubit>();
+                                                        loadChatCubit.load(
+                                                          itemOfferId: widget
+                                                              .itemOfferId,
+                                                        );
 
-                                                  HelperUtils
-                                                      .showSnackBarMessage(
-                                                          context,
-                                                          "Payment Successful!",
-                                                          type: MessageType
-                                                              .success);
-                                                }
-                                              });
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.symmetric(
-                                                  horizontal: 16, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: Colors.green,
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(Icons.payment,
-                                                      size: 16,
-                                                      color: Colors.white),
-                                                  SizedBox(width: 4),
-                                                  CustomText("Pay Now",
-                                                      color: Colors.white,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize:
-                                                          context.font.small),
-                                                ],
+                                                        HelperUtils
+                                                            .showSnackBarMessage(
+                                                                context,
+                                                                "Payment Successful!",
+                                                                type: MessageType
+                                                                    .success);
+                                                      }
+                                                    });
+                                                  },
+                                            child: Opacity(
+                                              opacity:
+                                                  _isItemDisabled() ? 0.5 : 1.0,
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 8),
+                                                decoration: BoxDecoration(
+                                                  color: _isItemDisabled()
+                                                      ? Colors.grey
+                                                      : Colors.green,
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.payment,
+                                                        size: 16,
+                                                        color: Colors.white),
+                                                    SizedBox(width: 4),
+                                                    CustomText("Pay Now",
+                                                        color: Colors.white,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize:
+                                                            context.font.small),
+                                                  ],
+                                                ),
                                               ),
                                             ),
                                           ),

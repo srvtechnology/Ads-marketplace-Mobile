@@ -24,7 +24,8 @@ class ChatMessageHandler {
     _chatMessageStream.sink.add(messages);
   }
 
-  static void loadMessages(List<Widget> chats, BuildContext context) {
+  static void loadMessages(List<Widget> chats, BuildContext context,
+      {String? itemStatus}) {
     List<Widget> messagesWithDate = [];
     String previousDate = "";
     // Get the current date and time
@@ -51,8 +52,17 @@ class ChatMessageHandler {
         previousDate = formattedDate;
       }
 
+      // Update ChatMessage with itemStatus if provided
+      Widget messageWidget = chats[i];
+      if (itemStatus != null && messageWidget is ChatMessage) {
+        // Create a new ChatMessage with itemStatus
+        var messageData = messageWidget.toJson();
+        messageData['item_status'] = itemStatus;
+        messageWidget = ChatMessage.fromJson(messageData);
+      }
+
       // Add message widget
-      messagesWithDate.insert(0, chats[i]);
+      messagesWithDate.insert(0, messageWidget);
     }
 
     // Update the messages list and sink the new messages to the stream

@@ -1573,7 +1573,10 @@ class _ChatScreenState extends State<ChatScreen>
                       listener: (context, state) {
                         if (state is LoadChatMessagesSuccess) {
                           ChatMessageHandler.loadMessages(
-                              state.messages, context);
+                            state.messages,
+                            context,
+                            itemStatus: state.itemStatus?['status']?.toString(),
+                          );
                           totalMessageCount = state.messages.length;
                           isFetchedFirstTime = true;
                           setState(() {});

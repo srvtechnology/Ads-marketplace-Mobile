@@ -12,6 +12,12 @@ class Constant {
   static const String packageName = AppSettings.packageName;
   static String playstoreURLAndroid = "";
   static String appstoreURLios = "";
+  static const String termsConditionsUrl =
+      "https://admin.thebhutanmarket.com/terms-conditions";
+  static const String privacyPolicyUrl =
+      "https://admin.thebhutanmarket.com/privacy-policy";
+  static const String deleteAccountUrl =
+      "https://admin.thebhutanmarket.com/delete-account";
   static String iOSAppId = '';
   static const String shareappText = AppSettings.shareAppText;
 

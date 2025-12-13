@@ -43,6 +43,7 @@ import 'package:eClassify/ui/screens/settings/contact_us.dart';
 import 'package:eClassify/ui/screens/settings/notification_detail.dart';
 import 'package:eClassify/ui/screens/settings/notifications.dart';
 import 'package:eClassify/ui/screens/settings/profile_setting.dart';
+import 'package:eClassify/ui/screens/settings/webview_screen.dart';
 import 'package:eClassify/ui/screens/sold_out_bought_screen.dart';
 import 'package:eClassify/ui/screens/splash_screen.dart';
 import 'package:eClassify/ui/screens/sub_category/sub_category_screen.dart';
@@ -133,6 +134,7 @@ class Routes {
   static const sectionWiseItemsScreen = '/sectionWiseItemsScreen';
   static const blockedUserListScreen = '/blockedUserListScreen';
   static const payStackWebViewScreen = '/payStackWebViewScreen';
+  static const webViewScreen = '/webViewScreen';
 
   static const playground = 'playground';
 
@@ -222,6 +224,8 @@ class Routes {
         return LocationPermissionScreen.route(routeSettings);
       case profileSettings:
         return ProfileSettings.route(routeSettings);
+      case webViewScreen:
+        return WebViewScreen.route(routeSettings);
       case filterScreen:
         return FilterScreen.route(routeSettings);
       case notificationPage:
