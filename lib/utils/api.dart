@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
@@ -270,6 +271,17 @@ class Api {
   }) async {
     try {
       final Dio dio = Dio();
+
+      // Disable SSL certificate validation (for development/testing only)
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
+
       dio.interceptors.add(NetworkRequestInterceptor());
 
       late FormData formData;
@@ -368,6 +380,17 @@ class Api {
       bool? useBaseUrl}) async {
     try {
       final Dio dio = Dio();
+
+      // Disable SSL certificate validation (for development/testing only)
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
+
       dio.interceptors.add(NetworkRequestInterceptor());
 
       final response = await dio.delete(
@@ -403,6 +426,17 @@ class Api {
       bool? useBaseUrl}) async {
     try {
       final Dio dio = Dio();
+
+      // Disable SSL certificate validation (for development/testing only)
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
+
       dio.interceptors.add(NetworkRequestInterceptor());
 
       final response = await dio.get(
