@@ -24,9 +24,8 @@ class Validator {
 
   static String? emptyValueValidation(String? value,
       {String? errmsg, required BuildContext context}) {
-
     errmsg ??= 'pleaseEnterSomeText'.translate(context);
-    
+
     return (value ?? "").trim().isEmpty ? errmsg : null;
   }
 
@@ -54,9 +53,17 @@ class Validator {
       {String? errmsg, required BuildContext context}) {
     errmsg ??= 'pleaseEnterSomeText'.translate(context);
     final pattern = RegExp(r'^[a-zA-Z ]+$');
-    if ((value ??= "").trim().isEmpty) {
+    final trimmedValue = value?.trim() ?? '';
+
+    if (trimmedValue.isEmpty) {
       return errmsg;
-    } else if (!pattern.hasMatch(value)) {
+    } else if (trimmedValue.length < 2) {
+      // Name too short - minimum 2 characters
+      return "nameTooShort".translate(context);
+    } else if (trimmedValue.length > 50) {
+      // Name too long - maximum 50 characters
+      return "nameTooLong".translate(context);
+    } else if (!pattern.hasMatch(trimmedValue)) {
       return 'pleaseEnterOnlyAlphabets'.translate(context);
     } else {
       return null;

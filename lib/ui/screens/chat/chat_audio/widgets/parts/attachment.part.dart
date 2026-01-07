@@ -61,20 +61,12 @@ class _AttachmentMessageState extends State<AttachmentMessage> {
     }
   }
 
-
   Future<String?> getDownloadPath() async {
     Directory? directory;
     try {
-      if (Platform.isIOS) {
-        directory = await getApplicationDocumentsDirectory();
-      } else {
-        directory = Directory('/storage/emulated/0/Download');
-        // Put file in global download folder, if for an unknown reason it didn't exist, we fallback
-        // ignore: avoid_slow_async_io
-        if (!await directory.exists()) {
-          directory = await getExternalStorageDirectory();
-        }
-      }
+      // Use app-private documents directory for security
+      // This prevents other apps from accessing downloaded files
+      directory = await getApplicationDocumentsDirectory();
     } catch (err) {
       if (kDebugMode) {
         HelperUtils.showSnackBarMessage(
