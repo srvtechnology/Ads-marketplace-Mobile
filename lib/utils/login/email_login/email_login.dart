@@ -5,7 +5,9 @@ import 'package:eClassify/utils/login/lib/payloads.dart';
 
 class EmailLogin extends LoginSystem {
   String? verificationEmail;
+  String? verificationPassword;
   bool needsOtpVerification = false;
+  bool needsMfaVerification = false;
 
   @override
   Future<Map<String, dynamic>?> login() async {
@@ -29,21 +31,23 @@ class EmailLogin extends LoginSystem {
           emit(MSuccess());
         } else if (payloadData.type == EmailLoginType.login) {
           // Login flow - call email login API
+          // MFA is enabled: token NOT issued here, only after OTP verification
           emit(MProgress());
           result = await AuthRepository().emailLogin(
             email: payloadData.email,
             password: payloadData.password,
           );
 
-          // Check if email verification is needed
-          if (result['email_verified'] == false) {
+          // MFA is required - store credentials for OTP verification
+          if (result['requires_mfa'] == true) {
             verificationEmail = payloadData.email;
-            needsOtpVerification = true;
+            verificationPassword = payloadData.password;
+            needsMfaVerification = true;
           }
 
           emit(MSuccess());
         } else if (payloadData.type == EmailLoginType.verifyOtp) {
-          // OTP verification flow
+          // Signup OTP verification flow
           emit(MProgress());
           String otp = payloadData.otp ?? '';
           result = await AuthRepository().verifyEmailOTP(
@@ -52,6 +56,18 @@ class EmailLogin extends LoginSystem {
           );
 
           needsOtpVerification = false;
+          emit(MSuccess());
+        } else if (payloadData.type == EmailLoginType.loginVerifyOtp) {
+          // MFA OTP verification flow - TOKEN IS ISSUED HERE ONLY
+          emit(MProgress());
+          String otp = payloadData.otp ?? '';
+          result = await AuthRepository().emailLoginVerifyOtp(
+            email: verificationEmail ?? payloadData.email,
+            otp: otp,
+          );
+
+          // MFA verified successfully - token is now available
+          needsMfaVerification = false;
           emit(MSuccess());
         }
       } on Exception catch (e) {

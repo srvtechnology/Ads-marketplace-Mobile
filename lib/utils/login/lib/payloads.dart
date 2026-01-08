@@ -6,7 +6,7 @@ class MultiLoginPayload {
   MultiLoginPayload(this.payloads);
 }
 
-enum EmailLoginType { login, signup, verifyOtp }
+enum EmailLoginType { login, signup, verifyOtp, loginVerifyOtp }
 
 class EmailLoginPayload extends LoginPayload {
   final String email;

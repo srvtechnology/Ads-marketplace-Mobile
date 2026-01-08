@@ -184,6 +184,7 @@ class AuthRepository {
   }
 
   /// Email Login - Login existing user with email and password
+  /// Returns success with requires_mfa flag, token issued only after MFA verification
   Future<Map<String, dynamic>> emailLogin({
     required String email,
     required String password,
@@ -200,26 +201,51 @@ class AuthRepository {
       );
 
       if (response['error'] == false) {
-        // Check if email is not verified and OTP was sent
-        if (response['data'] != null && response['data']['user'] != null) {
-          // Email not verified case
-          return {
-            'email_verified': false,
-            'user': response['data']['user'],
-            'otp': response['data']['otp'],
-            'message': response['message'],
-          };
-        } else {
-          // Email verified, successful login
-          return {
-            'email_verified': true,
-            'data': response['data'],
-            'token': response['token'],
-            'id': response['data']['id'].toString(),
-          };
-        }
+        // MFA is enabled - OTP will be sent to email
+        // Response indicates MFA is required, no token issued yet
+        return {
+          'success': true,
+          'requires_mfa': true,
+          'email': email,
+          'message': response['message'] ?? 'OTP sent to your email',
+          'user_details': response['data'],
+        };
       } else {
         throw ApiException(response['message'] ?? 'Login failed');
+      }
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Email Login Verify OTP - Verify MFA OTP after email login
+  /// Token is ONLY issued after successful OTP verification
+  Future<Map<String, dynamic>> emailLoginVerifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    try {
+      Map<String, String> parameters = {
+        Api.email: email,
+        Api.otp: otp,
+      };
+
+      Map<String, dynamic> response = await Api.post(
+        url: Api.emailLoginVerifyOtpApi,
+        parameter: parameters,
+      );
+
+      if (response['error'] == false) {
+        // MFA verification successful - token is now issued
+        return {
+          'success': true,
+          'mfa_verified': true,
+          'data': response['data'],
+          'token': response['token'],
+          'id': response['data']['id'].toString(),
+        };
+      } else {
+        throw ApiException(response['message'] ?? 'OTP verification failed');
       }
     } catch (e) {
       rethrow;

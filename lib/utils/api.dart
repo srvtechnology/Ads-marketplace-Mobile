@@ -62,6 +62,7 @@ class Api {
   static const String emailSignupApi = 'email-signup';
   static const String emailSignupVerifyOtpApi = 'email-signup-verify-otp';
   static const String emailLoginApi = 'email-login';
+  static const String emailLoginVerifyOtpApi = 'email-login-verify-otp';
 
   // Forgot Password API
   static const String forgetPasswordApi = 'forget-password-api';

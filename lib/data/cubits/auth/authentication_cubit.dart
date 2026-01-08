@@ -105,7 +105,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
               AuthenticationFail("Invalid response from phone authentication"));
         }
       } else if (type == AuthenticationType.email) {
-        // For API-based email authentication
+        // For API-based email authentication with MFA
         dynamic loginResult = await mMultiAuthentication.login();
 
         if (loginResult == null) {
@@ -115,18 +115,25 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
 
           // Check if this is a signup response (needs OTP verification)
           if (loginResult['success'] == true &&
-              loginResult['user_details'] != null) {
+              loginResult['user_details'] != null &&
+              loginResult['requires_mfa'] != true) {
             // Signup successful, needs OTP verification
             emit(AuthenticationSuccess(type!, loginResult, payload!, null));
           }
-          // Check if this is a login response that needs email verification
-          else if (loginResult['email_verified'] == false) {
-            // Email not verified, OTP sent
+          // Check if MFA is required (login step 1 - no token yet)
+          else if (loginResult['requires_mfa'] == true) {
+            // MFA required - OTP sent to email, no token issued yet
             emit(AuthenticationSuccess(type!, loginResult, payload!, null));
           }
-          // Check if this is a successful login with token
-          else if (loginResult['email_verified'] == true ||
+          // Check if MFA verification successful (login step 2 - token issued)
+          else if (loginResult['mfa_verified'] == true &&
               loginResult['token'] != null) {
+            // MFA verified - token NOW issued
+            final token = loginResult['token']?.toString() ?? '';
+            emit(AuthenticationSuccess(type!, loginResult, payload!, token));
+          }
+          // Check if this is a successful login with token (legacy/fallback)
+          else if (loginResult['token'] != null) {
             final token = loginResult['token']?.toString() ?? '';
             emit(AuthenticationSuccess(type!, loginResult, payload!, token));
           } else {
@@ -138,6 +145,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
               AuthenticationFail("Invalid response from email authentication"));
         }
       } else {
+        // For Google/Apple authentication (Firebase-based)
         UserCredential? credential = await mMultiAuthentication.login();
 
         if (credential == null) {
