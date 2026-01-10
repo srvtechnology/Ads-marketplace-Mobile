@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/security_utils.dart';
 import 'package:flutter/material.dart';
 
 class Validator {
@@ -105,9 +106,13 @@ class Validator {
       {String? secondFieldValue, required BuildContext context}) {
     if (password!.isEmpty) {
       return "fieldMustNotBeEmpty".translate(context);
-    } else if (password.length < 6) {
-      return "passwordWarning".translate(context);
     }
+
+    // Use SecurityUtils for strong password validation
+    if (!SecurityUtils.validatePasswordStrength(password)) {
+      return SecurityUtils.getPasswordStrengthMessage(password);
+    }
+
     if (secondFieldValue != null) {
       if (password != secondFieldValue) {
         return "fieldSameWarning".translate(context);

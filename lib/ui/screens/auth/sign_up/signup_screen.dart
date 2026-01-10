@@ -17,6 +17,7 @@ import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
+import 'package:eClassify/utils/security_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,8 +48,85 @@ class _SignupScreenState extends CloudState<SignupScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool isObscure = true;
 
+  // Password strength tracking
+  String _passwordStrength = '';
+  double _passwordStrengthValue = 0.0;
+  Color _passwordStrengthColor = Colors.grey;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen to password changes for real-time validation
+    _passwordController.addListener(_updatePasswordStrength);
+  }
+
+  @override
+  void dispose() {
+    _passwordController.removeListener(_updatePasswordStrength);
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _updatePasswordStrength() {
+    final password = _passwordController.text;
+
+    if (password.isEmpty) {
+      setState(() {
+        _passwordStrength = '';
+        _passwordStrengthValue = 0.0;
+        _passwordStrengthColor = Colors.grey;
+      });
+      return;
+    }
+
+    // Calculate password strength
+    int strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.contains(RegExp(r'[A-Z]'))) strength++;
+    if (password.contains(RegExp(r'[a-z]'))) strength++;
+    if (password.contains(RegExp(r'[0-9]'))) strength++;
+    if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) strength++;
+
+    setState(() {
+      switch (strength) {
+        case 0:
+        case 1:
+          _passwordStrength = 'Weak';
+          _passwordStrengthValue = 0.25;
+          _passwordStrengthColor = Colors.red;
+          break;
+        case 2:
+          _passwordStrength = 'Fair';
+          _passwordStrengthValue = 0.5;
+          _passwordStrengthColor = Colors.orange;
+          break;
+        case 3:
+          _passwordStrength = 'Good';
+          _passwordStrengthValue = 0.75;
+          _passwordStrengthColor = Colors.blue;
+          break;
+        case 4:
+        case 5:
+          _passwordStrength = 'Strong';
+          _passwordStrengthValue = 1.0;
+          _passwordStrengthColor = Colors.green;
+          break;
+      }
+    });
+  }
+
   void onTapSignup() async {
     if (_formKey.currentState?.validate() ?? false) {
+      // Additional password strength check
+      if (!SecurityUtils.validatePasswordStrength(_passwordController.text)) {
+        HelperUtils.showSnackBarMessage(
+          context,
+          SecurityUtils.getPasswordStrengthMessage(_passwordController.text),
+        );
+        return;
+      }
+
       context.read<AuthenticationCubit>().setData(
           payload: EmailLoginPayload(
               email: _emailController.text,
@@ -187,6 +265,49 @@ class _SignupScreenState extends CloudState<SignupScreen> {
                           borderColor: context.color.textLightColor
                               .withValues(alpha: 0.3),
                         ),
+                        // Password strength indicator
+                        if (_passwordController.text.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          // Progress bar
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: LinearProgressIndicator(
+                              value: _passwordStrengthValue,
+                              backgroundColor: context.color.textLightColor
+                                  .withValues(alpha: 0.2),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                _passwordStrengthColor,
+                              ),
+                              minHeight: 4,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          // Strength label
+                          Row(
+                            children: [
+                              CustomText(
+                                'Password strength: ',
+                                fontSize: context.font.small,
+                                color: context.color.textColorDark
+                                    .withValues(alpha: 0.7),
+                              ),
+                              CustomText(
+                                _passwordStrength,
+                                fontSize: context.font.small,
+                                color: _passwordStrengthColor,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          // Password requirements
+                          CustomText(
+                            'Must contain: 8+ chars, uppercase, lowercase, number, special char',
+                            fontSize: context.font.smaller,
+                            color: context.color.textColorDark
+                                .withValues(alpha: 0.5),
+                          ),
+                        ],
                         const SizedBox(
                           height: 36,
                         ),
