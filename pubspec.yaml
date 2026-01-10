@@ -73,6 +73,8 @@ dependencies:
   file_picker: ^9.0.2
   android_intent_plus: ^5.3.0
   google_cloud_translation: ^0.0.4
+  flutter_secure_storage: ^9.2.2
+  crypto: ^3.0.5
 
 dependency_overrides:
   intl: ^0.20.0

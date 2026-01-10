@@ -68,20 +68,31 @@ class _WebViewScreenState extends State<WebViewScreen> {
     }
 
     _controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      // Restrict JavaScript - only enable for trusted domains that require it
+      ..setJavaScriptMode(JavaScriptMode.disabled)
       ..setBackgroundColor(const Color(0x00000000))
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
             // Update loading bar.
           },
-          onPageStarted: (String url) {},
+          onPageStarted: (String url) {
+            // Enable JavaScript only for trusted domains that need it
+            if (_isUrlTrusted(url)) {
+              _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+            }
+          },
           onPageFinished: (String url) {
             setState(() {
               isLoading = false;
             });
           },
-          onWebResourceError: (WebResourceError error) {},
+          onWebResourceError: (WebResourceError error) {
+            setState(() {
+              _errorMessage = 'Failed to load page: ${error.description}';
+              isLoading = false;
+            });
+          },
           // Block navigation to untrusted domains
           onNavigationRequest: (NavigationRequest request) {
             if (!_isUrlTrusted(request.url)) {

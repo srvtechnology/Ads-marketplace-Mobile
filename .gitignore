@@ -123,3 +123,4 @@ coverage/
 # Firebase - Keep config files but ignore sensitive data
 # Keep google-services.json and GoogleService-Info.plist as they're needed
 # but be careful not to commit sensitive keys
+releases/
