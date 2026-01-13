@@ -165,7 +165,8 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                   context,
                                   title: "fullName",
                                   controller: nameController,
-                                  validator: CustomTextFieldValidator.nullCheck,
+                                  validator: CustomTextFieldValidator
+                                      .name, // Changed from nullCheck to name for proper validation
                                 ),
                                 buildTextField(
                                   context,
@@ -625,7 +626,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     }
   }
 
-
   void showPicker() {
     showModalBottomSheet(
         context: context,
@@ -640,7 +640,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                     leading: const Icon(Icons.photo_library),
                     title: CustomText("gallery".translate(context)),
                     onTap: () async {
-
                       await profileImagePicker.pick(
                           context: context,
                           source: ImageSource.gallery,
@@ -651,7 +650,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                   leading: const Icon(Icons.photo_camera),
                   title: CustomText("camera".translate(context)),
                   onTap: () async {
-
                     await profileImagePicker.pick(
                         context: context,
                         source: ImageSource.camera,
@@ -675,7 +673,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
           );
         });
   }
-
 
   void showCountryCode() {
     showCountryPicker(

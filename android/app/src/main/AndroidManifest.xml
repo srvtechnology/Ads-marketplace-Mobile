@@ -2,6 +2,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.bhutanmarket.srvtech">
  
+    <!-- Custom permission for protecting notification broadcast receiver -->
+    <permission
+        android:name="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+        android:protectionLevel="signature" />
+    
+    <uses-permission android:name="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION" />
+    
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -115,6 +122,18 @@
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+        
+        <!-- Secure FileProvider for temporary file handling -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
 
@@ -149,6 +168,56 @@
             android:resource="@xml/gma_ad_services_config"
             tools:replace="android:resource" />
 
+        <!-- Protected Broadcast Receiver for Awesome Notifications -->
+        <receiver
+            android:name="me.carda.awesome_notifications.core.receivers.DartNotificationActionReceiver"
+            android:exported="true"
+            android:permission="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+            tools:replace="android:permission">
+            <intent-filter>
+                <action android:name="me.carda.awesome_notifications.NOTIFICATION_ACTION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Protected Service for Awesome Notifications -->
+        <service
+            android:name="me.carda.awesome_notifications.core.managers.StatusBarManager"
+            android:exported="true"
+            android:permission="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+            tools:replace="android:permission,android:exported" />
+
+        <!-- Protected Broadcast Receiver for Scheduled Notifications -->
+        <receiver
+            android:name="me.carda.awesome_notifications.core.receivers.DartScheduledNotificationReceiver"
+            android:exported="true"
+            android:permission="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+            tools:replace="android:permission">
+            <intent-filter>
+                <action android:name="me.carda.awesome_notifications.SCHEDULED_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Protected Broadcast Receiver for Refresh Schedules -->
+        <receiver
+            android:name="me.carda.awesome_notifications.core.receivers.DartRefreshSchedulesReceiver"
+            android:exported="true"
+            android:permission="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+            tools:replace="android:permission">
+            <intent-filter>
+                <action android:name="me.carda.awesome_notifications.REFRESH_SCHEDULES" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Protected Broadcast Receiver for Dismissed Notifications -->
+        <receiver
+            android:name="me.carda.awesome_notifications.core.receivers.DartDismissedNotificationReceiver"
+            android:exported="true"
+            android:permission="com.bhutanmarket.srvtech.NOTIFICATION_PERMISSION"
+            tools:replace="android:permission">
+            <intent-filter>
+                <action android:name="me.carda.awesome_notifications.NOTIFICATION_DISMISSED" />
+            </intent-filter>
+        </receiver>
 
     </application>
 </manifest>

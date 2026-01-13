@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internal cache directory for temporary files -->
+    <!-- Files here are private to the app and automatically cleaned by system -->
+    <cache-path name="cache" path="/" />
+    
+    <!-- Internal files directory for app-private files -->
+    <files-path name="files" path="/" />
+    
+    <!-- External cache directory (cleaned by system when storage is low) -->
+    <external-cache-path name="external_cache" path="/" />
+    
+    <!-- External files directory (persists until app uninstall) -->
+    <external-files-path name="external_files" path="/" />
+</paths>

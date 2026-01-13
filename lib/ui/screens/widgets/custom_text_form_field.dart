@@ -13,7 +13,8 @@ enum CustomTextFieldValidator {
   otpSix,
   minAndMixLen,
   url,
-  slug
+  slug,
+  name // Added for proper name validation (2-50 chars, alphabets only)
 }
 
 class CustomTextFormField extends StatelessWidget {
@@ -141,6 +142,9 @@ class CustomTextFormField extends StatelessWidget {
         if (validator == CustomTextFieldValidator.password) {
           return Validator.validatePassword(value, context: context);
         }
+        if (validator == CustomTextFieldValidator.name) {
+          return Validator.validateName(value, context: context);
+        }
         return null;
       },
       keyboardType: keyboard,
@@ -157,7 +161,6 @@ class CustomTextFormField extends StatelessWidget {
                   fontSize: context.font.large),
           filled: true,
           fillColor: fillColor ?? context.color.secondaryColor,
-
           focusedBorder: OutlineInputBorder(
               borderSide:
                   BorderSide(width: 1.5, color: context.color.territoryColor),
@@ -165,7 +168,8 @@ class CustomTextFormField extends StatelessWidget {
           enabledBorder: OutlineInputBorder(
               borderSide: BorderSide(
                   width: 1.5,
-                  color: borderColor ?? context.color.textLightColor.withValues(alpha: 0.3)),
+                  color: borderColor ??
+                      context.color.textLightColor.withValues(alpha: 0.3)),
               borderRadius: BorderRadius.circular(10)),
           border: OutlineInputBorder(
               borderSide: BorderSide(
