@@ -273,15 +273,8 @@ class Api {
     try {
       final Dio dio = Dio();
 
-      // Disable SSL certificate validation (for development/testing only)
-      dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          final client = HttpClient();
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) => true;
-          return client;
-        },
-      );
+      // SSL pinning enabled - certificates will be validated
+      dio.httpClientAdapter = IOHttpClientAdapter();
 
       dio.interceptors.add(NetworkRequestInterceptor());
 
@@ -382,15 +375,8 @@ class Api {
     try {
       final Dio dio = Dio();
 
-      // Disable SSL certificate validation (for development/testing only)
-      dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          final client = HttpClient();
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) => true;
-          return client;
-        },
-      );
+      // SSL pinning enabled - certificates will be validated
+      dio.httpClientAdapter = IOHttpClientAdapter();
 
       dio.interceptors.add(NetworkRequestInterceptor());
 
@@ -428,15 +414,8 @@ class Api {
     try {
       final Dio dio = Dio();
 
-      // Disable SSL certificate validation (for development/testing only)
-      dio.httpClientAdapter = IOHttpClientAdapter(
-        createHttpClient: () {
-          final client = HttpClient();
-          client.badCertificateCallback =
-              (X509Certificate cert, String host, int port) => true;
-          return client;
-        },
-      );
+      // SSL pinning enabled - certificates will be validated
+      dio.httpClientAdapter = IOHttpClientAdapter();
 
       dio.interceptors.add(NetworkRequestInterceptor());
 
