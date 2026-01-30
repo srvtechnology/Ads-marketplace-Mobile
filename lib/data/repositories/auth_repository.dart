@@ -87,11 +87,13 @@ class AuthRepository {
   Future<Map<String, dynamic>> verifyOTP({
     required String phoneNumber,
     required String otp,
+    String? fcmToken,
   }) async {
     try {
-      Map<String, String> parameters = {
+      Map<String, dynamic> parameters = {
         Api.mobile: phoneNumber,
         Api.otp: otp,
+        if (fcmToken != null) "fcm_token": fcmToken,
       };
 
       Map<String, dynamic> response = await Api.post(
@@ -223,11 +225,13 @@ class AuthRepository {
   Future<Map<String, dynamic>> emailLoginVerifyOtp({
     required String email,
     required String otp,
+    String? fcmToken,
   }) async {
     try {
-      Map<String, String> parameters = {
+      Map<String, dynamic> parameters = {
         Api.email: email,
         Api.otp: otp,
+        if (fcmToken != null) "fcm_token": fcmToken,
       };
 
       Map<String, dynamic> response = await Api.post(

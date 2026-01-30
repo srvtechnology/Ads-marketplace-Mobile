@@ -207,7 +207,6 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                   ))),
         ),
       ),
-
       elevation: context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
           ? 0
           : 6,
@@ -223,7 +222,6 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-
       itemCount: 15,
       separatorBuilder: (context, index) {
         return Container();
@@ -359,12 +357,9 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                                 Duration.zero,
                                 () {
                                   context.read<FetchHomeScreenCubit>().fetch(
-
-                                      state: widget.stateName,
-                                      radius: null);
+                                      state: widget.stateName, radius: null);
                                   context.read<FetchHomeAllItemsCubit>().fetch(
-                                      state: widget.stateName,
-                                      radius: null);
+                                      state: widget.stateName, radius: null);
                                 },
                               );
 
@@ -388,8 +383,6 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                                 'latitude': double.parse(widget.latitude),
                                 'longitude': double.parse(widget.latitude)
                               };
-                              Navigator.pop(context);
-                              Navigator.pop(context);
                               Navigator.pop(context, result);
                             }
                           },
@@ -434,7 +427,11 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                                               double.parse(city.latitude!),
                                           "longitude":
                                               double.parse(city.longitude!)
-                                        });
+                                        }).then((value) {
+                                      if (value != null) {
+                                        Navigator.pop(context, value);
+                                      }
+                                    });
                                   } else {
                                     if (widget.from == "home") {
                                       if (Constant.isDemoModeOn) {
@@ -519,8 +516,6 @@ class CitiesScreenState extends CloudState<CitiesScreen> {
                               },
                               child: ListTile(
                                 onTap: () {
-
-
                                   context
                                       .read<FetchAreasCubit>()
                                       .fetchAreas(cityId: city.id!);

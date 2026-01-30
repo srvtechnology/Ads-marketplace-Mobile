@@ -687,7 +687,11 @@ class CountriesScreenState extends State<CountriesScreen>
                                       "latitude": country.latitude,
                                       "longitude": country.longitude,
                                       "from": widget.from
-                                    });
+                                    }).then((value) {
+                                  if (value != null) {
+                                    Navigator.pop(context, value);
+                                  }
+                                });
                               },
                               title: CustomText(
                                 country.name!,

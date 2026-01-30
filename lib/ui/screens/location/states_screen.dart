@@ -50,7 +50,6 @@ class StatesScreen extends StatefulWidget {
           BlocProvider(
             create: (context) => FetchStatesCubit(),
           ),
-
         ],
         child: StatesScreen(
           countryId: arguments?['countryId'],
@@ -201,7 +200,6 @@ class StatesScreenState extends State<StatesScreen> {
                   ))),
         ),
       ),
-
       elevation: context.watch<AppThemeCubit>().state.appTheme == AppTheme.dark
           ? 0
           : 6,
@@ -217,7 +215,6 @@ class StatesScreenState extends State<StatesScreen> {
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-
       itemCount: 15,
       separatorBuilder: (context, index) {
         return Container();
@@ -382,7 +379,6 @@ class StatesScreenState extends State<StatesScreen> {
                                 'latitude': double.parse(widget.latitude),
                                 'longitude': double.parse(widget.longitude),
                               };
-                              Navigator.pop(context);
                               Navigator.pop(context, result);
                             }
                           },
@@ -425,7 +421,11 @@ class StatesScreenState extends State<StatesScreen> {
                                           "countryName": widget.countryName,
                                           "latitude": states.latitude,
                                           "longitude": states.longitude,
-                                        });
+                                        }).then((value) {
+                                      if (value != null) {
+                                        Navigator.pop(context, value);
+                                      }
+                                    });
                                   }
                                 }
                               },

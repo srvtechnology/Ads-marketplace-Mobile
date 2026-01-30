@@ -1,3 +1,5 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/login/lib/login_status.dart';
 import 'package:eClassify/utils/login/lib/login_system.dart';
@@ -61,9 +63,13 @@ class EmailLogin extends LoginSystem {
           // MFA OTP verification flow - TOKEN IS ISSUED HERE ONLY
           emit(MProgress());
           String otp = payloadData.otp ?? '';
+
+          String? fcmToken = await FirebaseMessaging.instance.getToken();
+
           result = await AuthRepository().emailLoginVerifyOtp(
             email: verificationEmail ?? payloadData.email,
             otp: otp,
+            fcmToken: fcmToken,
           );
 
           // MFA verified successfully - token is now available

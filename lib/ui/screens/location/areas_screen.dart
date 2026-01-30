@@ -352,12 +352,9 @@ class AreasScreenState extends State<AreasScreen> {
                                 Duration.zero,
                                 () {
                                   context.read<FetchHomeScreenCubit>().fetch(
-
-                                      city: widget.cityName,
-                                      radius: null);
+                                      city: widget.cityName, radius: null);
                                   context.read<FetchHomeAllItemsCubit>().fetch(
-                                      city: widget.cityName,
-                                      radius: null);
+                                      city: widget.cityName, radius: null);
                                 },
                               );
 
@@ -488,9 +485,6 @@ class AreasScreenState extends State<AreasScreen> {
                                 'longitude': widget.longitude
                               };
 
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                              Navigator.pop(context);
                               Navigator.pop(context, result);
                             }
                           },
