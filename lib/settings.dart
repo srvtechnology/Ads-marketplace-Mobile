@@ -42,7 +42,7 @@ class AppSettings {
 
   static const int hiddenAPIProcessDelay = 1;
 
-  static const String shareNavigationWebUrl = "eclassifyweb.wrteam.me";
+  static const String shareNavigationWebUrl = "admin.thebhutanmarket.com";
 
   static const MapType googleMapType = MapType.normal;
 

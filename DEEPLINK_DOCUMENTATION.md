@@ -7,23 +7,23 @@ This document provides a comprehensive overview of the deep link implementation 
 
 ### 1. **Deep Link Scheme**
 - **Custom Scheme**: `bhutanmarket://`
-- **Web Domain**: `eclassifyweb.wrteam.me`
+- **Web Domain**: `admin.thebhutanmarket.com`
 - **Protocol**: HTTPS (for universal/app links)
 
 ### 2. **Supported Deep Link Patterns**
 
 #### Pattern 1: Product Details
 ```
-bhutanmarket://eclassifyweb.wrteam.me/product-details/{slug}
-https://eclassifyweb.wrteam.me/product-details/{slug}?share=true
+bhutanmarket://admin.thebhutanmarket.com/product-details/{slug}
+https://admin.thebhutanmarket.com/product-details/{slug}?share=true
 ```
 - **Purpose**: Navigate to a specific product/item details page
 - **Parameter**: `slug` - Unique identifier for the product
 
 #### Pattern 2: Seller Profile
 ```
-bhutanmarket://eclassifyweb.wrteam.me/seller/{sellerId}
-https://eclassifyweb.wrteam.me/seller/{sellerId}?share=true
+bhutanmarket://admin.thebhutanmarket.com/seller/{sellerId}
+https://admin.thebhutanmarket.com/seller/{sellerId}?share=true
 ```
 - **Purpose**: Navigate to a specific seller's profile page
 - **Parameter**: `sellerId` - Unique identifier for the seller
@@ -41,7 +41,7 @@ https://eclassifyweb.wrteam.me/seller/{sellerId}?share=true
 <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
 ```
 
-**2. Intent Filter Configuration** (Lines 90-109)
+**2. Intent Filter Configuration** (Lines 105-125)
 ```xml
 <intent-filter android:autoVerify="true">
     <action android:name="android.intent.action.VIEW" />
@@ -51,13 +51,13 @@ https://eclassifyweb.wrteam.me/seller/{sellerId}?share=true
     
     <!-- Product Details Deep Link -->
     <data
-        android:host="eclassifyweb.wrteam.me"
+        android:host="admin.thebhutanmarket.com"
         android:pathPattern="/product-details/.*"
         android:scheme="bhutanmarket" />
     
     <!-- Seller Profile Deep Link -->
     <data
-        android:host="eclassifyweb.wrteam.me"
+        android:host="admin.thebhutanmarket.com"
         android:pathPattern="/seller/.*"
         android:scheme="bhutanmarket" />
 </intent-filter>
@@ -151,7 +151,7 @@ static String nativeDeepLinkUrl(String type, String value) {
 
 **Usage:**
 - Generates shareable deep links for products and sellers
-- Format: `https://eclassifyweb.wrteam.me/{type}/{value}?share=true`
+- Format: `https://admin.thebhutanmarket.com/{type}/{value}?share=true`
 - Types: `product-details`, `seller`
 
 **Share Functionality** (Lines 100-144)
@@ -307,7 +307,7 @@ void initState() {
 #### File: `lib/settings.dart` (Line 45)
 
 ```dart
-static const String shareNavigationWebUrl = "eclassifyweb.wrteam.me";
+static const String shareNavigationWebUrl = "admin.thebhutanmarket.com";
 ```
 
 This constant defines the domain used for generating shareable deep links.
@@ -369,7 +369,7 @@ User selects "Copy Link" or "Share"
     ↓
 nativeDeepLinkUrl() generates link
     ↓
-Format: https://eclassifyweb.wrteam.me/{type}/{value}?share=true
+Format: https://admin.thebhutanmarket.com/{type}/{value}?share=true
     ↓
 Link copied to clipboard or shared via native dialog
 ```
@@ -396,7 +396,7 @@ And in code files:
 
 For Android App Links to work properly, you need to host a Digital Asset Links JSON file at:
 ```
-https://eclassifyweb.wrteam.me/.well-known/assetlinks.json
+https://admin.thebhutanmarket.com/.well-known/assetlinks.json
 ```
 
 **Required assetlinks.json format:**
@@ -406,8 +406,7 @@ https://eclassifyweb.wrteam.me/.well-known/assetlinks.json
   "target": {
     "namespace": "android_app",
     "package_name": "com.bhutanmarket.srvtech",
-    "sha256_cert_fingerprints": [
-      "YOUR_APP_SHA256_FINGERPRINT_HERE"
+    "sha256_cert_fingerprints": [  "4D:47:BB:DD:AD:EE:3F:FB:06:A3:06:0E:87:05:64:DC:E0:FC:6B:CC:72:78:CF:73:EB:8F:53:C9:5D:23:2E:02"
     ]
   }
 }]
@@ -417,7 +416,7 @@ https://eclassifyweb.wrteam.me/.well-known/assetlinks.json
 
 For iOS Universal Links, you need to host an Apple App Site Association file at:
 ```
-https://eclassifyweb.wrteam.me/.well-known/apple-app-site-association
+https://admin.thebhutanmarket.com/.well-known/apple-app-site-association
 ```
 
 **Required apple-app-site-association format:**
@@ -427,7 +426,7 @@ https://eclassifyweb.wrteam.me/.well-known/apple-app-site-association
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.bhutanmarket.srvtech",
+        "appID": "S8FMPCAZUD.com.bhutanmarket.srvtech",
         "paths": [
           "/product-details/*",
           "/seller/*"
@@ -443,19 +442,19 @@ https://eclassifyweb.wrteam.me/.well-known/apple-app-site-association
 **Android:**
 ```bash
 # Test custom scheme
-adb shell am start -W -a android.intent.action.VIEW -d "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-slug"
+adb shell am start -W -a android.intent.action.VIEW -d "bhutanmarket://admin.thebhutanmarket.com/product-details/test-slug"
 
 # Test HTTPS (App Links)
-adb shell am start -W -a android.intent.action.VIEW -d "https://eclassifyweb.wrteam.me/product-details/test-slug"
+adb shell am start -W -a android.intent.action.VIEW -d "https://admin.thebhutanmarket.com/product-details/test-slug"
 ```
 
 **iOS:**
 ```bash
 # Test custom scheme
-xcrun simctl openurl booted "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-slug"
+xcrun simctl openurl booted "bhutanmarket://admin.thebhutanmarket.com/product-details/test-slug"
 
 # Test HTTPS (Universal Links)
-xcrun simctl openurl booted "https://eclassifyweb.wrteam.me/product-details/test-slug"
+xcrun simctl openurl booted "https://admin.thebhutanmarket.com/product-details/test-slug"
 ```
 
 ---
@@ -466,7 +465,7 @@ xcrun simctl openurl booted "https://eclassifyweb.wrteam.me/product-details/test
 The app currently doesn't have an active listener for deep links when the app is already running in the background. The commented-out `app_links` package would provide this functionality.
 
 ### 2. **No Web Verification Files**
-The `.well-known` directory files (assetlinks.json and apple-app-site-association) are not present in the repository. These need to be hosted on the web server at `eclassifyweb.wrteam.me`.
+The `.well-known` directory files (assetlinks.json and apple-app-site-association) are not present in the repository. These need to be hosted on the web server at `admin.thebhutanmarket.com`.
 
 ### 3. **No Dynamic Link Handling**
 There's no implementation for Firebase Dynamic Links, which could provide:

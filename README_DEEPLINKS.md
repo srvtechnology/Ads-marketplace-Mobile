@@ -114,7 +114,7 @@ This documentation is split into multiple files for easy navigation:
 | Feature | Status | Details |
 |---------|--------|---------|
 | **Custom Scheme** | ✅ Working | `bhutanmarket://` |
-| **HTTPS Deep Links** | ✅ Working | `https://eclassifyweb.wrteam.me` |
+| **HTTPS Deep Links** | ✅ Working | `https://admin.thebhutanmarket.com` |
 | **Product Deep Links** | ✅ Working | `/product-details/{slug}` |
 | **Seller Deep Links** | ✅ Working | `/seller/{sellerId}` |
 | **Share Functionality** | ✅ Working | Copy & Share options |
@@ -137,7 +137,7 @@ bhutanmarket://
 
 ### Web Domain
 ```
-eclassifyweb.wrteam.me
+admin.thebhutanmarket.com
 ```
 
 ### Package Name
@@ -161,12 +161,12 @@ For production deep links to work properly, you must host these files:
 
 **Android App Links:**
 ```
-https://eclassifyweb.wrteam.me/.well-known/assetlinks.json
+https://admin.thebhutanmarket.com/.well-known/assetlinks.json
 ```
 
 **iOS Universal Links:**
 ```
-https://eclassifyweb.wrteam.me/.well-known/apple-app-site-association
+https://admin.thebhutanmarket.com/.well-known/apple-app-site-association
 ```
 
 See **DEEPLINK_DOCUMENTATION.md** for file templates.
@@ -249,7 +249,7 @@ Deep links work differently in development vs production:
 ### External Resources:
 - [Android App Links Guide](https://developer.android.com/training/app-links)
 - [iOS Universal Links Guide](https://developer.apple.com/ios/universal-links/)
-- [Flutter Deep Linking](https://docs.flutter.dev/ui/navigation/deep-linking)
+- [Flutter Deep Linking Guide](https://docs.flutter.dev/ui/navigation/deep-linking)
 - [app_links Package](https://pub.dev/packages/app_links)
 
 ### Code References:
@@ -279,11 +279,8 @@ See **DEEPLINK_DOCUMENTATION.md** → "Recommendations" for detailed implementat
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | Jan 31, 2026 | Updated web domain to admin.thebhutanmarket.com |
 | 1.0 | Jan 29, 2026 | Initial documentation created |
-| - | - | Documented existing implementation |
-| - | - | Created comprehensive guides |
-| - | - | Added testing commands |
-| - | - | Identified missing components |
 
 ---
 
@@ -325,9 +322,9 @@ For new developers working with deep links:
 
 ---
 
-**Last Updated**: January 29, 2026  
+**Last Updated**: January 31, 2026  
 **App Version**: 2.5.0+34  
-**Documentation Version**: 1.0  
+**Documentation Version**: 1.1  
 **Maintained By**: Development Team
 
 ---

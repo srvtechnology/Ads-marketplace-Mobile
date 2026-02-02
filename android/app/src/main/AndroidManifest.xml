@@ -96,12 +96,12 @@
             
 
                 <data
-                    android:host="eclassifyweb.wrteam.me"
+                    android:host="admin.thebhutanmarket.com"
                     android:pathPattern="/product-details/.*"
                     android:scheme="bhutanmarket" />
 
                 <data
-                    android:host="eclassifyweb.wrteam.me"
+                    android:host="admin.thebhutanmarket.com"
                     android:pathPattern="/seller/.*"
                     android:scheme="bhutanmarket" />
             

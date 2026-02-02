@@ -59,12 +59,12 @@ Ads-marketplace-Mobile/
     <category android:name="android.intent.category.BROWSABLE" />
     
     <data
-        android:host="eclassifyweb.wrteam.me"
+        android:host="admin.thebhutanmarket.com"
         android:pathPattern="/product-details/.*"
         android:scheme="bhutanmarket" />
     
     <data
-        android:host="eclassifyweb.wrteam.me"
+        android:host="admin.thebhutanmarket.com"
         android:pathPattern="/seller/.*"
         android:scheme="bhutanmarket" />
 </intent-filter>
@@ -140,7 +140,7 @@ static void shareItem(BuildContext context, String type, String slug) {
 ```dart
 // Generate a product deep link
 String link = HelperUtils.nativeDeepLinkUrl('product-details', 'my-product-123');
-// Result: https://eclassifyweb.wrteam.me/product-details/my-product-123?share=true
+// Result: https://admin.thebhutanmarket.com/product-details/my-product-123?share=true
 
 // Show share dialog
 HelperUtils.shareItem(context, 'product-details', 'my-product-123');
@@ -308,7 +308,7 @@ void initState() {
 
 **Line 45**: Deep link domain
 ```dart
-static const String shareNavigationWebUrl = "eclassifyweb.wrteam.me";
+static const String shareNavigationWebUrl = "admin.thebhutanmarket.com";
 ```
 
 **Usage**: This constant is used in `HelperUtils.nativeDeepLinkUrl()` to generate shareable links.
@@ -374,11 +374,11 @@ Create a test script at: `scripts/test_deeplinks_android.sh`
 #!/bin/bash
 # Test product deep link
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-123"
+  -d "bhutanmarket://admin.thebhutanmarket.com/product-details/test-123"
 
 # Test seller deep link
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "bhutanmarket://eclassifyweb.wrteam.me/seller/456"
+  -d "bhutanmarket://admin.thebhutanmarket.com/seller/456"
 ```
 
 ### iOS Test Commands
@@ -387,11 +387,11 @@ Create a test script at: `scripts/test_deeplinks_ios.sh`
 #!/bin/bash
 # Test product deep link
 xcrun simctl openurl booted \
-  "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-123"
+  "bhutanmarket://admin.thebhutanmarket.com/product-details/test-123"
 
 # Test seller deep link
 xcrun simctl openurl booted \
-  "bhutanmarket://eclassifyweb.wrteam.me/seller/456"
+  "bhutanmarket://admin.thebhutanmarket.com/seller/456"
 ```
 
 ---
@@ -485,6 +485,6 @@ Navigator.pushNamed(context, '/product-details/$slug');
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: January 29, 2026  
+**Document Version**: 1.1 (Domain Update)
+**Last Updated**: January 31, 2026  
 **App Version**: 2.5.0+34

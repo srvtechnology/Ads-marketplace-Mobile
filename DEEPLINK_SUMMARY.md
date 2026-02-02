@@ -6,8 +6,8 @@
 
 | Type | Custom Scheme | HTTPS URL |
 |------|--------------|-----------|
-| **Product** | `bhutanmarket://eclassifyweb.wrteam.me/product-details/{slug}` | `https://eclassifyweb.wrteam.me/product-details/{slug}?share=true` |
-| **Seller** | `bhutanmarket://eclassifyweb.wrteam.me/seller/{sellerId}` | `https://eclassifyweb.wrteam.me/seller/{sellerId}?share=true` |
+| **Product** | `bhutanmarket://admin.thebhutanmarket.com/product-details/{slug}` | `https://admin.thebhutanmarket.com/product-details/{slug}?share=true` |
+| **Seller** | `bhutanmarket://admin.thebhutanmarket.com/seller/{sellerId}` | `https://admin.thebhutanmarket.com/seller/{sellerId}?share=true` |
 
 ---
 
@@ -20,7 +20,7 @@
   - ✅ Flutter deep linking enabled
   - ✅ Auto-verify for App Links
   - ✅ Custom scheme: `bhutanmarket`
-  - ✅ Host: `eclassifyweb.wrteam.me`
+  - ✅ Host: `admin.thebhutanmarket.com`
   - ✅ Path patterns: `/product-details/*` and `/seller/*`
 
 ### iOS
@@ -120,7 +120,7 @@
 | Component | Android | iOS | Status |
 |-----------|---------|-----|--------|
 | **Custom Scheme** | `bhutanmarket` | `bhutanmarket` | ✅ Configured |
-| **Host Domain** | `eclassifyweb.wrteam.me` | `eclassifyweb.wrteam.me` | ✅ Configured |
+| **Host Domain** | `admin.thebhutanmarket.com` | `admin.thebhutanmarket.com` | ✅ Configured |
 | **Product Pattern** | `/product-details/*` | - | ✅ Configured |
 | **Seller Pattern** | `/seller/*` | - | ✅ Configured |
 | **Auto Verify** | ✅ Enabled | N/A | ⚠️ Needs web file |
@@ -137,19 +137,19 @@
 ```bash
 # Test Product Deep Link (Custom Scheme)
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-product-123"
+  -d "bhutanmarket://admin.thebhutanmarket.com/product-details/test-product-123"
 
 # Test Seller Deep Link (Custom Scheme)
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "bhutanmarket://eclassifyweb.wrteam.me/seller/456"
+  -d "bhutanmarket://admin.thebhutanmarket.com/seller/456"
 
 # Test Product Deep Link (HTTPS - App Links)
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "https://eclassifyweb.wrteam.me/product-details/test-product-123?share=true"
+  -d "https://admin.thebhutanmarket.com/product-details/test-product-123?share=true"
 
 # Test Seller Deep Link (HTTPS - App Links)
 adb shell am start -W -a android.intent.action.VIEW \
-  -d "https://eclassifyweb.wrteam.me/seller/456?share=true"
+  -d "https://admin.thebhutanmarket.com/seller/456?share=true"
 ```
 
 ### iOS Testing
@@ -157,19 +157,19 @@ adb shell am start -W -a android.intent.action.VIEW \
 ```bash
 # Test Product Deep Link (Custom Scheme)
 xcrun simctl openurl booted \
-  "bhutanmarket://eclassifyweb.wrteam.me/product-details/test-product-123"
+  "bhutanmarket://admin.thebhutanmarket.com/product-details/test-product-123"
 
 # Test Seller Deep Link (Custom Scheme)
 xcrun simctl openurl booted \
-  "bhutanmarket://eclassifyweb.wrteam.me/seller/456"
+  "bhutanmarket://admin.thebhutanmarket.com/seller/456"
 
 # Test Product Deep Link (HTTPS - Universal Links)
 xcrun simctl openurl booted \
-  "https://eclassifyweb.wrteam.me/product-details/test-product-123?share=true"
+  "https://admin.thebhutanmarket.com/product-details/test-product-123?share=true"
 
 # Test Seller Deep Link (HTTPS - Universal Links)
 xcrun simctl openurl booted \
-  "https://eclassifyweb.wrteam.me/seller/456?share=true"
+  "https://admin.thebhutanmarket.com/seller/456?share=true"
 ```
 
 ---
@@ -183,7 +183,7 @@ xcrun simctl openurl booted \
 2. **Missing Web Verification Files**
    - No `assetlinks.json` for Android App Links
    - No `apple-app-site-association` for iOS Universal Links
-   - These must be hosted at: `https://eclassifyweb.wrteam.me/.well-known/`
+   - These must be hosted at: `https://admin.thebhutanmarket.com/.well-known/`
 
 3. **No Dynamic Links**
    - No Firebase Dynamic Links implementation
@@ -225,7 +225,7 @@ xcrun simctl openurl booted \
   ```
 
 - [ ] **Host files on web server**
-  - Upload to: `https://eclassifyweb.wrteam.me/.well-known/`
+  - Upload to: `https://admin.thebhutanmarket.com/.well-known/`
   - Ensure HTTPS is enabled
   - Verify files are accessible
 
@@ -248,10 +248,10 @@ xcrun simctl openurl booted \
 ```dart
 // In your code
 String productLink = HelperUtils.nativeDeepLinkUrl('product-details', 'my-product-slug');
-// Returns: https://eclassifyweb.wrteam.me/product-details/my-product-slug?share=true
+// Returns: https://admin.thebhutanmarket.com/product-details/my-product-slug?share=true
 
 String sellerLink = HelperUtils.nativeDeepLinkUrl('seller', '123');
-// Returns: https://eclassifyweb.wrteam.me/seller/123?share=true
+// Returns: https://admin.thebhutanmarket.com/seller/123?share=true
 ```
 
 ### Share Deep Link
@@ -284,12 +284,12 @@ HelperUtils.shareItem(context, 'product-details', 'my-product-slug');
 
 3. **Check iOS Universal Links:**
    - Settings → Your App → Associated Domains
-   - Should show: `applinks:eclassifyweb.wrteam.me`
+   - Should show: `applinks:admin.thebhutanmarket.com`
 
 4. **Test web verification files:**
    ```bash
-   curl https://eclassifyweb.wrteam.me/.well-known/assetlinks.json
-   curl https://eclassifyweb.wrteam.me/.well-known/apple-app-site-association
+   curl https://admin.thebhutanmarket.com/.well-known/assetlinks.json
+   curl https://admin.thebhutanmarket.com/.well-known/apple-app-site-association
    ```
 
 ---
@@ -303,6 +303,6 @@ HelperUtils.shareItem(context, 'product-details', 'my-product-slug');
 
 ---
 
-**Last Updated**: January 29, 2026
+**Last Updated**: January 31, 2026
 **App Version**: 2.5.0+34
 **Package**: com.bhutanmarket.srvtech
