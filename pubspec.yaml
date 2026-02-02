@@ -4,7 +4,7 @@ description: A classified app
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev [Be careful]
 
-version: 2.5.0+34
+version: 2.6.1+35
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -97,6 +97,7 @@ flutter_launcher_icons:
   ios: true
   image_path: "assets/app_icon.png"
   min_sdk_android: 21
+  remove_alpha_ios: true
 
 
 flutter:
