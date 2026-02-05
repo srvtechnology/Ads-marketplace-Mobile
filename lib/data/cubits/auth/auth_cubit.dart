@@ -27,14 +27,10 @@ class AuthFailure extends AuthState {
 }
 
 class AuthCubit extends Cubit<AuthState> {
-
-  AuthCubit() : super(AuthInitial()) {
-
-  }
+  AuthCubit() : super(AuthInitial()) {}
 
   void checkIsAuthenticated() {
     if (HiveUtils.isUserAuthenticated()) {
-
       emit(Authenticated(true));
     } else {
       emit(Unauthenticated());
@@ -50,7 +46,10 @@ class AuthCubit extends Cubit<AuthState> {
       String? notification,
       String? mobile,
       String? countryCode,
-      int? personalDetail}) async {
+      int? personalDetail,
+      String? bankName,
+      String? accountNumber,
+      String? accountHolderName}) async {
     Map<String, dynamic> parameters = {
       Api.name: name ?? '',
       Api.email: email ?? '',
@@ -59,7 +58,10 @@ class AuthCubit extends Cubit<AuthState> {
       Api.notification: notification,
       Api.mobile: mobile,
       Api.countryCode: countryCode,
-      Api.personalDetail: personalDetail
+      Api.personalDetail: personalDetail,
+      'bank_name': bankName ?? '',
+      'account_number': accountNumber ?? '',
+      'account_holder_name': accountHolderName ?? '',
     };
     if (fileUserimg != null) {
       parameters['profile'] = await MultipartFile.fromFile(fileUserimg.path);
@@ -70,7 +72,6 @@ class AuthCubit extends Cubit<AuthState> {
           await Api.post(url: Api.updateProfileApi, parameter: parameters);
       if (!response[Api.error]) {
         HiveUtils.setUserData(response['data']);
-
       }
 
       return response;

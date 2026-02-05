@@ -261,8 +261,86 @@ class _ChatListScreenState extends State<ChatListScreen>
             if (state.chatedUserList.isEmpty) {
               return NoChatFound();
             }
+
+            // Check if bank details are incomplete
+            final userDetails = HiveUtils.getUserDetails();
+            final isBankDetailsIncomplete = (userDetails.bankName == null ||
+                    userDetails.bankName!.isEmpty) ||
+                (userDetails.accountNumber == null ||
+                    userDetails.accountNumber!.isEmpty) ||
+                (userDetails.accountHolderName == null ||
+                    userDetails.accountHolderName!.isEmpty);
+
             return Column(
               children: [
+                // Bank details warning banner
+                if (isBankDetailsIncomplete)
+                  Container(
+                    margin: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color:
+                          context.color.territoryColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color:
+                            context.color.territoryColor.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.warning_amber_rounded,
+                          color: context.color.territoryColor,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "fillBankDetailsWarning".translate(context),
+                                style: TextStyle(
+                                  color: context.color.textDefaultColor,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              Routes.profileSettings,
+                            );
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: context.color.territoryColor,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: Text(
+                              "updateProfile".translate(context),
+                              style: TextStyle(
+                                color: context.color.buttonColor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 Expanded(
                   child: ListView.builder(
                       controller: chatSellerScreenController,

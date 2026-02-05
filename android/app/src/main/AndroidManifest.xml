@@ -64,7 +64,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="PLACE_YOUR_ANDROID_APP_GOOGLE_MAP_KEY_HERE" />
+            android:value="AIzaSyD0ijY8WcVy1Oeek40mpsNCLoYBiXtc1EU" />
 
 
         <activity

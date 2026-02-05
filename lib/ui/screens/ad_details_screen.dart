@@ -1761,7 +1761,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         borderRadius: BorderRadius.circular(18),
                         child: UiUtils.getImage(
                           youtubeVideoThumbnail,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           height: 300,
                           width: double.maxFinite,
                         ),
@@ -1828,7 +1828,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(18),
                       child: UiUtils.getImage(images[index]!,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           height: 300,
                           width: MediaQuery.of(context).size.width),
                     ),

@@ -1,5 +1,3 @@
-
-
 class UserModel {
   String? address;
   String? createdAt;
@@ -19,6 +17,9 @@ class UserModel {
   String? token;
   String? updatedAt;
   int? isVerified;
+  String? bankName;
+  String? accountNumber;
+  String? accountHolderName;
 
   UserModel(
       {this.address,
@@ -38,7 +39,10 @@ class UserModel {
       this.token,
       this.updatedAt,
       this.isPersonalDetailShow,
-      this.isVerified});
+      this.isVerified,
+      this.bankName,
+      this.accountNumber,
+      this.accountHolderName});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     address = json['address'];
@@ -68,6 +72,9 @@ class UserModel {
             ? json['show_personal_details']
             : int.parse(json['show_personal_details'])
         : null);
+    bankName = json['bank_name'];
+    accountNumber = json['account_number'];
+    accountHolderName = json['account_holder_name'];
   }
 
   Map<String, dynamic> toJson() {
@@ -90,12 +97,15 @@ class UserModel {
     data['updated_at'] = updatedAt;
     data['show_personal_details'] = isPersonalDetailShow;
     data['is_verified'] = isVerified;
+    data['bank_name'] = bankName;
+    data['account_number'] = accountNumber;
+    data['account_holder_name'] = accountHolderName;
     return data;
   }
 
   @override
   String toString() {
-    return 'UserModel(address: $address, createdAt: $createdAt, customertotalpost: $customerTotalPost, email: $email, fcmId: $fcmId, firebaseId: $firebaseId, id: $id, isActive: $isActive, isProfileCompleted: $isProfileCompleted, type: $type, mobile: $mobile, name: $name, profile: $profile, token: $token, updatedAt: $updatedAt,notification:$notification,isPersonalDetailShow:$isPersonalDetailShow,isVerified:$isVerified)';
+    return 'UserModel(address: $address, createdAt: $createdAt, customertotalpost: $customerTotalPost, email: $email, fcmId: $fcmId, firebaseId: $firebaseId, id: $id, isActive: $isActive, isProfileCompleted: $isProfileCompleted, type: $type, mobile: $mobile, name: $name, profile: $profile, token: $token, updatedAt: $updatedAt,notification:$notification,isPersonalDetailShow:$isPersonalDetailShow,isVerified:$isVerified,bankName:$bankName,accountNumber:$accountNumber,accountHolderName:$accountHolderName)';
   }
 }
 

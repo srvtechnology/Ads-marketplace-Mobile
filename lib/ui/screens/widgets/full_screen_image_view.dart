@@ -44,6 +44,7 @@ class _FullScreenImageViewState extends State<FullScreenImageView> {
                   onTap: () {},
                   child: Image(
                     image: widget.provider,
+                    fit: BoxFit.contain,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
                           width: 100,
