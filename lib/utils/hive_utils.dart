@@ -6,6 +6,7 @@ import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_keys.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
+import 'package:eClassify/services/pusher_service.dart';
 
 class HiveUtils {
   ///private constructor
@@ -148,7 +149,6 @@ class HiveUtils {
     Hive.box(HiveKeys.authBox).put(HiveKeys.isAuthenticated, value);
   }
 
-
   static Future<void> setUserIsNotNew() {
     return Hive.box(HiveKeys.authBox).put(HiveKeys.isUserFirstTime, false);
   }
@@ -251,7 +251,6 @@ class HiveUtils {
 
   @visibleForTesting
   static Future<void> setUserIsNew() {
-
     Hive.box(HiveKeys.authBox).put(HiveKeys.isAuthenticated, false);
     return Hive.box(HiveKeys.authBox).put(HiveKeys.isUserFirstTime, true);
   }
@@ -270,6 +269,14 @@ class HiveUtils {
 
   static void logoutUser(context,
       {required VoidCallback onLogout, bool? isRedirect}) async {
+    String? userId = getUserId();
+    if (userId != null && userId.isNotEmpty) {
+      try {
+        await PusherService.disconnect(int.parse(userId));
+      } catch (e) {
+        print("Error disconnecting pusher: $e");
+      }
+    }
     await Hive.box(HiveKeys.userDetailsBox).clear();
     HiveUtils.setUserIsAuthenticated(false);
 

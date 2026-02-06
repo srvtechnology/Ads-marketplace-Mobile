@@ -1,5 +1,3 @@
-
-
 import 'package:eClassify/data/model/seller_ratings_model.dart';
 
 class ChatUser {
@@ -161,8 +159,9 @@ class Item {
     status = json['status'];
     status = json['status'];
     isPurchased = json['is_purchased'];
-    review =
-        json['review'] != null ? UserRatings.fromJson(json['review']) : null;
+    review = (json['review'] != null && json['review'] is Map<String, dynamic>)
+        ? UserRatings.fromJson(json['review'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {

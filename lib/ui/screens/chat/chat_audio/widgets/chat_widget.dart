@@ -298,14 +298,14 @@ class ChatMessageState extends State<ChatMessage>
             selectedMessage = false;
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 7),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             child: Container(
               alignment: widget.senderId.toString() == HiveUtils.getUserId()
                   ? AlignmentDirectional.centerEnd
                   : AlignmentDirectional.centerStart,
               width: MediaQuery.of(context).size.width,
               margin: EdgeInsetsDirectional.only(
-                // top: MediaQuery.of(context).size.height * 0.007,
+                // top: MediaQuery.of(context).size.height * 0.002,
                 end: widget.senderId.toString() == HiveUtils.getUserId()
                     ? 20
                     : 0,
@@ -321,7 +321,7 @@ class ChatMessageState extends State<ChatMessage>
                 children: [
                   Container(
                     constraints:
-                        BoxConstraints(maxWidth: context.screenWidth * 0.74),
+                        BoxConstraints(maxWidth: context.screenWidth * 0.85),
                     decoration: BoxDecoration(
                         color: _isOffer
                             ? context.color.territoryColor.withOpacity(0.25)
@@ -344,7 +344,7 @@ class ChatMessageState extends State<ChatMessage>
                       crossAxisAlignment: WrapCrossAlignment.end,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(8),
                           child: Container(
                             child: _isOffer
                                 ? Column(

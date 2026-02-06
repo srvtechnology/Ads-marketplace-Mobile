@@ -3,7 +3,9 @@ import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 import 'package:eClassify/data/model/chat/chat_user_model.dart';
+import 'package:eClassify/services/pusher_service.dart';
 import 'package:eClassify/ui/screens/chat/chatTile.dart';
+import 'dart:async';
 
 import 'package:eClassify/ui/screens/widgets/errors/no_internet.dart';
 import 'package:eClassify/ui/screens/widgets/errors/something_went_wrong.dart';
@@ -38,12 +40,26 @@ class _ChatListScreenState extends State<ChatListScreen>
   ScrollController chatBuyerScreenController = ScrollController();
   ScrollController chatSellerScreenController = ScrollController();
 
+  StreamSubscription? _pusherSubscription;
+
   @override
   void initState() {
     if (HiveUtils.isUserAuthenticated()) {
       context.read<GetBuyerChatListCubit>().fetch();
       context.read<GetSellerChatListCubit>().fetch();
       context.read<BlockedUsersListCubit>().blockedUsersList();
+
+      int? currentUserId = int.tryParse(HiveUtils.getUserId() ?? "0");
+      if (currentUserId != null) {
+        PusherService.init(userId: currentUserId);
+        _pusherSubscription = PusherService.eventsStream.listen((data) {
+          if (mounted) {
+            context.read<GetBuyerChatListCubit>().fetch();
+            context.read<GetSellerChatListCubit>().fetch();
+          }
+        });
+      }
+
       chatBuyerScreenController.addListener(() {
         if (chatBuyerScreenController.isEndReached()) {
           if (context.read<GetBuyerChatListCubit>().hasMoreData()) {
@@ -61,6 +77,14 @@ class _ChatListScreenState extends State<ChatListScreen>
     }
 
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _pusherSubscription?.cancel();
+    chatBuyerScreenController.dispose();
+    chatSellerScreenController.dispose();
+    super.dispose();
   }
 
   @override
@@ -213,9 +237,8 @@ class _ChatListScreenState extends State<ChatListScreen>
                                 ? chatedUser.item!.status!
                                 : null,
                             buyerId: chatedUser.buyerId.toString(),
-                            isPurchased: chatedUser.item!.isPurchased ?? 0,
-                            alreadyReview:
-                                chatedUser.item!.review == null ? false : true,
+                            isPurchased: chatedUser.item?.isPurchased ?? 0,
+                            alreadyReview: chatedUser.item?.review != null,
                             unreadCount: chatedUser.unreadCount,
                           ),
                         );
@@ -384,8 +407,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                                 : null,
                             buyerId: chatedUser.buyerId.toString(),
                             isPurchased: chatedUser.item?.isPurchased ?? 0,
-                            alreadyReview:
-                                chatedUser.item!.review == null ? false : true,
+                            alreadyReview: chatedUser.item?.review != null,
                             unreadCount: chatedUser.unreadCount,
                           ),
                         );

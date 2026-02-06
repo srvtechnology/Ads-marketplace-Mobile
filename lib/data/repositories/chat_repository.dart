@@ -7,9 +7,8 @@ import 'package:flutter/material.dart';
 
 class ChatRepository {
   Future<DataOutput<ChatUser>> fetchBuyerChatList(int page) async {
-    Map<String, dynamic> response = await Api.get(
-        url: Api.getChatListApi,
-        queryParameters: {"type": "buyer", "page": page});
+    Map<String, dynamic> response = await Api.post(
+        url: Api.getChatListApi, parameter: {"type": "buyer", "page": page});
 
     List<ChatUser> modelList = (response['data']['data'] as List).map(
       (e) {
@@ -21,9 +20,8 @@ class ChatRepository {
   }
 
   Future<DataOutput<ChatUser>> fetchSellerChatList(int page) async {
-    Map<String, dynamic> response = await Api.get(
-        url: Api.getChatListApi,
-        queryParameters: {"page": page, "type": "seller"});
+    Map<String, dynamic> response = await Api.post(
+        url: Api.getChatListApi, parameter: {"page": page, "type": "seller"});
 
     List<ChatUser> modelList = (response['data']["data"] as List).map(
       (e) {

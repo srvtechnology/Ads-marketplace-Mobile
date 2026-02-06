@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:eClassify/services/pusher_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:eClassify/app/routes.dart';
@@ -19,7 +20,7 @@ import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
-import 'package:eClassify/ui/screens/chat/chat_audio/widgets/record_button.dart';
+
 import 'package:eClassify/ui/screens/widgets/animated_routes/transparant_route.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -89,20 +90,16 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _recordButtonAnimation = AnimationController(
-    vsync: this,
-    duration: const Duration(
-      milliseconds: 500,
-    ),
-  );
   TextEditingController controller = TextEditingController();
   PlatformFile? messageAttachment;
+  StreamSubscription? _pusherSubscription;
+
   bool isFetchedFirstTime = false;
   double scrollPositionWhenLoadMore = 0;
   late Stream<PermissionStatus> notificationStream = notificationPermission();
   late StreamSubscription notificationStreamSubscription;
   bool isNotificationPermissionGranted = true;
-  bool showRecordButton = true;
+
   int _rating = 0;
   final TextEditingController _feedbackController = TextEditingController();
   late final ScrollController _pageScrollController = ScrollController()
@@ -128,6 +125,39 @@ class _ChatScreenState extends State<ChatScreen>
           itemOfferId: widget.itemOfferId,
         );
 
+    int? currentUserId = int.tryParse(HiveUtils.getUserId() ?? "0");
+    if (currentUserId != null) {
+      PusherService.init(userId: currentUserId);
+      _pusherSubscription = PusherService.eventsStream.listen((messageData) {
+        // Check if data is nested inside 'data' key
+        Map<String, dynamic> data = messageData;
+        if (messageData.containsKey('data') && messageData['data'] is Map) {
+          data = messageData['data'];
+        }
+
+        if (data['item_offer_id'].toString() == widget.itemOfferId.toString()) {
+          ChatMessageHandler.add(ChatMessage(
+            key: ValueKey(data['id']),
+            id: int.tryParse(data['id'].toString()),
+            senderId: int.tryParse(data['sender_id'].toString()) ?? 0,
+            itemOfferId: int.tryParse(data['item_offer_id'].toString()) ?? 0,
+            message: data['message'],
+            file: data['file'],
+            audio: data['audio'],
+            createdAt: data['created_at'],
+            updatedAt: data['created_at'],
+            messageType: data['message_type'],
+            isSentNow: false,
+          ));
+          if (mounted) {
+            setState(() {
+              totalMessageCount++;
+            });
+          }
+        }
+      });
+    }
+
     currentlyChatItemId = widget.itemId;
     currentlyChatingWith = widget.userId;
     notificationStreamSubscription =
@@ -138,11 +168,7 @@ class _ChatScreenState extends State<ChatScreen>
       }
     });
     controller.addListener(() {
-      if (controller.text.isNotEmpty) {
-        showRecordButton = false;
-      } else {
-        showRecordButton = true;
-      }
+      if (controller.text.isNotEmpty) {}
       setState(() {});
     });
 
@@ -164,7 +190,9 @@ class _ChatScreenState extends State<ChatScreen>
 
   @override
   void dispose() {
+    _pusherSubscription?.cancel();
     notificationStreamSubscription.cancel();
+    controller.dispose();
     super.dispose();
   }
 
@@ -541,7 +569,7 @@ class _ChatScreenState extends State<ChatScreen>
                                       : Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            SizedBox(height: 10),
+                                            SizedBox(height: 5),
                                             Row(
                                               children: [
                                                 Expanded(
@@ -554,7 +582,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                     child: Container(
                                                       padding:
                                                           EdgeInsets.symmetric(
-                                                              vertical: 12),
+                                                              vertical: 8),
                                                       decoration: BoxDecoration(
                                                         border: Border(
                                                           bottom: BorderSide(
@@ -601,7 +629,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                     child: Container(
                                                       padding:
                                                           EdgeInsets.symmetric(
-                                                              vertical: 12),
+                                                              vertical: 8),
                                                       decoration: BoxDecoration(
                                                         border: Border(
                                                           bottom: BorderSide(
@@ -639,7 +667,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                 scrollDirection:
                                                     Axis.horizontal,
                                                 padding: EdgeInsets.symmetric(
-                                                    horizontal: 10),
+                                                    horizontal: 5),
                                                 child: Row(
                                                   children: [
                                                     "Is it available?",
@@ -650,7 +678,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                     return Padding(
                                                       padding:
                                                           const EdgeInsets.only(
-                                                              right: 8.0),
+                                                              right: 4.0),
                                                       child: InkWell(
                                                         onTap: () {
                                                           controller.text =
@@ -661,7 +689,7 @@ class _ChatScreenState extends State<ChatScreen>
                                                               .symmetric(
                                                                   horizontal:
                                                                       12,
-                                                                  vertical: 6),
+                                                                  vertical: 4),
                                                           decoration:
                                                               BoxDecoration(
                                                             color: context.color
@@ -774,8 +802,6 @@ class _ChatScreenState extends State<ChatScreen>
                                                                             () {
                                                                           messageAttachment =
                                                                               file;
-                                                                          showRecordButton =
-                                                                              false;
                                                                         });
                                                                       }
                                                                     }
@@ -785,8 +811,6 @@ class _ChatScreenState extends State<ChatScreen>
                                                                           () {
                                                                         messageAttachment =
                                                                             null;
-                                                                        showRecordButton =
-                                                                            true;
                                                                       });
                                                                     }
                                                                   }
@@ -828,9 +852,9 @@ class _ChatScreenState extends State<ChatScreen>
                                                             contentPadding:
                                                                 const EdgeInsets
                                                                     .symmetric(
-                                                                    vertical: 6,
+                                                                    vertical: 4,
                                                                     horizontal:
-                                                                        8),
+                                                                        6),
                                                             border: OutlineInputBorder(
                                                                 borderRadius:
                                                                     BorderRadius
@@ -858,122 +882,73 @@ class _ChatScreenState extends State<ChatScreen>
                                                       const SizedBox(
                                                         width: 9.5,
                                                       ),
-                                                      if (showRecordButton)
-                                                        RecordButton(
-                                                          controller:
-                                                              _recordButtonAnimation,
-                                                          callback: (path) {
-                                                            ChatMessageHandler
-                                                                .add(
-                                                              BlocProvider(
-                                                                create: (context) =>
-                                                                    SendMessageCubit(),
-                                                                child: ChatMessage(
-                                                                    key: ValueKey(DateTime
-                                                                            .now()
-                                                                        .toString()
-                                                                        .toString()),
-                                                                    message:
-                                                                        controller
-                                                                            .text,
-                                                                    senderId: int
-                                                                        .parse(HiveUtils
-                                                                            .getUserId()!),
-                                                                    createdAt: DateTime
-                                                                            .now()
-                                                                        .toString(),
-                                                                    isSentNow:
-                                                                        true,
-                                                                    audio: path,
-                                                                    type: "N",
-                                                                    itemOfferId:
-                                                                        widget
-                                                                            .itemOfferId,
-                                                                    file: "",
-                                                                    updatedAt: DateTime
-                                                                            .now()
-                                                                        .toString()),
-                                                              ),
-                                                            );
-                                                            totalMessageCount++;
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          showDeleteButton
+                                                              .value = false;
+                                                          if (controller.text
+                                                                  .trim()
+                                                                  .isEmpty &&
+                                                              messageAttachment ==
+                                                                  null) return;
 
-                                                            setState(() {});
-                                                          },
-                                                          isSending: false,
-                                                        ),
-                                                      if (!showRecordButton)
-                                                        GestureDetector(
-                                                          onTap: () {
-                                                            showDeleteButton
-                                                                .value = false;
-                                                            if (controller.text
-                                                                    .trim()
-                                                                    .isEmpty &&
-                                                                messageAttachment ==
-                                                                    null)
-                                                              return;
-
-                                                            ChatMessageHandler
-                                                                .add(
-                                                              BlocProvider(
+                                                          ChatMessageHandler
+                                                              .add(
+                                                            BlocProvider(
+                                                              key: ValueKey(
+                                                                  DateTime.now()
+                                                                      .toString()),
+                                                              create: (context) =>
+                                                                  SendMessageCubit(),
+                                                              child:
+                                                                  ChatMessage(
                                                                 key: ValueKey(
                                                                     DateTime.now()
                                                                         .toString()),
-                                                                create: (context) =>
-                                                                    SendMessageCubit(),
-                                                                child:
-                                                                    ChatMessage(
-                                                                  key: ValueKey(
-                                                                      DateTime.now()
-                                                                          .toString()),
-                                                                  message:
-                                                                      controller
-                                                                          .text,
-                                                                  senderId: int.parse(
-                                                                      HiveUtils
-                                                                          .getUserId()!),
-                                                                  createdAt: DateTime
-                                                                          .now()
-                                                                      .toString(),
-                                                                  isSentNow:
-                                                                      true,
-                                                                  updatedAt: DateTime
-                                                                          .now()
-                                                                      .toString(),
-                                                                  audio: "",
-                                                                  type: "N",
-                                                                  file: messageAttachment !=
-                                                                          null
-                                                                      ? messageAttachment
-                                                                          ?.path
-                                                                      : "",
-                                                                  itemOfferId:
-                                                                      widget
-                                                                          .itemOfferId,
-                                                                ),
+                                                                message:
+                                                                    controller
+                                                                        .text,
+                                                                senderId: int.parse(
+                                                                    HiveUtils
+                                                                        .getUserId()!),
+                                                                createdAt: DateTime
+                                                                        .now()
+                                                                    .toString(),
+                                                                isSentNow: true,
+                                                                updatedAt: DateTime
+                                                                        .now()
+                                                                    .toString(),
+                                                                audio: "",
+                                                                type: "N",
+                                                                file: messageAttachment !=
+                                                                        null
+                                                                    ? messageAttachment
+                                                                        ?.path
+                                                                    : "",
+                                                                itemOfferId: widget
+                                                                    .itemOfferId,
                                                               ),
-                                                            );
-
-                                                            totalMessageCount++;
-                                                            controller.text =
-                                                                "";
-                                                            messageAttachment =
-                                                                null;
-                                                            setState(() {});
-                                                          },
-                                                          child: CircleAvatar(
-                                                            radius: 20,
-                                                            backgroundColor: context
-                                                                .color
-                                                                .territoryColor,
-                                                            child: Icon(
-                                                              Icons.send,
-                                                              color: context
-                                                                  .color
-                                                                  .buttonColor,
                                                             ),
+                                                          );
+
+                                                          totalMessageCount++;
+                                                          controller.text = "";
+                                                          messageAttachment =
+                                                              null;
+                                                          setState(() {});
+                                                        },
+                                                        child: CircleAvatar(
+                                                          radius: 20,
+                                                          backgroundColor: context
+                                                              .color
+                                                              .territoryColor,
+                                                          child: Icon(
+                                                            Icons.send,
+                                                            color: context.color
+                                                                .buttonColor,
                                                           ),
-                                                        )
+                                                        ),
+                                                      )
                                                     ],
                                                   ),
                                                 ),
@@ -1238,7 +1213,7 @@ class _ChatScreenState extends State<ChatScreen>
             elevation: 0,
             iconTheme: IconThemeData(color: context.color.territoryColor),
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(70),
+              preferredSize: Size.fromHeight(60),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -1249,7 +1224,7 @@ class _ChatScreenState extends State<ChatScreen>
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 25, vertical: 0),
                     color: context.color.secondaryColor,
-                    height: 63,
+                    height: 55,
                     child: Row(
                       children: [
                         FittedBox(
@@ -1281,8 +1256,8 @@ class _ChatScreenState extends State<ChatScreen>
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(24),
                               child: SizedBox(
-                                width: 47,
-                                height: 47,
+                                width: 40,
+                                height: 40,
                                 child: UiUtils.getImage(
                                   widget.itemImage,
                                   fit: BoxFit.cover,
@@ -1640,7 +1615,7 @@ class _ChatScreenState extends State<ChatScreen>
                                               addAutomaticKeepAlives: true,
                                               itemCount: snapshot.data!.length,
                                               padding: const EdgeInsets.only(
-                                                  bottom: 10),
+                                                  bottom: 5),
                                               itemBuilder: (context, index) {
                                                 dynamic chat =
                                                     snapshot.data![index];
