@@ -1,7 +1,3 @@
-
-
-import 'dart:io';
-
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/api.dart';
@@ -40,13 +36,14 @@ class LoginCubit extends Cubit<LoginState> {
   final AuthRepository _authRepository = AuthRepository();
 
   Future<String?> getDeviceToken() async {
-    String? token;
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
-    } else {
-      token = await FirebaseMessaging.instance.getToken();
+    try {
+      // Get FCM token for both iOS and Android
+      String? token = await FirebaseMessaging.instance.getToken();
+      return token;
+    } catch (e) {
+      print('Error getting FCM token: $e');
+      return null;
     }
-    return token;
   }
 
   void login({
@@ -121,8 +118,7 @@ class LoginCubit extends Cubit<LoginState> {
     }
   }
 
-
-  void loginWithTwilio({
+  void loginWithApi({
     required String phoneNumber,
     required String firebaseUserId,
     required String type,

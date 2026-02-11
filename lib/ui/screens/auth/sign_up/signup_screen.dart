@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
+import 'package:eClassify/data/cubits/auth/login_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/ui/screens/auth/sign_up/email_verification_screen.dart';
 
 import 'package:eClassify/ui/screens/widgets/custom_text_form_field.dart';
@@ -15,6 +18,7 @@ import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/login/lib/payloads.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/utils/security_utils.dart';
@@ -56,6 +60,7 @@ class _SignupScreenState extends CloudState<SignupScreen> {
   @override
   void initState() {
     super.initState();
+    _emailController.text = widget.emailId ?? "";
     // Listen to password changes for real-time validation
     _passwordController.addListener(_updatePasswordStrength);
   }
@@ -118,12 +123,9 @@ class _SignupScreenState extends CloudState<SignupScreen> {
 
   void onTapSignup() async {
     if (_formKey.currentState?.validate() ?? false) {
-      // Additional password strength check
       if (!SecurityUtils.validatePasswordStrength(_passwordController.text)) {
         HelperUtils.showSnackBarMessage(
-          context,
-          SecurityUtils.getPasswordStrengthMessage(_passwordController.text),
-        );
+            context, "passwordIsWeak".translate(context));
         return;
       }
 
@@ -139,228 +141,282 @@ class _SignupScreenState extends CloudState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    _emailController.text = widget.emailId!;
-    return SafeArea(
-      top: false,
-      child: AnnotatedRegion(
-        value: SystemUiOverlayStyle(
-          statusBarColor: context.color.backgroundColor,
-        ),
+    return AnnotatedRegion(
+      value: UiUtils.getSystemUiOverlayStyle(
+          context: context, statusBarColor: context.color.backgroundColor),
+      child: SafeArea(
+        top: false,
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
           bottomNavigationBar: termAndPolicyTxt(),
-          body: BlocConsumer<AuthenticationCubit, AuthenticationState>(
-            listener: (context, state) {
-              if (state is AuthenticationSuccess) {
-                if (state.type == AuthenticationType.email) {
-                  // API-based email signup
-                  var credential = state.credential as Map<String, dynamic>;
-
-                  // Check if signup was successful (needs OTP verification)
-                  if (credential['success'] == true ||
-                      credential['email_verified'] == false) {
-                    Navigator.push<dynamic>(context, MaterialPageRoute(
-                      builder: (context) {
-                        return EmailVerificationScreen(
-                          email: _emailController.text,
-                          password: _passwordController.text,
-                        );
-                      },
-                    ));
+          body: MultiBlocListener(
+            listeners: [
+              BlocListener<LoginCubit, LoginState>(
+                listener: (context, state) {
+                  if (state is LoginSuccess) {
+                    Widgets.hideLoder(context);
+                    context
+                        .read<UserDetailsCubit>()
+                        .fill(HiveUtils.getUserDetails());
+                    if (state.isProfileCompleted) {
+                      HiveUtils.setUserIsAuthenticated(true);
+                      if (HiveUtils.getCityName() != null &&
+                          HiveUtils.getCityName() != "") {
+                        HelperUtils.killPreviousPages(
+                            context, Routes.main, {"from": "login"});
+                      } else {
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            Routes.locationPermissionScreen, (route) => false);
+                      }
+                    } else {
+                      Navigator.pushNamed(
+                        context,
+                        Routes.completeProfile,
+                        arguments: {
+                          "from": "login",
+                          "popToCurrent": false,
+                        },
+                      );
+                    }
                   }
-                }
-              }
 
-              if (state is AuthenticationFail) {
-                HelperUtils.showSnackBarMessage(
-                    context, state.error.toString());
-              }
-            },
-            builder: (context, state) {
-              return Form(
-                key: _formKey,
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.only(left: 18.0, right: 18, top: 23),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Align(
-                          alignment: AlignmentDirectional.bottomEnd,
-                          child: FittedBox(
-                            fit: BoxFit.none,
-                            child: MaterialButton(
-                              onPressed: () {
-                                HelperUtils.killPreviousPages(
-                                    context,
-                                    Routes.main,
-                                    {"from": "login", "isSkipped": true});
-                              },
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              color: context.color.forthColor
-                                  .withValues(alpha: 0.102),
-                              elevation: 0,
-                              height: 28,
-                              minWidth: 64,
-                              child: CustomText(
-                                "skip".translate(context),
-                                color: context.color.forthColor,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 66,
-                        ),
-                        CustomText(
-                          "welcome".translate(context),
-                          fontSize: context.font.extraLarge,
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        CustomText(
-                          "signUpToeClassify".translate(context),
-                          fontSize: context.font.large,
-                          color: context.color.textColorDark
-                              .withValues(alpha: 0.7),
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        CustomTextFormField(
-                          controller: _emailController,
-                          isReadOnly: true,
-                          fillColor: context.color.secondaryColor,
-                          validator: CustomTextFieldValidator.email,
-                          hintText: "emailAddress".translate(context),
-                          borderColor: context.color.textLightColor
-                              .withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(
-                          height: 14,
-                        ),
-                        CustomTextFormField(
-                          controller: _passwordController,
-                          fillColor: context.color.secondaryColor,
-                          obscureText: isObscure,
-                          suffix: IconButton(
+                  if (state is LoginFailure) {
+                    Widgets.hideLoder(context);
+                    HelperUtils.showSnackBarMessage(
+                        context, state.errorMessage.toString());
+                  }
+
+                  if (state is LoginInProgress) {
+                    Widgets.showLoader(context);
+                  }
+                },
+              ),
+              BlocListener<AuthenticationCubit, AuthenticationState>(
+                listener: (context, state) {
+                  if (state is AuthenticationSuccess) {
+                    Widgets.hideLoder(context);
+
+                    if (state.type == AuthenticationType.email) {
+                      // API-based email signup
+                      var credential = state.credential as Map<String, dynamic>;
+
+                      // Check if signup was successful (needs OTP verification)
+                      if (credential['success'] == true ||
+                          credential['email_verified'] == false) {
+                        Navigator.push<dynamic>(context, MaterialPageRoute(
+                          builder: (context) {
+                            return EmailVerificationScreen(
+                              email: _emailController.text,
+                              password: _passwordController.text,
+                            );
+                          },
+                        ));
+                      }
+                    } else if (state.type == AuthenticationType.google ||
+                        state.type == AuthenticationType.apple) {
+                      // Social Authentication Success
+                      context.read<LoginCubit>().login(
+                            firebaseUserId: state.credential.user!.uid,
+                            type: state.type.name,
+                            credential: state.credential,
+                          );
+                    }
+                  }
+
+                  if (state is AuthenticationFail) {
+                    Widgets.hideLoder(context);
+                    HelperUtils.showSnackBarMessage(
+                        context, state.error.toString());
+                  }
+
+                  if (state is AuthenticationInProcess) {
+                    Widgets.showLoader(context);
+                  }
+                },
+              ),
+            ],
+            child: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(left: 18.0, right: 18, top: 23),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Align(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        child: FittedBox(
+                          fit: BoxFit.none,
+                          child: MaterialButton(
                             onPressed: () {
-                              isObscure = !isObscure;
-                              setState(() {});
+                              HelperUtils.killPreviousPages(
+                                  context,
+                                  Routes.main,
+                                  {"from": "login", "isSkipped": true});
                             },
-                            icon: Icon(
-                              !isObscure
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: context.color.textColorDark
-                                  .withValues(alpha: 0.3),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            color: context.color.forthColor
+                                .withValues(alpha: 0.102),
+                            elevation: 0,
+                            height: 28,
+                            minWidth: 64,
+                            child: CustomText(
+                              "skip".translate(context),
+                              color: context.color.forthColor,
                             ),
                           ),
-                          hintText: "password".translate(context),
-                          validator: CustomTextFieldValidator.password,
-                          borderColor: context.color.textLightColor
-                              .withValues(alpha: 0.3),
                         ),
-                        // Password strength indicator
-                        if (_passwordController.text.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          // Progress bar
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: _passwordStrengthValue,
-                              backgroundColor: context.color.textLightColor
-                                  .withValues(alpha: 0.2),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                _passwordStrengthColor,
-                              ),
-                              minHeight: 4,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          // Strength label
-                          Row(
-                            children: [
-                              CustomText(
-                                'Password strength: ',
-                                fontSize: context.font.small,
-                                color: context.color.textColorDark
-                                    .withValues(alpha: 0.7),
-                              ),
-                              CustomText(
-                                _passwordStrength,
-                                fontSize: context.font.small,
-                                color: _passwordStrengthColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          // Password requirements
-                          CustomText(
-                            'Must contain: 8+ chars, uppercase, lowercase, number, special char',
-                            fontSize: context.font.smaller,
+                      ),
+                      const SizedBox(
+                        height: 66,
+                      ),
+                      CustomText(
+                        "welcome".translate(context),
+                        fontSize: context.font.extraLarge,
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      CustomText(
+                        "signUpToeClassify".translate(context),
+                        fontSize: context.font.large,
+                        color:
+                            context.color.textColorDark.withValues(alpha: 0.7),
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      CustomTextFormField(
+                        controller: _emailController,
+                        isReadOnly: true,
+                        fillColor: context.color.secondaryColor,
+                        validator: CustomTextFieldValidator.email,
+                        hintText: "emailAddress".translate(context),
+                        borderColor:
+                            context.color.textLightColor.withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(
+                        height: 14,
+                      ),
+                      CustomTextFormField(
+                        controller: _passwordController,
+                        fillColor: context.color.secondaryColor,
+                        obscureText: isObscure,
+                        suffix: IconButton(
+                          onPressed: () {
+                            isObscure = !isObscure;
+                            setState(() {});
+                          },
+                          icon: Icon(
+                            !isObscure
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: context.color.textColorDark
-                                .withValues(alpha: 0.5),
+                                .withValues(alpha: 0.3),
                           ),
-                        ],
-                        const SizedBox(
-                          height: 36,
                         ),
-                        UiUtils.buildButton(context,
-                            onPressed: onTapSignup,
-                            buttonTitle:
-                                "verifyEmailAddress".translate(context),
-                            radius: 10,
-                            disabled: false,
-                            height: 46,
-                            disabledColor:
-                                const Color.fromARGB(255, 104, 102, 106)),
-                        const SizedBox(
-                          height: 36,
-                        ),
-                        if (Constant.mobileAuthentication == "1") mobileAuth(),
-                        if (Constant.googleAuthentication == "1" ||
-                            Constant.appleAuthentication == "1")
-                          googleAndAppleAuth(),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CustomText("alreadyHaveAcc".translate(context),
-                                color: context.color.textColorDark
-                                    .withValues(alpha: 0.7)),
-                            const SizedBox(
-                              width: 12,
+                        hintText: "password".translate(context),
+                        validator: CustomTextFieldValidator.password,
+                        borderColor:
+                            context.color.textLightColor.withValues(alpha: 0.3),
+                      ),
+                      // Password strength indicator
+                      if (_passwordController.text.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        // Progress bar
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: _passwordStrengthValue,
+                            backgroundColor: context.color.textLightColor
+                                .withValues(alpha: 0.2),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              _passwordStrengthColor,
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                Navigator.pushReplacementNamed(
-                                    context, Routes.login);
-                              },
-                              child: CustomText(
-                                "login".translate(context),
-                                showUnderline: true,
-                                color: context.color.territoryColor,
-                              ),
-                            )
+                            minHeight: 4,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        // Strength label
+                        Row(
+                          children: [
+                            CustomText(
+                              'Password strength: ',
+                              fontSize: context.font.small,
+                              color: context.color.textColorDark
+                                  .withValues(alpha: 0.7),
+                            ),
+                            CustomText(
+                              _passwordStrength,
+                              fontSize: context.font.small,
+                              color: _passwordStrengthColor,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ],
                         ),
-                        const SizedBox(
-                          height: 24,
+                        const SizedBox(height: 4),
+                        // Password requirements
+                        CustomText(
+                          'Must contain: 8+ chars, uppercase, lowercase, number, special char',
+                          fontSize: context.font.smaller,
+                          color: context.color.textColorDark
+                              .withValues(alpha: 0.5),
                         ),
                       ],
-                    ),
+                      const SizedBox(
+                        height: 36,
+                      ),
+                      UiUtils.buildButton(context,
+                          onPressed: onTapSignup,
+                          buttonTitle: "verifyEmailAddress".translate(context),
+                          radius: 10,
+                          disabled: false,
+                          height: 46,
+                          disabledColor:
+                              const Color.fromARGB(255, 104, 102, 106)),
+                      const SizedBox(
+                        height: 36,
+                      ),
+                      if (Constant.mobileAuthentication == "1") mobileAuth(),
+                      if (Constant.googleAuthentication == "1" ||
+                          Constant.appleAuthentication == "1")
+                        googleAndAppleAuth(),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CustomText("alreadyHaveAcc".translate(context),
+                              color: context.color.textColorDark
+                                  .withValues(alpha: 0.7)),
+                          const SizedBox(
+                            width: 12,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushReplacementNamed(
+                                  context, Routes.login);
+                            },
+                            child: CustomText(
+                              "login".translate(context),
+                              showUnderline: true,
+                              color: context.color.territoryColor,
+                            ),
+                          )
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 24,
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
@@ -424,29 +480,28 @@ class _SignupScreenState extends CloudState<SignupScreen> {
           const SizedBox(
             height: 12,
           ),
-          if (Platform.isIOS)
-            UiUtils.buildButton(context,
-                prefixWidget: Padding(
-                  padding: EdgeInsetsDirectional.only(end: 10.0),
-                  child:
-                      UiUtils.getSvg(AppIcons.appleIcon, width: 22, height: 22),
-                ),
-                showElevation: false,
-                buttonColor: secondaryColor_,
-                border: context.watch<AppThemeCubit>().state.appTheme !=
-                        AppTheme.dark
-                    ? BorderSide(
-                        color: context.color.textDefaultColor
-                            .withValues(alpha: 0.5))
-                    : null,
-                textColor: textDarkColor, onPressed: () {
-              context.read<AuthenticationCubit>().setData(
-                  payload: AppleLoginPayload(), type: AuthenticationType.apple);
-              context.read<AuthenticationCubit>().authenticate();
-            },
-                height: 46,
-                radius: 8,
-                buttonTitle: "continueWithApple".translate(context)),
+          UiUtils.buildButton(context,
+              prefixWidget: Padding(
+                padding: EdgeInsetsDirectional.only(end: 10.0),
+                child:
+                    UiUtils.getSvg(AppIcons.appleIcon, width: 22, height: 22),
+              ),
+              showElevation: false,
+              buttonColor: secondaryColor_,
+              border: context.watch<AppThemeCubit>().state.appTheme !=
+                      AppTheme.dark
+                  ? BorderSide(
+                      color:
+                          context.color.textDefaultColor.withValues(alpha: 0.5))
+                  : null,
+              textColor: textDarkColor, onPressed: () {
+            context.read<AuthenticationCubit>().setData(
+                payload: AppleLoginPayload(), type: AuthenticationType.apple);
+            context.read<AuthenticationCubit>().authenticate();
+          },
+              height: 46,
+              radius: 8,
+              buttonTitle: "continueWithApple".translate(context)),
         ]
       ],
     );

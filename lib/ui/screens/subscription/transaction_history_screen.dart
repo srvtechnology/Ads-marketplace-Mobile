@@ -84,8 +84,10 @@ class _TransactionHistoryState extends State<TransactionHistory> {
   void _imgFromGallery(ImageSource imageSource, String transactionId) async {
     if (isUploading) return; // Prevent multiple selections while uploading
 
-    final pickedFile =
-        await ImagePicker().pickImage(source: imageSource, imageQuality: 75);
+    final pickedFile = await ImagePicker().pickImage(
+        source: imageSource,
+        imageQuality: 75,
+        requestFullMetadata: false); // Fix for iOS green tint issue
 
     if (pickedFile != null) {
       receiptImage = File(pickedFile.path);

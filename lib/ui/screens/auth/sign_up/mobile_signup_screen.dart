@@ -7,8 +7,10 @@ import 'package:eClassify/app/app_theme.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/system/app_theme_cubit.dart';
+import 'package:eClassify/data/cubits/auth/login_cubit.dart';
+import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/data/helper/widgets.dart';
-
 import 'package:eClassify/ui/theme/theme.dart';
 
 import 'package:eClassify/utils/app_icon.dart';
@@ -215,12 +217,96 @@ class MobileSignUpScreenState extends State<MobileSignUpScreen> {
                 backgroundColor: context.color.backgroundColor,
                 bottomNavigationBar:
                     !isOtpSent ? termAndPolicyTxt() : SizedBox.shrink(),
-                body: Builder(builder: (context) {
-                  return Form(
-                    key: _formKey,
-                    child: isOtpSent ? verifyOTPWidget() : buildLoginWidget(),
-                  );
-                }),
+                body: MultiBlocListener(
+                  listeners: [
+                    BlocListener<LoginCubit, LoginState>(
+                      listener: (context, state) {
+                        if (state is LoginSuccess) {
+                          Widgets.hideLoder(context);
+                          context
+                              .read<UserDetailsCubit>()
+                              .fill(HiveUtils.getUserDetails());
+                          if (state.isProfileCompleted) {
+                            HiveUtils.setUserIsAuthenticated(true);
+                            if (HiveUtils.getCityName() != null &&
+                                HiveUtils.getCityName() != "") {
+                              HelperUtils.killPreviousPages(
+                                  context, Routes.main, {"from": "login"});
+                            } else {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  Routes.locationPermissionScreen,
+                                  (route) => false);
+                            }
+                          } else {
+                            Navigator.pushNamed(
+                              context,
+                              Routes.completeProfile,
+                              arguments: {
+                                "from": "login",
+                                "popToCurrent": false,
+                              },
+                            );
+                          }
+                        }
+
+                        if (state is LoginFailure) {
+                          Widgets.hideLoder(context);
+                          HelperUtils.showSnackBarMessage(
+                              context, state.errorMessage.toString());
+                        }
+
+                        if (state is LoginInProgress) {
+                          Widgets.showLoader(context);
+                        }
+                      },
+                    ),
+                    BlocListener<AuthenticationCubit, AuthenticationState>(
+                      listener: (context, state) {
+                        if (state is AuthenticationSuccess) {
+                          Widgets.hideLoder(context);
+
+                          if (state.type == AuthenticationType.phone) {
+                            // API-based phone authentication
+                            context.read<LoginCubit>().loginWithApi(
+                                phoneNumber:
+                                    (state.payload as PhoneLoginPayload)
+                                        .phoneNumber,
+                                firebaseUserId:
+                                    state.credential['id']?.toString() ?? '',
+                                type: state.type.name,
+                                credential: state.credential,
+                                countryCode:
+                                    "+${(state.payload as PhoneLoginPayload).countryCode}");
+                          } else if (state.type == AuthenticationType.google ||
+                              state.type == AuthenticationType.apple) {
+                            // Social Authentication Success
+                            context.read<LoginCubit>().login(
+                                  firebaseUserId: state.credential.user!.uid,
+                                  type: state.type.name,
+                                  credential: state.credential,
+                                );
+                          }
+                        }
+
+                        if (state is AuthenticationFail) {
+                          Widgets.hideLoder(context);
+                          HelperUtils.showSnackBarMessage(
+                              context, state.error.toString());
+                        }
+
+                        if (state is AuthenticationInProcess) {
+                          Widgets.showLoader(context);
+                        }
+                      },
+                    ),
+                  ],
+                  child: Builder(builder: (context) {
+                    return Form(
+                      key: _formKey,
+                      child: isOtpSent ? verifyOTPWidget() : buildLoginWidget(),
+                    );
+                  }),
+                ),
               ),
             ),
           ),

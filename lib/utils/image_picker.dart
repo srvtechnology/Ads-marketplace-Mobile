@@ -31,13 +31,13 @@ class PickImage {
       int? imageLimit,
       int? maxLength,
       required BuildContext context}) async {
-        try{
-
-    if (pickMultiple == false || pickMultiple == null) {
-      final XFile? pickedFile = await _picker.pickImage(
+    try {
+      if (pickMultiple == false || pickMultiple == null) {
+        final XFile? pickedFile = await _picker.pickImage(
           source: source ?? ImageSource.gallery,
           imageQuality: Constant.uploadImageQuality,
           preferredCameraDevice: CameraDevice.rear,
+          requestFullMetadata: false, // Fix for iOS green tint issue
         );
         if (pickedFile != null) {
           File file = File(pickedFile.path);
@@ -51,46 +51,46 @@ class PickImage {
             "file": [file], // Wrapped in a list for consistency
           });
         }
-     
-    } else {
-      List<XFile> list = await _picker.pickMultiImage(
-          imageQuality: Constant.uploadImageQuality, requestFullMetadata: true);
-
-      if (imageLimit != null &&
-          maxLength != null &&
-          (list.length + maxLength) > imageLimit) {
-        HelperUtils.showSnackBarMessage(
-            context, "max5ImagesAllowed".translate(context));
-            return;
       } else {
-        Iterable<Future<File>> result = list.map((image) async {
-          File myImage = File(image.path);
-          if (await myImage.length() > Constant.maxSizeInBytes) {
-            myImage = await HelperUtils.compressImageFile(myImage);
-          } else {
-            myImage = File(image.path);
-          }
-          return myImage;
-        });
-        List<File> templistFile = [];
-        await for (Future<File> futureFile in Stream.fromIterable(result)) {
-          File file = await futureFile;
-          templistFile.add(file);
-        }
+        List<XFile> list = await _picker.pickMultiImage(
+            imageQuality: Constant.uploadImageQuality,
+            requestFullMetadata: false); // Fix for iOS green tint issue
 
-        _sink.add({
-          "error": "",
-          "file": templistFile,
-        });
+        if (imageLimit != null &&
+            maxLength != null &&
+            (list.length + maxLength) > imageLimit) {
+          HelperUtils.showSnackBarMessage(
+              context, "max5ImagesAllowed".translate(context));
+          return;
+        } else {
+          Iterable<Future<File>> result = list.map((image) async {
+            File myImage = File(image.path);
+            if (await myImage.length() > Constant.maxSizeInBytes) {
+              myImage = await HelperUtils.compressImageFile(myImage);
+            } else {
+              myImage = File(image.path);
+            }
+            return myImage;
+          });
+          List<File> templistFile = [];
+          await for (Future<File> futureFile in Stream.fromIterable(result)) {
+            File file = await futureFile;
+            templistFile.add(file);
+          }
+
+          _sink.add({
+            "error": "",
+            "file": templistFile,
+          });
+        }
       }
-    } } catch (error) {
+    } catch (error) {
       _sink.add({
         "error": error.toString(),
         "file": [],
       });
     }
   }
-
 
   /// This widget will listen changes in ui, it is wrapper around Stream builder
   Widget listenChangesInUI(

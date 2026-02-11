@@ -662,59 +662,6 @@ class _ChatScreenState extends State<ChatScreen>
                                               ],
                                             ),
                                             if (isChatTab) ...[
-                                              SizedBox(height: 10),
-                                              SingleChildScrollView(
-                                                scrollDirection:
-                                                    Axis.horizontal,
-                                                padding: EdgeInsets.symmetric(
-                                                    horizontal: 5),
-                                                child: Row(
-                                                  children: [
-                                                    "Is it available?",
-                                                    "What's the condition?",
-                                                    "Can I see more photos?",
-                                                    "I'm interested!"
-                                                  ].map((text) {
-                                                    return Padding(
-                                                      padding:
-                                                          const EdgeInsets.only(
-                                                              right: 4.0),
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          controller.text =
-                                                              text;
-                                                        },
-                                                        child: Container(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      12,
-                                                                  vertical: 4),
-                                                          decoration:
-                                                              BoxDecoration(
-                                                            color: context.color
-                                                                .secondaryColor,
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20),
-                                                            border: Border.all(
-                                                                color: context
-                                                                    .color
-                                                                    .borderColor),
-                                                          ),
-                                                          child: CustomText(
-                                                              text,
-                                                              fontSize: context
-                                                                  .font
-                                                                  .smaller),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  }).toList(),
-                                                ),
-                                              ),
-                                              SizedBox(height: 10),
                                               if (!isBlocked)
                                                 Padding(
                                                   padding: const EdgeInsets

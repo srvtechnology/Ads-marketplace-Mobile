@@ -163,7 +163,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 var credential = state.credential as Map<String, dynamic>;
                 if (credential['token'] != null) {
                   // OTP verified successfully, proceed with login
-                  context.read<LoginCubit>().loginWithTwilio(
+                  context.read<LoginCubit>().loginWithApi(
                       phoneNumber: '',
                       firebaseUserId: credential['id']?.toString() ?? '',
                       type: state.type.name,

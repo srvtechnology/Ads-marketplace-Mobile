@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -73,72 +72,67 @@ class LocalAwesomeNotification {
           notificationData.data["image"] != "";
 
       if (isChat) {
-        int chatId = int.parse(notificationData.data['sender_id']) +
-            int.parse(notificationData.data['item_id']);
+        int chatId =
+            (int.tryParse(notificationData.data['sender_id'] ?? "0") ?? 0) +
+                (int.tryParse(notificationData.data['item_id'] ?? "0") ?? 0);
 
-        if (Platform.isAndroid) {
-          await notification.createNotification(
-            content: NotificationContent(
-              id: isChat ? chatId : Random().nextInt(5000),
-              title: notificationData.data["title"],
-              // icon: AppIcons.aboutUs,
-              hideLargeIconOnExpand: true,
-              summary: "${notificationData.data['user_name']}",
-              locked: isLocked,
-              payload: Map.from(notificationData.data),
-              autoDismissible: true,
+        await notification.createNotification(
+          content: NotificationContent(
+            id: isChat ? chatId : Random().nextInt(5000),
+            title: notificationData.data["title"],
+            // icon: AppIcons.aboutUs,
+            hideLargeIconOnExpand: true,
+            summary: "${notificationData.data['user_name']}",
+            locked: isLocked,
+            payload: Map.from(notificationData.data),
+            autoDismissible: true,
 
-              body: notificationData.data["body"],
-              wakeUpScreen: true,
+            body: notificationData.data["body"],
+            wakeUpScreen: true,
 
-              notificationLayout: NotificationLayout.MessagingGroup,
-              groupKey: notificationData.data["id"],
-              channelKey: "Chat Notification",
-            ),
-          );
-        }
+            notificationLayout: NotificationLayout.Messaging,
+            groupKey: notificationData.data["id"],
+            channelKey: "Chat Notification",
+          ),
+        );
       } else {
         if (hasImage) {
           String? imageUrl = notificationData.data["image"];
 
-          if (Platform.isAndroid) {
-            await notification.createNotification(
-              content: NotificationContent(
-                id: Random().nextInt(5000),
-                title: notificationData.data["title"],
-                bigPicture: imageUrl,
-                hideLargeIconOnExpand: true,
-                summary: null,
-                locked: isLocked,
-                payload: Map.from(notificationData.data),
-                autoDismissible: true,
-                body: notificationData.data["body"],
-                wakeUpScreen: true,
-                notificationLayout: NotificationLayout.BigPicture,
-                groupKey: notificationData.data["item_id"],
-                channelKey: Constant.notificationChannel,
-              ),
-            );
-          }
+          await notification.createNotification(
+            content: NotificationContent(
+              id: Random().nextInt(5000),
+              title: notificationData.data["title"],
+              bigPicture: imageUrl,
+              hideLargeIconOnExpand: true,
+              summary: null,
+              locked: isLocked,
+              payload: Map.from(notificationData.data),
+              autoDismissible: true,
+              body: notificationData.data["body"],
+              wakeUpScreen: true,
+              notificationLayout: NotificationLayout.BigPicture,
+              groupKey: notificationData.data["item_id"],
+              channelKey: Constant.notificationChannel,
+            ),
+          );
         } else {
-          if (Platform.isAndroid) {
-            await notification.createNotification(
-              content: NotificationContent(
-                id: Random().nextInt(5000),
-                title: notificationData.data["title"],
-                hideLargeIconOnExpand: true,
-                summary: null,
-                locked: isLocked,
-                payload: Map.from(notificationData.data),
-                autoDismissible: true,
-                body: notificationData.data["body"],
-                wakeUpScreen: true,
-                notificationLayout: NotificationLayout.Default,
-                groupKey: notificationData.data["item_id"],
-                channelKey: Constant.notificationChannel,
-              ),
-            );
-          }
+          await notification.createNotification(
+            content: NotificationContent(
+              id: Random().nextInt(5000),
+              title: notificationData.data["title"],
+              hideLargeIconOnExpand: true,
+              summary: null,
+              locked: isLocked,
+              payload: Map.from(notificationData.data),
+              autoDismissible: true,
+              body: notificationData.data["body"],
+              wakeUpScreen: true,
+              notificationLayout: NotificationLayout.Default,
+              groupKey: notificationData.data["item_id"],
+              channelKey: Constant.notificationChannel,
+            ),
+          );
         }
       }
     } catch (e) {

@@ -33,17 +33,19 @@ class SignUpMainScreen extends StatefulWidget {
   const SignUpMainScreen({super.key});
 
   @override
-  State<SignUpMainScreen> createState() => LoginScreenState();
+  State<SignUpMainScreen> createState() => SignUpMainScreenState();
 
   static MaterialPageRoute route(RouteSettings routeSettings) {
     return MaterialPageRoute(builder: (_) => SignUpMainScreen());
   }
 }
 
-class LoginScreenState extends State<SignUpMainScreen> {
+class SignUpMainScreenState extends State<SignUpMainScreen> {
   final TextEditingController emailMobileTextController =
       TextEditingController();
-  String? phone, countryCode, countryName, flagEmoji;
+  String? phone;
+  String? countryCode = Constant.defaultCountryCode;
+  String? countryName, flagEmoji;
 
   Timer? timer;
   late Size size;
@@ -53,7 +55,7 @@ class LoginScreenState extends State<SignUpMainScreen> {
   String numberOrEmail = "";
   final _formKey = GlobalKey<FormState>();
 
-  late PhoneLoginPayload phoneLoginPayload =
+  PhoneLoginPayload get phoneLoginPayload =>
       PhoneLoginPayload(emailMobileTextController.text, countryCode!);
   bool isBack = false;
 
@@ -234,7 +236,7 @@ class LoginScreenState extends State<SignUpMainScreen> {
 
                         if (state.type == AuthenticationType.phone) {
                           // API-based phone authentication
-                          context.read<LoginCubit>().loginWithTwilio(
+                          context.read<LoginCubit>().loginWithApi(
                               phoneNumber: (state.payload as PhoneLoginPayload)
                                   .phoneNumber,
                               firebaseUserId:
@@ -251,7 +253,7 @@ class LoginScreenState extends State<SignUpMainScreen> {
                           // For signup, the response will have success=true or email_verified=false
                           // In both cases, user should be redirected to OTP/complete profile
                           if (credential['token'] != null) {
-                            context.read<LoginCubit>().loginWithTwilio(
+                            context.read<LoginCubit>().loginWithApi(
                                 phoneNumber: '',
                                 firebaseUserId:
                                     credential['id']?.toString() ?? '',

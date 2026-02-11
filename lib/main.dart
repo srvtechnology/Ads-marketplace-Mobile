@@ -11,13 +11,11 @@ import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/hive_utils.dart';
-import 'package:eClassify/utils/notification/notification_service.dart';
 import 'package:eClassify/utils/ui_utils.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-
 
 void main() => initApp();
 
@@ -34,8 +32,6 @@ class EntryPointState extends State<EntryPoint> {
   @override
   void initState() {
     super.initState();
-    FirebaseMessaging.onBackgroundMessage(
-        NotificationService.onBackgroundMessageHandler);
     ChatGlobals.init();
   }
 
@@ -70,7 +66,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-
     AppTheme currentTheme = context.watch<AppThemeCubit>().state.appTheme;
     return BlocBuilder<LanguageCubit, LanguageState>(
       builder: (context, languageState) {
@@ -100,14 +95,12 @@ class _AppState extends State<App> {
               }
               return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
-                  textScaler: const TextScaler.linear(
-                      1.0),
+                  textScaler: const TextScaler.linear(1.0),
                 ),
                 child: Directionality(
                   textDirection: direction,
                   child: DevicePreview(
                     enabled: false,
-
                     builder: (context) {
                       return child!;
                     },

@@ -294,19 +294,21 @@ class HelperUtils {
       }
 
       final filePath = file.absolute.path;
-      final lastIndex = filePath.lastIndexOf(RegExp(r'.png|.jp'));
-      final splitted = filePath.substring(0, (lastIndex));
-      final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+      final lastIndex = filePath.lastIndexOf('.');
+      final splitted =
+          (lastIndex != -1) ? filePath.substring(0, lastIndex) : filePath;
+      final outPath = "${splitted}_out.jpg";
 
       XFile? result = await FlutterImageCompress.compressAndGetFile(
         filePath,
         outPath,
         quality: Constant.uploadImageQuality,
+        format: CompressFormat.jpeg,
       );
 
-      return File(result!.path);
+      return result != null ? File(result.path) : file;
     } catch (e) {
-      throw Exception("Error compressing image: $e");
+      return file;
     }
   }
 

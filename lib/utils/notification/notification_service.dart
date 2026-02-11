@@ -353,11 +353,27 @@ class NotificationService {
   }
 
   static Future<void> registerListeners(context) async {
-    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-        alert: true, badge: true, sound: true);
-    await foregroundNotificationHandler(context);
-    await terminatedStateNotificationHandler(context);
-    onTapNotificationHandler(context);
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+          alert: true, badge: true, sound: true);
+
+      String? token = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $token");
+
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      print("APNS Token: $apnsToken");
+
+      await foregroundNotificationHandler(context);
+      await terminatedStateNotificationHandler(context);
+      onTapNotificationHandler(context);
+    }
   }
 
   static void disposeListeners() {

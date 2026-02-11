@@ -40,7 +40,6 @@ import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 const double sidePadding = 10;
 
@@ -75,10 +74,7 @@ class HomeScreenState extends State<HomeScreen>
     super.initState();
     initializeSettings();
     addPageScrollListener();
-    notificationPermissionChecker();
-    LocalAwesomeNotification().init(context);
-    ///////////////////////////////////////
-    NotificationService.init(context);
+    _initNotifications();
     context.read<SliderCubit>().fetchSlider(
           context,
         );
@@ -138,6 +134,12 @@ class HomeScreenState extends State<HomeScreen>
 
   void addPageScrollListener() {
     //homeScreenController.addListener(pageScrollListener);
+  }
+
+  Future<void> _initNotifications() async {
+    // Request permissions and initialize
+    await NotificationService.registerListeners(context);
+    LocalAwesomeNotification().init(context);
   }
 
   @override
@@ -540,11 +542,5 @@ class AllItemsWidget extends StatelessWidget {
         return SizedBox.shrink();
       },
     );
-  }
-}
-
-Future<void> notificationPermissionChecker() async {
-  if (!(await Permission.notification.isGranted)) {
-    await Permission.notification.request();
   }
 }

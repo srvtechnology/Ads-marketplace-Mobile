@@ -356,9 +356,19 @@ class LoginScreenState extends State<LoginScreen> {
                         var credential =
                             state.credential as Map<String, dynamic>;
 
-                        // Check if this requires OTP verification (signup or unverified login)
-                        if (credential['success'] == true ||
-                            credential['email_verified'] == false) {
+                        // Check if login is already successful (token is issued)
+                        if (credential['token'] != null) {
+                          // Login successful with token
+                          context.read<LoginCubit>().loginWithApi(
+                              phoneNumber: '',
+                              firebaseUserId:
+                                  credential['id']?.toString() ?? '',
+                              type: state.type.name,
+                              credential: credential,
+                              countryCode: '');
+                        } else if (credential['success'] == true ||
+                            credential['email_verified'] == false ||
+                            credential['requires_mfa'] == true) {
                           // Show OTP verification screen
                           // The UI will handle showing OTP input
                           setState(() {
@@ -373,20 +383,10 @@ class LoginScreenState extends State<LoginScreen> {
                             HelperUtils.showSnackBarMessage(
                                 context, credential['message']);
                           }
-                        } else if (credential['email_verified'] == true ||
-                            credential['token'] != null) {
-                          // Login successful with token
-                          context.read<LoginCubit>().loginWithTwilio(
-                              phoneNumber: '',
-                              firebaseUserId:
-                                  credential['id']?.toString() ?? '',
-                              type: state.type.name,
-                              credential: credential,
-                              countryCode: '');
                         }
                       } else if (state.type == AuthenticationType.phone) {
                         // API-based phone authentication (including Twilio and custom OTP)
-                        context.read<LoginCubit>().loginWithTwilio(
+                        context.read<LoginCubit>().loginWithApi(
                             phoneNumber: (state.payload as PhoneLoginPayload)
                                 .phoneNumber,
                             firebaseUserId:
@@ -988,12 +988,12 @@ class LoginScreenState extends State<LoginScreen> {
                 ? MaterialButton(
                     onPressed: () {
                       if (isEmailOtp) {
-                        // Resend email OTP - trigger email signup/login again
+                        // Resend email OTP - trigger email login again
                         context.read<AuthenticationCubit>().setData(
                               payload: EmailLoginPayload(
                                 email: emailController.text,
                                 password: _passwordController.text,
-                                type: EmailLoginType.signup,
+                                type: EmailLoginType.login,
                               ),
                               type: AuthenticationType.email,
                             );
@@ -1032,7 +1032,7 @@ class LoginScreenState extends State<LoginScreen> {
                         payload: EmailLoginPayload(
                           email: emailController.text,
                           password: _passwordController.text,
-                          type: EmailLoginType.verifyOtp,
+                          type: EmailLoginType.loginVerifyOtp,
                           otp: otp!.trim(),
                         ),
                         type: AuthenticationType.email,
