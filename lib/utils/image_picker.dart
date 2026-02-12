@@ -35,7 +35,7 @@ class PickImage {
       if (pickMultiple == false || pickMultiple == null) {
         final XFile? pickedFile = await _picker.pickImage(
           source: source ?? ImageSource.gallery,
-          imageQuality: Constant.uploadImageQuality,
+          imageQuality: Platform.isIOS ? null : Constant.uploadImageQuality,
           preferredCameraDevice: CameraDevice.rear,
           requestFullMetadata: false, // Fix for iOS green tint issue
         );
@@ -53,7 +53,7 @@ class PickImage {
         }
       } else {
         List<XFile> list = await _picker.pickMultiImage(
-            imageQuality: Constant.uploadImageQuality,
+            imageQuality: Platform.isIOS ? null : Constant.uploadImageQuality,
             requestFullMetadata: false); // Fix for iOS green tint issue
 
         if (imageLimit != null &&
