@@ -118,7 +118,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                         context,
                         onPressed: _onUpdatePressed,
                         height: 48,
-                        buttonTitle: "updateProfile".translate(context),
+                        buttonTitle: "updateBankDetails".translate(context),
                       ),
                     ],
                   ),

@@ -339,7 +339,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                           onTap: () {
                             Navigator.pushNamed(
                               context,
-                              Routes.profileSettings,
+                              Routes.bankDetailsScreen,
                             );
                           },
                           child: Container(
@@ -352,7 +352,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              "updateProfile".translate(context),
+                              "updateBankDetails".translate(context),
                               style: TextStyle(
                                 color: context.color.buttonColor,
                                 fontSize: 12,
