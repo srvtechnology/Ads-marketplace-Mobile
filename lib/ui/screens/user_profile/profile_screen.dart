@@ -715,6 +715,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ),
                   customTile(
                     context,
+                    title: "bankAccountDetails".translate(context),
+                    svgImagePath: AppIcons.bankTransferIcon,
+                    onTap: () {
+                      UiUtils.checkUser(
+                          onNotGuest: () {
+                            Navigator.pushNamed(
+                                context, Routes.bankDetailsScreen);
+                          },
+                          context: context);
+                    },
+                  ),
+                  customTile(
+                    context,
                     title: "language".translate(context),
                     svgImagePath: AppIcons.language,
                     onTap: () {

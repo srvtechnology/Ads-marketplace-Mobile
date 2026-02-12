@@ -345,8 +345,12 @@ class NotificationService {
         }
       } else {
         Future.delayed(Duration.zero, () {
-          HelperUtils.goToNextPage(Routes.notificationPage,
-              Constant.navigatorKey.currentContext!, false);
+          HelperUtils.goToNextPage(
+            Routes.main,
+            Constant.navigatorKey.currentContext!,
+            false,
+          );
+          MainActivity.globalKey.currentState?.onItemTapped(1);
         });
       }
     });

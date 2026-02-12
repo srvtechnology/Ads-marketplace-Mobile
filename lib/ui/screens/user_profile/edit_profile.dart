@@ -60,10 +60,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
   late final TextEditingController nameController = TextEditingController();
   late final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
-  final TextEditingController bankNameController = TextEditingController();
-  final TextEditingController accountNumberController = TextEditingController();
-  final TextEditingController accountHolderNameController =
-      TextEditingController();
   dynamic size;
   dynamic city, _state, country;
   double? latitude, longitude;
@@ -89,14 +85,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     nameController.text = (HiveUtils.getUserDetails().name) ?? "";
     emailController.text = HiveUtils.getUserDetails().email ?? "";
     addressController.text = HiveUtils.getUserDetails().address ?? "";
-
-    // Initialize bank details if available
-    // Note: Add these fields to UserModel if they exist in API response
-    bankNameController.text = HiveUtils.getUserDetails().bankName ?? "";
-    accountNumberController.text =
-        HiveUtils.getUserDetails().accountNumber ?? "";
-    accountHolderNameController.text =
-        HiveUtils.getUserDetails().accountHolderName ?? "";
 
     if (widget.from == "login") {
       isNotificationsEnabled = true;
@@ -142,9 +130,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
     nameController.dispose();
     emailController.dispose();
     addressController.dispose();
-    bankNameController.dispose();
-    accountNumberController.dispose();
-    accountHolderNameController.dispose();
   }
 
   @override
@@ -205,38 +190,6 @@ class UserProfileScreenState extends State<UserProfileScreen> {
                                 ),
                                 SizedBox(
                                   height: 20,
-                                ),
-                                Divider(
-                                  color: context.color.textLightColor
-                                      .withValues(alpha: 0.3),
-                                  thickness: 1,
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                CustomText(
-                                  "bankAccountDetails".translate(context),
-                                  fontSize: context.font.larger,
-                                  fontWeight: FontWeight.w600,
-                                  color: context.color.textDefaultColor,
-                                ),
-                                SizedBox(
-                                  height: 5,
-                                ),
-                                buildTextField(
-                                  context,
-                                  title: "bankName",
-                                  controller: bankNameController,
-                                ),
-                                buildTextField(
-                                  context,
-                                  title: "accountNumber",
-                                  controller: accountNumberController,
-                                ),
-                                buildTextField(
-                                  context,
-                                  title: "accountHolder",
-                                  controller: accountHolderNameController,
                                 ),
                                 SizedBox(
                                   height: 20,
@@ -618,18 +571,17 @@ class UserProfileScreenState extends State<UserProfileScreen> {
       isLoading = true;
     });
     try {
-      var response = await context.read<AuthCubit>().updateuserdata(context,
-          name: nameController.text.trim(),
-          email: emailController.text.trim(),
-          fileUserimg: fileUserimg,
-          address: addressController.text,
-          mobile: phoneController.text,
-          notification: isNotificationsEnabled == true ? "1" : "0",
-          countryCode: countryCode,
-          personalDetail: isPersonalDetailShow == true ? 1 : 0,
-          bankName: bankNameController.text.trim(),
-          accountNumber: accountNumberController.text.trim(),
-          accountHolderName: accountHolderNameController.text.trim());
+      var response = await context.read<AuthCubit>().updateuserdata(
+            context,
+            name: nameController.text.trim(),
+            email: emailController.text.trim(),
+            fileUserimg: fileUserimg,
+            address: addressController.text,
+            mobile: phoneController.text,
+            notification: isNotificationsEnabled == true ? "1" : "0",
+            countryCode: countryCode,
+            personalDetail: isPersonalDetailShow == true ? 1 : 0,
+          );
 
       Future.delayed(
         Duration.zero,

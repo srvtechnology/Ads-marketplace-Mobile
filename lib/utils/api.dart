@@ -144,6 +144,8 @@ class Api {
   static String unBlockUserApi = "unblock-user";
   static String blockedUsersListApi = "blocked-users";
   static String getPaymentDetailsApi = "payment-transactions";
+  static String getBankAccountDetailsApi = "get-bank-account-details";
+  static String updateBankAccountDetailsApi = "bank-account-details-update";
 
   static String userPurchasePackageApi = "user-purchase-package";
   static String deleteInquiryApi = "delete-inquiry";

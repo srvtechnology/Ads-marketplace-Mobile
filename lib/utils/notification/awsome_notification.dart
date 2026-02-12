@@ -345,8 +345,9 @@ class NotificationController {
       }
     } else {
       Future.delayed(Duration.zero, () {
-        Navigator.pushNamed(
-            Constant.navigatorKey.currentContext!, Routes.notificationPage);
+        Navigator.popUntil(
+            Constant.navigatorKey.currentContext!, (route) => route.isFirst);
+        MainActivity.globalKey.currentState?.onItemTapped(1);
       });
     }
   }

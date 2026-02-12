@@ -426,7 +426,7 @@ https://admin.thebhutanmarket.com/.well-known/apple-app-site-association
     "apps": [],
     "details": [
       {
-        "appID": "S8FMPCAZUD.com.bhutanmarket.srvtech",
+        "appID": "5D2JQYC6NS.com.bhutanmarket.srvtech",
         "paths": [
           "/product-details/*",
           "/seller/*"

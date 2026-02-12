@@ -51,6 +51,10 @@ import 'package:eClassify/ui/screens/sub_category/sub_category_screen.dart';
 import 'package:eClassify/ui/screens/subscription/packages_list.dart';
 import 'package:eClassify/ui/screens/subscription/transaction_history_screen.dart';
 import 'package:eClassify/ui/screens/user_profile/edit_profile.dart';
+import 'package:eClassify/ui/screens/user_profile/bank_details_screen.dart';
+import 'package:eClassify/data/cubits/bank_details_cubit.dart';
+import 'package:eClassify/data/repositories/bank_details_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
 import 'package:eClassify/utils/constant.dart';
@@ -92,6 +96,7 @@ class Routes {
   static const mostViewedItemsScreen = '/mostViewedItemsScreen';
   static const blogDetailsScreenRoute = '/blogDetailsScreenRoute';
   static const myReviewsScreen = '/myReviewsScreenRoute';
+  static const bankDetailsScreen = '/bankDetailsScreen';
 
   static const languageListScreenRoute = '/languageListScreenRoute';
   static const searchScreenRoute = '/searchScreenRoute';
@@ -308,6 +313,13 @@ class Routes {
         return NearbyLocationScreen.route(routeSettings);
       case myReviewsScreen:
         return MyReviewScreen.route(routeSettings);
+      case bankDetailsScreen:
+        return CupertinoPageRoute(
+            builder: (context) => BlocProvider(
+                  create: (context) =>
+                      BankDetailsCubit(BankDetailsRepository()),
+                  child: const BankDetailsScreen(),
+                ));
 
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());

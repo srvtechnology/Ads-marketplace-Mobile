@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/api.dart';
@@ -58,6 +59,13 @@ class LoginCubit extends Cubit<LoginState> {
 
       String? token = await () async {
         try {
+          if (Platform.isIOS) {
+            await FirebaseMessaging.instance.requestPermission(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+          }
           return await FirebaseMessaging.instance.getToken();
         } catch (_) {
           return '';
@@ -129,6 +137,13 @@ class LoginCubit extends Cubit<LoginState> {
       emit(LoginInProgress());
       String? token = await () async {
         try {
+          if (Platform.isIOS) {
+            await FirebaseMessaging.instance.requestPermission(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+          }
           return await FirebaseMessaging.instance.getToken();
         } catch (_) {
           return '';
