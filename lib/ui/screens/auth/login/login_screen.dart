@@ -959,7 +959,7 @@ class LoginScreenState extends State<LoginScreen> {
               CustomText(
                 isEmailOtp
                     ? emailController.text
-                    : "+${phoneLoginPayload.countryCode}\\t${phoneLoginPayload.phoneNumber}",
+                    : "+${phoneLoginPayload.countryCode}\t${phoneLoginPayload.phoneNumber}",
                 fontSize: context.font.large,
               ),
               const SizedBox(

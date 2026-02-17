@@ -114,8 +114,7 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
 
         HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   void _showLocationServiceInstructions() {
@@ -169,8 +168,7 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
 
         HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
       }
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override
@@ -217,22 +215,7 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
                 },
                     radius: 8,
                     height: 46,
-                    buttonTitle: "findMyLocation".translate(context)),
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
-                child: UiUtils.buildButton(context,
-                    showElevation: false,
-                    buttonColor: context.color.backgroundColor,
-                    border: BorderSide(color: context.color.territoryColor),
-                    textColor: context.color.territoryColor, onPressed: () {
-                  Navigator.pushNamed(context, Routes.countriesScreen,
-                      arguments: {"from": "location"});
-                },
-                    radius: 8,
-                    height: 46,
-                    buttonTitle: "otherLocation".translate(context)),
+                    buttonTitle: "next".translate(context)),
               ),
             ],
           ),
