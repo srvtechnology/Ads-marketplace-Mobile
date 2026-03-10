@@ -174,8 +174,6 @@ class UiUtils {
       fit: fit,
       width: width,
       height: height,
-      memCacheHeight: 1000,
-      memCacheWidth: 1000,
       placeholder: (context, url) {
         return Container(
             width: width,
