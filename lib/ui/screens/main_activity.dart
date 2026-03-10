@@ -270,9 +270,12 @@ class MainActivityState extends State<MainActivity>
     super.dispose();
   }
 
+  final GlobalKey<ChatListScreenState> _chatListKey =
+      GlobalKey<ChatListScreenState>();
+
   late List<Widget> pages = [
     HomeScreen(from: widget.from),
-    ChatListScreen(),
+    ChatListScreen(key: _chatListKey),
     ItemsScreen(),
     const ProfileScreen(),
   ];
@@ -356,6 +359,12 @@ class MainActivityState extends State<MainActivity>
             setState(
               () {},
             );
+            // Refresh chat lists every time the Chat tab is tapped.
+            if (index == 1) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _chatListKey.currentState?.refresh();
+              });
+            }
           },
           context: context);
     } else {

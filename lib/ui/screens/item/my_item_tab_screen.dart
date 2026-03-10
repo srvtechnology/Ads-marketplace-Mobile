@@ -246,26 +246,56 @@ class _MyItemTabState extends CloudState<MyItemTab> {
           if (state is FetchMyItemsFailed) {
             if (state.error is ApiException) {
               if (state.error.error == "no-internet") {
-                return NoInternet(
-                  onRetry: () {
-                    context.read<FetchMyItemsCubit>().fetchMyItems(
-                        getItemsWithStatus: widget.getItemsWithStatus);
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight,
+                        child: NoInternet(
+                          onRetry: () {
+                            context.read<FetchMyItemsCubit>().fetchMyItems(
+                                getItemsWithStatus: widget.getItemsWithStatus);
+                          },
+                        ),
+                      ),
+                    );
                   },
                 );
               }
             }
 
-            return const SomethingWentWrong();
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: constraints.maxHeight,
+                    child: const SomethingWentWrong(),
+                  ),
+                );
+              },
+            );
           }
 
           if (state is FetchMyItemsSuccess) {
             if (state.items.isEmpty) {
-              return NoDataFound(
-                mainMessage: "noItemsFound".translate(context),
-                subMessage: "noItemsAvailable".translate(context),
-                onTap: () {
-                  context.read<FetchMyItemsCubit>().fetchMyItems(
-                      getItemsWithStatus: widget.getItemsWithStatus);
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: NoDataFound(
+                        mainMessage: "noItemsFound".translate(context),
+                        subMessage: "noItemsAvailable".translate(context),
+                        onTap: () {
+                          context.read<FetchMyItemsCubit>().fetchMyItems(
+                              getItemsWithStatus: widget.getItemsWithStatus);
+                        },
+                      ),
+                    ),
+                  );
                 },
               );
             }
@@ -275,6 +305,7 @@ class _MyItemTabState extends CloudState<MyItemTab> {
                 Expanded(
                   child: ListView.separated(
                     shrinkWrap: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     controller: _pageScrollController,
                     padding: const EdgeInsets.symmetric(
                       horizontal: sidePadding,

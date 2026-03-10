@@ -33,18 +33,43 @@ class ChatListScreen extends StatefulWidget {
   }
 
   @override
-  State<ChatListScreen> createState() => _ChatListScreenState();
+  State<ChatListScreen> createState() => ChatListScreenState();
 }
 
-class _ChatListScreenState extends State<ChatListScreen>
-    with AutomaticKeepAliveClientMixin {
+class ChatListScreenState extends State<ChatListScreen>
+    with SingleTickerProviderStateMixin {
   ScrollController chatBuyerScreenController = ScrollController();
   ScrollController chatSellerScreenController = ScrollController();
+  late TabController _tabController;
 
   StreamSubscription? _pusherSubscription;
 
+  /// Called from MainActivity when the Chat bottom-nav tab is tapped.
+  void refresh() {
+    if (!mounted) return;
+    if (HiveUtils.isUserAuthenticated()) {
+      context.read<GetBuyerChatListCubit>().fetch();
+      context.read<GetSellerChatListCubit>().fetch();
+    }
+  }
+
   @override
   void initState() {
+    super.initState();
+
+    _tabController = TabController(length: 2, vsync: this);
+
+    // Refresh the relevant cubit whenever the user switches tabs.
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) return;
+      if (!mounted) return;
+      if (_tabController.index == 0) {
+        context.read<GetSellerChatListCubit>().fetch();
+      } else {
+        context.read<GetBuyerChatListCubit>().fetch();
+      }
+    });
+
     if (HiveUtils.isUserAuthenticated()) {
       context.read<GetBuyerChatListCubit>().fetch();
       context.read<GetSellerChatListCubit>().fetch();
@@ -76,13 +101,12 @@ class _ChatListScreenState extends State<ChatListScreen>
         }
       });
     }
-
-    super.initState();
   }
 
   @override
   void dispose() {
     _pusherSubscription?.cancel();
+    _tabController.dispose();
     chatBuyerScreenController.dispose();
     chatSellerScreenController.dispose();
     super.dispose();
@@ -90,14 +114,13 @@ class _ChatListScreenState extends State<ChatListScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return AnnotatedRegion(
       value: UiUtils.getSystemUiOverlayStyle(
         context: context,
         statusBarColor: context.color.secondaryColor,
       ),
       child: DefaultTabController(
-        length: 2, // Number of tabs
+        length: 2,
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
           appBar: UiUtils.buildAppBar(
@@ -117,25 +140,19 @@ class _ChatListScreenState extends State<ChatListScreen>
 
             bottom: [
               TabBar(
+                controller: _tabController,
                 tabs: [
                   Tab(text: 'selling'.translate(context)),
                   Tab(text: 'buying'.translate(context)),
                 ],
-
                 indicatorColor: context.color.textDefaultColor,
-                // Line color
                 indicatorWeight: 1.5,
-                // Line thickness
                 labelColor: context.color.textDefaultColor,
-                // Selected tab text color
                 unselectedLabelColor:
                     context.color.textDefaultColor.withValues(alpha: 0.5),
-                // Unselected tab text color
                 labelStyle:
                     TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                // Selected tab text style
                 labelPadding: EdgeInsets.symmetric(horizontal: 16),
-                // Padding around the tab text
                 indicatorSize: TabBarIndicatorSize.tab,
               ),
               Divider(
@@ -147,10 +164,9 @@ class _ChatListScreenState extends State<ChatListScreen>
             ],
           ),
           body: TabBarView(
+            controller: _tabController,
             children: [
-              // Content of the 'Selling' tab
               sellingChatListData(),
-              // Content of the 'Buying' tab
               buyingChatListData(),
             ],
           ),
@@ -170,15 +186,35 @@ class _ChatListScreenState extends State<ChatListScreen>
           if (state is GetBuyerChatListFailed) {
             if (state.error is ApiException) {
               if (state.error.errorMessage == "no-internet") {
-                return NoInternet(
-                  onRetry: () {
-                    context.read<GetBuyerChatListCubit>().fetch();
+                return LayoutBuilder(
+                  builder: (context, constraints) {
+                    return SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: SizedBox(
+                        height: constraints.maxHeight,
+                        child: NoInternet(
+                          onRetry: () {
+                            context.read<GetBuyerChatListCubit>().fetch();
+                          },
+                        ),
+                      ),
+                    );
                   },
                 );
               }
             }
 
-            return const NoChatFound();
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: SizedBox(
+                    height: constraints.maxHeight,
+                    child: const NoChatFound(),
+                  ),
+                );
+              },
+            );
           }
 
           if (state is GetBuyerChatListInProgress) {
@@ -186,7 +222,17 @@ class _ChatListScreenState extends State<ChatListScreen>
           }
           if (state is GetBuyerChatListSuccess) {
             if (state.chatedUserList.isEmpty) {
-              return NoChatFound();
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: SizedBox(
+                      height: constraints.maxHeight,
+                      child: const NoChatFound(),
+                    ),
+                  );
+                },
+              );
             }
             return Column(
               children: [
@@ -194,6 +240,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                   child: ListView.builder(
                       controller: chatBuyerScreenController,
                       shrinkWrap: true,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       itemCount: state.chatedUserList.length,
                       padding: const EdgeInsetsDirectional.symmetric(
                           horizontal: 8, vertical: 4),
@@ -339,15 +386,37 @@ class _ChatListScreenState extends State<ChatListScreen>
                     if (state is GetSellerChatListFailed) {
                       if (state.error is ApiException) {
                         if (state.error.errorMessage == "no-internet") {
-                          return NoInternet(
-                            onRetry: () {
-                              context.read<GetSellerChatListCubit>().fetch();
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              return SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: SizedBox(
+                                  height: constraints.maxHeight,
+                                  child: NoInternet(
+                                    onRetry: () {
+                                      context
+                                          .read<GetSellerChatListCubit>()
+                                          .fetch();
+                                    },
+                                  ),
+                                ),
+                              );
                             },
                           );
                         }
                       }
 
-                      return const NoChatFound();
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            physics: const AlwaysScrollableScrollPhysics(),
+                            child: SizedBox(
+                              height: constraints.maxHeight,
+                              child: const NoChatFound(),
+                            ),
+                          );
+                        },
+                      );
                     }
 
                     if (state is GetSellerChatListInProgress) {
@@ -355,7 +424,17 @@ class _ChatListScreenState extends State<ChatListScreen>
                     }
                     if (state is GetSellerChatListSuccess) {
                       if (state.chatedUserList.isEmpty) {
-                        return const NoChatFound();
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
+                            return SingleChildScrollView(
+                              physics: const AlwaysScrollableScrollPhysics(),
+                              child: SizedBox(
+                                height: constraints.maxHeight,
+                                child: const NoChatFound(),
+                              ),
+                            );
+                          },
+                        );
                       }
 
                       return Column(
@@ -364,6 +443,7 @@ class _ChatListScreenState extends State<ChatListScreen>
                             child: ListView.builder(
                                 controller: chatSellerScreenController,
                                 shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
                                 itemCount: state.chatedUserList.length,
                                 padding: const EdgeInsetsDirectional.symmetric(
                                     horizontal: 8, vertical: 4),
@@ -514,7 +594,4 @@ class _ChatListScreenState extends State<ChatListScreen>
           );
         });
   }
-
-  @override
-  bool get wantKeepAlive => true;
 }
