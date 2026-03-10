@@ -86,8 +86,9 @@ class _TransactionHistoryState extends State<TransactionHistory> {
 
     final pickedFile = await ImagePicker().pickImage(
         source: imageSource,
-        imageQuality: 75,
-        requestFullMetadata: false); // Fix for iOS green tint issue
+        imageQuality:
+            Platform.isIOS ? null : 75, // Fix for iOS green tint issue
+        requestFullMetadata: false);
 
     if (pickedFile != null) {
       receiptImage = File(pickedFile.path);

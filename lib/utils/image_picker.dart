@@ -35,9 +35,11 @@ class PickImage {
       if (pickMultiple == false || pickMultiple == null) {
         final XFile? pickedFile = await _picker.pickImage(
           source: source ?? ImageSource.gallery,
-          imageQuality: Platform.isIOS ? null : Constant.uploadImageQuality,
+          imageQuality: Platform.isIOS
+              ? null
+              : Constant.uploadImageQuality, // Fix for iOS green tint issue
           preferredCameraDevice: CameraDevice.rear,
-          requestFullMetadata: false, // Fix for iOS green tint issue
+          requestFullMetadata: false,
         );
         if (pickedFile != null) {
           File file = File(pickedFile.path);
