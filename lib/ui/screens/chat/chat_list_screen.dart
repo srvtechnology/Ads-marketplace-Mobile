@@ -2,6 +2,7 @@ import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/model/chat/chat_user_model.dart';
 import 'package:eClassify/services/pusher_service.dart';
 import 'package:eClassify/ui/screens/chat/chatTile.dart';
@@ -256,171 +257,176 @@ class _ChatListScreenState extends State<ChatListScreen>
   }
 
   Widget sellingChatListData() {
-    return RefreshIndicator(
-      onRefresh: () async {
-        context.read<GetSellerChatListCubit>().fetch();
-      },
-      color: context.color.territoryColor,
-      child: BlocBuilder<GetSellerChatListCubit, GetSellerChatListState>(
-        builder: (context, state) {
-          if (state is GetSellerChatListFailed) {
-            if (state.error is ApiException) {
-              if (state.error.errorMessage == "no-internet") {
-                return NoInternet(
-                  onRetry: () {
-                    context.read<GetSellerChatListCubit>().fetch();
-                  },
-                );
-              }
-            }
-
-            return const NoChatFound();
-          }
-
-          if (state is GetSellerChatListInProgress) {
-            return buildChatListLoadingShimmer();
-          }
-          if (state is GetSellerChatListSuccess) {
-            if (state.chatedUserList.isEmpty) {
-              return NoChatFound();
-            }
-
-            // Check if bank details are incomplete
-            final userDetails = HiveUtils.getUserDetails();
-            final isBankDetailsIncomplete = (userDetails.bankName == null ||
-                    userDetails.bankName!.isEmpty) ||
+    return BlocBuilder<UserDetailsCubit, UserDetailsState>(
+      builder: (context, userState) {
+        final userDetails = userState.user;
+        final isBankDetailsIncomplete = userDetails == null ||
+            ((userDetails.bankName == null ||
+                    userDetails.bankName!.isEmpty ||
+                    userDetails.bankName == "null") &&
                 (userDetails.accountNumber == null ||
-                    userDetails.accountNumber!.isEmpty) ||
+                    userDetails.accountNumber!.isEmpty ||
+                    userDetails.accountNumber == "null") &&
                 (userDetails.accountHolderName == null ||
-                    userDetails.accountHolderName!.isEmpty);
+                    userDetails.accountHolderName!.isEmpty ||
+                    userDetails.accountHolderName == "null"));
 
-            return Column(
-              children: [
-                // Bank details warning banner
-                if (isBankDetailsIncomplete)
-                  Container(
-                    margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color:
-                          context.color.territoryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color:
-                            context.color.territoryColor.withValues(alpha: 0.3),
-                        width: 1,
+        return Column(
+          children: [
+            // Bank details warning banner
+            if (isBankDetailsIncomplete)
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: context.color.territoryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: context.color.territoryColor.withValues(alpha: 0.3),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      color: context.color.territoryColor,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "fillBankDetailsWarning".translate(context),
+                        style: TextStyle(
+                          color: context.color.textDefaultColor,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.warning_amber_rounded,
-                          color: context.color.territoryColor,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "fillBankDetailsWarning".translate(context),
-                                style: TextStyle(
-                                  color: context.color.textDefaultColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              Routes.bankDetailsScreen,
-                            );
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: context.color.territoryColor,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              "updateBankDetails".translate(context),
-                              style: TextStyle(
-                                color: context.color.buttonColor,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                Expanded(
-                  child: ListView.builder(
-                      controller: chatSellerScreenController,
-                      shrinkWrap: true,
-                      itemCount: state.chatedUserList.length,
-                      padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 8, vertical: 4),
-                      itemBuilder: (
-                        context,
-                        index,
-                      ) {
-                        ChatUser chatedUser = state.chatedUserList[index];
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: ChatTile(
-                            id: chatedUser.buyerId.toString(),
-                            itemId: chatedUser.itemId.toString(),
-                            isBuyerList: false,
-                            profilePicture: chatedUser.buyer?.profile ?? "",
-                            userName: chatedUser.buyer?.name ?? "",
-                            itemPicture: chatedUser.item != null &&
-                                    chatedUser.item!.image != null
-                                ? chatedUser.item!.image!
-                                : "",
-                            itemName: chatedUser.item != null &&
-                                    chatedUser.item!.name != null
-                                ? chatedUser.item!.name!
-                                : "",
-                            pendingMessageCount: "5",
-                            date: chatedUser.createdAt ?? '',
-                            itemOfferId: chatedUser.id!,
-                            itemPrice: chatedUser.item != null &&
-                                    chatedUser.item!.price != null
-                                ? chatedUser.item!.price!
-                                : 0,
-                            itemAmount: chatedUser.amount ?? null,
-                            status: chatedUser.item != null &&
-                                    chatedUser.item!.status != null
-                                ? chatedUser.item!.status!
-                                : null,
-                            buyerId: chatedUser.buyerId.toString(),
-                            isPurchased: chatedUser.item?.isPurchased ?? 0,
-                            alreadyReview: chatedUser.item?.review != null,
-                            unreadCount: chatedUser.unreadCount,
-                          ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      onPressed: () async {
+                        await Navigator.pushNamed(
+                          context,
+                          Routes.bankDetailsScreen,
                         );
-                      }),
+                        if (mounted) {
+                          setState(() {});
+                        }
+                      },
+                      icon: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: context.color.territoryColor,
+                        size: 18,
+                      ),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
                 ),
-                if (state.isLoadingMore) UiUtils.progress()
-              ],
-            );
-          }
+              ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  context.read<GetSellerChatListCubit>().fetch();
+                },
+                color: context.color.territoryColor,
+                child:
+                    BlocBuilder<GetSellerChatListCubit, GetSellerChatListState>(
+                  builder: (context, state) {
+                    if (state is GetSellerChatListFailed) {
+                      if (state.error is ApiException) {
+                        if (state.error.errorMessage == "no-internet") {
+                          return NoInternet(
+                            onRetry: () {
+                              context.read<GetSellerChatListCubit>().fetch();
+                            },
+                          );
+                        }
+                      }
 
-          return Container();
-        },
-      ),
+                      return const NoChatFound();
+                    }
+
+                    if (state is GetSellerChatListInProgress) {
+                      return buildChatListLoadingShimmer();
+                    }
+                    if (state is GetSellerChatListSuccess) {
+                      if (state.chatedUserList.isEmpty) {
+                        return const NoChatFound();
+                      }
+
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: ListView.builder(
+                                controller: chatSellerScreenController,
+                                shrinkWrap: true,
+                                itemCount: state.chatedUserList.length,
+                                padding: const EdgeInsetsDirectional.symmetric(
+                                    horizontal: 8, vertical: 4),
+                                itemBuilder: (
+                                  context,
+                                  index,
+                                ) {
+                                  ChatUser chatedUser =
+                                      state.chatedUserList[index];
+
+                                  return Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 4),
+                                    child: ChatTile(
+                                      id: chatedUser.buyerId.toString(),
+                                      itemId: chatedUser.itemId.toString(),
+                                      isBuyerList: false,
+                                      profilePicture:
+                                          chatedUser.buyer?.profile ?? "",
+                                      userName: chatedUser.buyer?.name ?? "",
+                                      itemPicture: chatedUser.item != null &&
+                                              chatedUser.item!.image != null
+                                          ? chatedUser.item!.image!
+                                          : "",
+                                      itemName: chatedUser.item != null &&
+                                              chatedUser.item!.name != null
+                                          ? chatedUser.item!.name!
+                                          : "",
+                                      pendingMessageCount: "5",
+                                      date: chatedUser.createdAt ?? '',
+                                      itemOfferId: chatedUser.id!,
+                                      itemPrice: chatedUser.item != null &&
+                                              chatedUser.item!.price != null
+                                          ? chatedUser.item!.price!
+                                          : 0,
+                                      itemAmount: chatedUser.amount ?? null,
+                                      status: chatedUser.item != null &&
+                                              chatedUser.item!.status != null
+                                          ? chatedUser.item!.status!
+                                          : null,
+                                      buyerId: chatedUser.buyerId.toString(),
+                                      isPurchased:
+                                          chatedUser.item?.isPurchased ?? 0,
+                                      alreadyReview:
+                                          chatedUser.item?.review != null,
+                                      unreadCount: chatedUser.unreadCount,
+                                    ),
+                                  );
+                                }),
+                          ),
+                          if (state.isLoadingMore) UiUtils.progress()
+                        ],
+                      );
+                    }
+
+                    return Container();
+                  },
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

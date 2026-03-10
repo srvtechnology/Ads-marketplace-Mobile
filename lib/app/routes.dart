@@ -53,6 +53,7 @@ import 'package:eClassify/ui/screens/subscription/transaction_history_screen.dar
 import 'package:eClassify/ui/screens/user_profile/edit_profile.dart';
 import 'package:eClassify/ui/screens/user_profile/bank_details_screen.dart';
 import 'package:eClassify/data/cubits/bank_details_cubit.dart';
+import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/repositories/bank_details_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -316,11 +317,10 @@ class Routes {
       case bankDetailsScreen:
         return CupertinoPageRoute(
             builder: (context) => BlocProvider(
-                  create: (context) =>
-                      BankDetailsCubit(BankDetailsRepository()),
+                  create: (context) => BankDetailsCubit(BankDetailsRepository(),
+                      context.read<UserDetailsCubit>()),
                   child: const BankDetailsScreen(),
                 ));
-
       default:
         return CupertinoPageRoute(builder: (context) => const Scaffold());
     }

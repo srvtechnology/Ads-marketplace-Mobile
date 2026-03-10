@@ -145,7 +145,7 @@ class ItemHorizontalCard extends StatelessWidget {
                                       ? 122
                                       : (122 + (additionalHeight ?? 0)),
                                   width: 100 + (additionalImageWidth ?? 0),
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                               // CustomText(item.promoted.toString()),

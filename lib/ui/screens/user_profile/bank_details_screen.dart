@@ -69,6 +69,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
                 state.data['account_holder_name'] ?? "";
           } else if (state is BankDetailsUpdateSuccess) {
             HelperUtils.showSnackBarMessage(context, state.message);
+
             // Optionally pop or keep on screen
           } else if (state is BankDetailsFetchFailure) {
             HelperUtils.showSnackBarMessage(context, state.errorMessage);

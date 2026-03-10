@@ -570,97 +570,108 @@ class _ChatScreenState extends State<ChatScreen>
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             SizedBox(height: 5),
-                                            Row(
-                                              children: [
-                                                Expanded(
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        isChatTab = true;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 8),
-                                                      decoration: BoxDecoration(
-                                                        border: Border(
-                                                          bottom: BorderSide(
+                                            if (widget.isFromBuyerList != false)
+                                              Row(
+                                                children: [
+                                                  Expanded(
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          isChatTab = true;
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                vertical: 8),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border(
+                                                            bottom: BorderSide(
+                                                              color: isChatTab
+                                                                  ? context
+                                                                      .color
+                                                                      .territoryColor
+                                                                  : Colors
+                                                                      .transparent,
+                                                              width: 2,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Center(
+                                                          child: CustomText(
+                                                            "Chat",
+                                                            fontWeight:
+                                                                isChatTab
+                                                                    ? FontWeight
+                                                                        .bold
+                                                                    : FontWeight
+                                                                        .normal,
                                                             color: isChatTab
                                                                 ? context.color
                                                                     .territoryColor
-                                                                : Colors
-                                                                    .transparent,
-                                                            width: 2,
+                                                                : context.color
+                                                                    .textLightColor,
                                                           ),
-                                                        ),
-                                                      ),
-                                                      child: Center(
-                                                        child: CustomText(
-                                                          "Chat",
-                                                          fontWeight: isChatTab
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                          color: isChatTab
-                                                              ? context.color
-                                                                  .territoryColor
-                                                              : context.color
-                                                                  .textLightColor,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                                Expanded(
-                                                  child: InkWell(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        isChatTab = false;
-                                                        if (offerController
-                                                            .text.isEmpty) {
-                                                          offerController.text =
-                                                              widget.itemPrice
-                                                                  .toStringAsFixed(
-                                                                      0);
-                                                        }
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      padding:
-                                                          EdgeInsets.symmetric(
-                                                              vertical: 8),
-                                                      decoration: BoxDecoration(
-                                                        border: Border(
-                                                          bottom: BorderSide(
+                                                  Expanded(
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        setState(() {
+                                                          isChatTab = false;
+                                                          if (offerController
+                                                              .text.isEmpty) {
+                                                            offerController
+                                                                    .text =
+                                                                widget.itemPrice
+                                                                    .toStringAsFixed(
+                                                                        0);
+                                                          }
+                                                        });
+                                                      },
+                                                      child: Container(
+                                                        padding: EdgeInsets
+                                                            .symmetric(
+                                                                vertical: 8),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          border: Border(
+                                                            bottom: BorderSide(
+                                                              color: !isChatTab
+                                                                  ? context
+                                                                      .color
+                                                                      .territoryColor
+                                                                  : Colors
+                                                                      .transparent,
+                                                              width: 2,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Center(
+                                                          child: CustomText(
+                                                            "Make Offer",
+                                                            fontWeight:
+                                                                !isChatTab
+                                                                    ? FontWeight
+                                                                        .bold
+                                                                    : FontWeight
+                                                                        .normal,
                                                             color: !isChatTab
                                                                 ? context.color
                                                                     .territoryColor
-                                                                : Colors
-                                                                    .transparent,
-                                                            width: 2,
+                                                                : context.color
+                                                                    .textLightColor,
                                                           ),
-                                                        ),
-                                                      ),
-                                                      child: Center(
-                                                        child: CustomText(
-                                                          "Make Offer",
-                                                          fontWeight: !isChatTab
-                                                              ? FontWeight.bold
-                                                              : FontWeight
-                                                                  .normal,
-                                                          color: !isChatTab
-                                                              ? context.color
-                                                                  .territoryColor
-                                                              : context.color
-                                                                  .textLightColor,
                                                         ),
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
+                                                ],
+                                              ),
+                                            const SizedBox(height: 10),
                                             if (isChatTab) ...[
                                               if (!isBlocked)
                                                 Padding(

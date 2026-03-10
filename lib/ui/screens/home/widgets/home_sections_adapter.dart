@@ -278,7 +278,7 @@ class _ItemCardState extends State<ItemCard> {
                         widget.item?.image ?? "",
                         height: MediaQuery.sizeOf(context).height / 5.45,
                         width: double.infinity,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                       ),
                     ),
                     if (widget.item?.isFeature ?? false)

@@ -1,4 +1,7 @@
+import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/data/model/user_model.dart';
 import 'package:eClassify/data/repositories/bank_details_repository.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BankDetailsState {}
@@ -32,14 +35,25 @@ class BankDetailsUpdateFailure extends BankDetailsState {
 
 class BankDetailsCubit extends Cubit<BankDetailsState> {
   final BankDetailsRepository _repository;
+  final UserDetailsCubit _userDetailsCubit;
 
-  BankDetailsCubit(this._repository) : super(BankDetailsInitial());
+  BankDetailsCubit(this._repository, this._userDetailsCubit)
+      : super(BankDetailsInitial());
 
   void fetchBankDetails() async {
     emit(BankDetailsFetchInProgress());
     try {
       final result = await _repository.getBankAccountDetails();
-      emit(BankDetailsFetchSuccess(result['data']));
+      final data = result['data'];
+
+      // Sync with Hive
+      await HiveUtils.setUserData(data);
+
+      // Sync with UserDetailsCubit
+      UserModel currentUser = HiveUtils.getUserDetails();
+      _userDetailsCubit.fill(currentUser);
+
+      emit(BankDetailsFetchSuccess(data));
     } catch (e) {
       emit(BankDetailsFetchFailure(e.toString()));
     }
@@ -58,9 +72,16 @@ class BankDetailsCubit extends Cubit<BankDetailsState> {
         accountHolderName: accountHolderName,
       );
 
-      // Update local hive data if successful?
-      // The user model has these fields, maybe we should update them too.
-      // But the cubit just handles its own state for now.
+      // Update local hive data if successful
+      await HiveUtils.setUserData({
+        'bank_name': bankName,
+        'account_number': accountNumber,
+        'account_holder_name': accountHolderName,
+      });
+
+      // Sync with UserDetailsCubit
+      UserModel currentUser = HiveUtils.getUserDetails();
+      _userDetailsCubit.fill(currentUser);
 
       emit(BankDetailsUpdateSuccess(
         data: result['data'],

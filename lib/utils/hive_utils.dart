@@ -69,7 +69,7 @@ class HiveUtils {
     Hive.box(HiveKeys.themeBox).put(HiveKeys.currentTheme, newTheme);
   }
 
-  static void setUserData(Map data) async {
+  static Future<void> setUserData(Map data) async {
     await Hive.box(HiveKeys.userDetailsBox).putAll(data);
   }
 
