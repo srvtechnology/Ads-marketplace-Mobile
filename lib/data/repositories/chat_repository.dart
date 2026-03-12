@@ -62,6 +62,14 @@ class ChatRepository {
             ? double.tryParse(result['amount'].toString())
             : null;
 
+        if (amount == null && type == "O" && message != null) {
+          String cleanMessage = message.trim();
+          if (cleanMessage.startsWith("Offered:")) {
+            String raw = cleanMessage.substring("Offered:".length).trim();
+            amount = double.tryParse(raw.replaceAll(RegExp(r'[^0-9.]'), ''));
+          }
+        }
+
         return ChatMessage(
           key: ValueKey(id),
           id: id,

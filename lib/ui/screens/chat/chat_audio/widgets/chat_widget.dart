@@ -94,6 +94,18 @@ class ChatMessage extends StatefulWidget {
   }
 
   factory ChatMessage.fromJson(Map json) {
+    double? amount = json['amount'] != null
+        ? double.tryParse(json['amount'].toString())
+        : null;
+
+    if (amount == null && json['type'] == "O" && json['message'] != null) {
+      String message = json['message'].toString().trim();
+      if (message.startsWith("Offered:")) {
+        String raw = message.substring("Offered:".length).trim();
+        amount = double.tryParse(raw.replaceAll(RegExp(r'[^0-9.]'), ''));
+      }
+    }
+
     var chat = ChatMessage(
         key: json['key'],
         id: json['id'],
@@ -107,7 +119,7 @@ class ChatMessage extends StatefulWidget {
         isSentNow: json['is_sent_now'],
         messageType: json['message_type'],
         type: json['type'],
-        amount: json['amount'],
+        amount: amount,
         offerStatus: json['offer_status'],
         itemStatus: json['item_status']);
     return chat;
@@ -169,7 +181,7 @@ class ChatMessageState extends State<ChatMessage>
   }
 
   String get _offerDisplayAmount {
-    if (widget.type == "O") {
+    if (widget.type == "O" && widget.amount != null) {
       return (Constant.currencyPositionIsLeft
               ? "${Constant.currencySymbol} "
               : "") +

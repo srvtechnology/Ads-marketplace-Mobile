@@ -289,7 +289,11 @@ class HelperUtils {
       final int fileSize = await file.length();
 
       if (fileSize <= Constant.maxSizeInBytes) {
-        // No need to compress if already within size limit
+        // No need to compress if already within size limit.
+        // On iOS, still need to fix EXIF rotation to prevent green tint.
+        if (Platform.isIOS) {
+          return await _fixIOSImageOrientation(file);
+        }
         return file;
       }
 
@@ -304,6 +308,38 @@ class HelperUtils {
         outPath,
         quality: Constant.uploadImageQuality,
         format: CompressFormat.jpeg,
+        // Fix for iOS green tint: correct EXIF rotation during re-encoding
+        // and strip EXIF so downstream Image.file doesn't re-rotate.
+        autoCorrectionAngle: true,
+        keepExif: false,
+      );
+
+      return result != null ? File(result.path) : file;
+    } catch (e) {
+      return file;
+    }
+  }
+
+  /// Fixes iOS EXIF orientation by re-encoding the image to JPEG with
+  /// the rotation baked in. This prevents the green tint that occurs when
+  /// flutter_image_compress processes HEIC/camera JPEGs without handling
+  /// the EXIF orientation tag correctly.
+  static Future<File> _fixIOSImageOrientation(File file) async {
+    try {
+      final filePath = file.absolute.path;
+      final lastIndex = filePath.lastIndexOf('.');
+      final splitted =
+          (lastIndex != -1) ? filePath.substring(0, lastIndex) : filePath;
+      final outPath = "${splitted}_rotated.jpg";
+
+      // Re-encode at high quality just to bake in rotation and strip EXIF
+      XFile? result = await FlutterImageCompress.compressAndGetFile(
+        filePath,
+        outPath,
+        quality: 95, // High quality since we're only fixing orientation
+        format: CompressFormat.jpeg,
+        autoCorrectionAngle: true, // Bake EXIF rotation into pixel data
+        keepExif: false, // Strip EXIF so no double-rotation happens
       );
 
       return result != null ? File(result.path) : file;

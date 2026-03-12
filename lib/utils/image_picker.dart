@@ -44,7 +44,10 @@ class PickImage {
         if (pickedFile != null) {
           File file = File(pickedFile.path);
 
-          if (await file.length() > Constant.maxSizeInBytes) {
+          // On iOS: always run through compressImageFile to bake in EXIF
+          // rotation and prevent green tint on auto-rotated camera images.
+          // On other platforms: only compress if over size limit.
+          if (Platform.isIOS || await file.length() > Constant.maxSizeInBytes) {
             file = await HelperUtils.compressImageFile(file);
           }
 
@@ -67,10 +70,10 @@ class PickImage {
         } else {
           Iterable<Future<File>> result = list.map((image) async {
             File myImage = File(image.path);
-            if (await myImage.length() > Constant.maxSizeInBytes) {
+            // On iOS: always fix orientation; on others: only if over limit.
+            if (Platform.isIOS ||
+                await myImage.length() > Constant.maxSizeInBytes) {
               myImage = await HelperUtils.compressImageFile(myImage);
-            } else {
-              myImage = File(image.path);
             }
             return myImage;
           });
