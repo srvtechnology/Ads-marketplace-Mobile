@@ -117,6 +117,7 @@ class _ChatScreenState extends State<ChatScreen>
   bool isLoading = false;
   bool isChatTab = true;
   TextEditingController offerController = TextEditingController();
+  FocusNode offerFocusNode = FocusNode();
 
   @override
   void initState() {
@@ -193,6 +194,7 @@ class _ChatScreenState extends State<ChatScreen>
     _pusherSubscription?.cancel();
     notificationStreamSubscription.cancel();
     controller.dispose();
+    offerFocusNode.dispose();
     super.dispose();
   }
 
@@ -989,6 +991,8 @@ class _ChatScreenState extends State<ChatScreen>
                                                               child: TextField(
                                                                 controller:
                                                                     offerController,
+                                                                focusNode:
+                                                                    offerFocusNode,
                                                                 keyboardType:
                                                                     TextInputType
                                                                         .number,
@@ -1012,6 +1016,24 @@ class _ChatScreenState extends State<ChatScreen>
                                                                           .color
                                                                           .textLightColor),
                                                                 ),
+                                                              ),
+                                                            ),
+                                                            IconButton(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .zero,
+                                                              constraints:
+                                                                  const BoxConstraints(),
+                                                              onPressed: () {
+                                                                offerFocusNode
+                                                                    .requestFocus();
+                                                              },
+                                                              icon: Icon(
+                                                                Icons.edit,
+                                                                size: 20,
+                                                                color: context
+                                                                    .color
+                                                                    .territoryColor,
                                                               ),
                                                             ),
                                                           ],
