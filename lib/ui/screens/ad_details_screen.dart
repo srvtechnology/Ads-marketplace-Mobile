@@ -1500,94 +1500,75 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                 );
               }
             },
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (chatedUser == null)
-                  Expanded(
-                    child: _buildButton("makeAnOffer".translate(context), () {
-                      UiUtils.checkUser(
-                          onNotGuest: () {
-                            safetyTipsBottomSheet();
-                            //makeOfferBottomSheet(model);
-                          },
-                          context: context);
-                    }, null, null),
-                  ),
-                if (chatedUser == null) SizedBox(width: 10),
-                Expanded(
-                  child: _buildButton("chat".translate(context), () {
-                    UiUtils.checkUser(
-                        onNotGuest: () {
-                          if (chatedUser != null) {
-                            Navigator.push(context, MaterialPageRoute(
-                              builder: (context) {
-                                return MultiBlocProvider(
-                                  providers: [
-                                    BlocProvider(
-                                      create: (context) => SendMessageCubit(),
-                                    ),
-                                    BlocProvider(
-                                      create: (context) =>
-                                          LoadChatMessagesCubit(),
-                                    ),
-                                    BlocProvider(
-                                      create: (context) => DeleteMessageCubit(),
-                                    ),
-                                  ],
-                                  child: ChatScreen(
-                                    itemId: chatedUser.itemId.toString(),
-                                    profilePicture: chatedUser.seller != null &&
-                                            chatedUser.seller!.profile != null
-                                        ? chatedUser.seller!.profile!
-                                        : "",
-                                    userName: chatedUser.seller != null &&
-                                            chatedUser.seller!.name != null
-                                        ? chatedUser.seller!.name!
-                                        : "",
-                                    date: chatedUser.createdAt!,
-                                    itemOfferId: chatedUser.id!,
-                                    itemPrice: chatedUser.item != null &&
-                                            chatedUser.item!.price != null
-                                        ? chatedUser.item!.price!
-                                        : 0.0,
-                                    itemOfferPrice: chatedUser.amount != null
-                                        ? chatedUser.amount!
-                                        : null,
-                                    itemImage: chatedUser.item != null &&
-                                            chatedUser.item!.image != null
-                                        ? chatedUser.item!.image!
-                                        : "",
-                                    itemTitle: chatedUser.item != null &&
-                                            chatedUser.item!.name != null
-                                        ? chatedUser.item!.name!
-                                        : "",
-                                    userId: chatedUser.sellerId.toString(),
-                                    buyerId: chatedUser.buyerId.toString(),
-                                    status: chatedUser.item!.status,
-                                    from: "item",
-                                    isPurchased: model.isPurchased!,
-                                    alreadyReview: model.review == null
-                                        ? false
-                                        : model.review!.isEmpty
-                                            ? false
-                                            : true,
-                                    isFromBuyerList: true,
-                                  ),
-                                );
-                              },
-                            ));
-                          } else {
-                            context
-                                .read<MakeAnOfferItemCubit>()
-                                .makeAnOfferItem(id: model.id!, from: "chat");
-                          }
+            child: _buildButton("chat".translate(context), () {
+              UiUtils.checkUser(
+                  onNotGuest: () {
+                    if (chatedUser != null) {
+                      Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return MultiBlocProvider(
+                            providers: [
+                              BlocProvider(
+                                create: (context) => SendMessageCubit(),
+                              ),
+                              BlocProvider(
+                                create: (context) =>
+                                    LoadChatMessagesCubit(),
+                              ),
+                              BlocProvider(
+                                create: (context) => DeleteMessageCubit(),
+                              ),
+                            ],
+                            child: ChatScreen(
+                              itemId: chatedUser.itemId.toString(),
+                              profilePicture: chatedUser.seller != null &&
+                                      chatedUser.seller!.profile != null
+                                  ? chatedUser.seller!.profile!
+                                  : "",
+                              userName: chatedUser.seller != null &&
+                                      chatedUser.seller!.name != null
+                                  ? chatedUser.seller!.name!
+                                  : "",
+                              date: chatedUser.createdAt!,
+                              itemOfferId: chatedUser.id!,
+                              itemPrice: chatedUser.item != null &&
+                                      chatedUser.item!.price != null
+                                  ? chatedUser.item!.price!
+                                  : 0.0,
+                              itemOfferPrice: chatedUser.amount != null
+                                  ? chatedUser.amount!
+                                  : null,
+                              itemImage: chatedUser.item != null &&
+                                      chatedUser.item!.image != null
+                                  ? chatedUser.item!.image!
+                                  : "",
+                              itemTitle: chatedUser.item != null &&
+                                      chatedUser.item!.name != null
+                                  ? chatedUser.item!.name!
+                                  : "",
+                              userId: chatedUser.sellerId.toString(),
+                              buyerId: chatedUser.buyerId.toString(),
+                              status: chatedUser.item!.status,
+                              from: "item",
+                              isPurchased: model.isPurchased!,
+                              alreadyReview: model.review == null
+                                  ? false
+                                  : model.review!.isEmpty
+                                      ? false
+                                      : true,
+                              isFromBuyerList: true,
+                            ),
+                          );
                         },
-                        context: context);
-                  }, null, null),
-                ),
-              ],
-            ),
+                      ));
+                    } else {
+                      context
+                          .read<MakeAnOfferItemCubit>()
+                          .makeAnOfferItem(id: model.id!, from: "chat");
+                    }
+                  },
+                  context: context);
+            }, null, null),
           );
         },
       );

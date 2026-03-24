@@ -15,6 +15,8 @@ import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/search_screen.dart';
 import 'package:eClassify/ui/screens/item/my_items_screen.dart';
 import 'package:eClassify/ui/screens/user_profile/profile_screen.dart';
+import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
+import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
 import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
@@ -139,6 +141,11 @@ class MainActivityState extends State<MainActivity>
     if (widget.sellerId != null) {
       Navigator.pushNamed(context, Routes.sellerProfileScreen,
           arguments: {"sellerId": int.parse(widget.sellerId!)});
+    }
+
+    if (HiveUtils.isUserAuthenticated()) {
+      context.read<GetBuyerChatListCubit>().fetch();
+      context.read<GetSellerChatListCubit>().fetch();
     }
   }
 
@@ -389,8 +396,27 @@ class MainActivityState extends State<MainActivity>
           children: <Widget>[
             buildBottomNavigationbarItem(0, AppIcons.homeNav,
                 AppIcons.homeNavActive, "homeTab".translate(context)),
-            buildBottomNavigationbarItem(1, AppIcons.chatNav,
-                AppIcons.chatNavActive, "chat".translate(context)),
+            BlocBuilder<GetBuyerChatListCubit, GetBuyerChatListState>(
+              builder: (context, buyerState) {
+                return BlocBuilder<GetSellerChatListCubit,
+                    GetSellerChatListState>(
+                  builder: (context, sellerState) {
+                    int unreadCount = 0;
+                    if (buyerState is GetBuyerChatListSuccess) {
+                      unreadCount += buyerState.chatedUserList.fold(
+                          0, (sum, user) => sum + (user.unreadCount ?? 0));
+                    }
+                    if (sellerState is GetSellerChatListSuccess) {
+                      unreadCount += sellerState.chatedUserList.fold(
+                          0, (sum, user) => sum + (user.unreadCount ?? 0));
+                    }
+                    return buildBottomNavigationbarItem(1, AppIcons.chatNav,
+                        AppIcons.chatNavActive, "chat".translate(context),
+                        unreadCount: unreadCount);
+                  },
+                );
+              },
+            ),
             BlocListener<FetchUserPackageLimitCubit,
                 FetchUserPackageLimitState>(
               listener: (context, state) {
@@ -449,8 +475,9 @@ class MainActivityState extends State<MainActivity>
     int index,
     String svgImage,
     String activeSvg,
-    String title,
-  ) {
+    String title, {
+    int? unreadCount,
+  }) {
     return Expanded(
       child: Material(
         type: MaterialType.transparency,
@@ -462,12 +489,45 @@ class MainActivityState extends State<MainActivity>
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (currentTab == index) ...{
-                UiUtils.getSvg(activeSvg),
-              } else ...{
-                UiUtils.getSvg(svgImage,
-                    color: context.color.textLightColor.withValues(alpha: 0.5)),
-              },
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  if (currentTab == index) ...{
+                    UiUtils.getSvg(activeSvg),
+                  } else ...{
+                    UiUtils.getSvg(svgImage,
+                        color:
+                            context.color.textLightColor.withValues(alpha: 0.5)),
+                  },
+                  if (unreadCount != null && unreadCount > 0)
+                    Positioned(
+                      right: -5,
+                      top: -5,
+                      child: Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: context.color.territoryColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                              color: context.color.secondaryColor, width: 1.5),
+                        ),
+                        constraints: BoxConstraints(
+                          minWidth: 20,
+                          minHeight: 20,
+                        ),
+                        child: Text(
+                          unreadCount > 9 ? '9+' : unreadCount.toString(),
+                          style: TextStyle(
+                            color: context.color.buttonColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               CustomText(title,
                   textAlign: TextAlign.center,
                   color: currentTab == index

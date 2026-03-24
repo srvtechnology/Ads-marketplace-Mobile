@@ -154,6 +154,7 @@ class _BankDetailsScreenState extends State<BankDetailsScreen> {
         CustomTextFormField(
           controller: controller,
           isReadOnly: readOnly,
+          enableInteractiveSelection: false,
           // Add validators if needed
           validator: CustomTextFieldValidator.nullCheck,
           fillColor: context.color.secondaryColor,

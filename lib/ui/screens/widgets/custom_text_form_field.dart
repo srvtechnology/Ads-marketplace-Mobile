@@ -41,6 +41,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextCapitalization? capitalization;
   final bool? isRequired;
   final bool? isMobileRequired;
+  final bool? enableInteractiveSelection;
 
   const CustomTextFormField({
     super.key,
@@ -67,6 +68,7 @@ class CustomTextFormField extends StatelessWidget {
     this.capitalization,
     this.isRequired,
     this.isMobileRequired = true,
+    this.enableInteractiveSelection,
   });
 
   @override
@@ -74,6 +76,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       controller: controller,
       inputFormatters: formaters,
+      enableInteractiveSelection: enableInteractiveSelection,
       obscureText: obscureText ?? false,
       textInputAction: action,
       onTapOutside: (PointerDownEvent event) {
