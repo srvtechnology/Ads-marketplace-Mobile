@@ -572,107 +572,6 @@ class _ChatScreenState extends State<ChatScreen>
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             SizedBox(height: 5),
-                                            if (widget.isFromBuyerList != false)
-                                              Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          isChatTab = true;
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical: 8),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                            bottom: BorderSide(
-                                                              color: isChatTab
-                                                                  ? context
-                                                                      .color
-                                                                      .territoryColor
-                                                                  : Colors
-                                                                      .transparent,
-                                                              width: 2,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Center(
-                                                          child: CustomText(
-                                                            "Chat",
-                                                            fontWeight:
-                                                                isChatTab
-                                                                    ? FontWeight
-                                                                        .bold
-                                                                    : FontWeight
-                                                                        .normal,
-                                                            color: isChatTab
-                                                                ? context.color
-                                                                    .territoryColor
-                                                                : context.color
-                                                                    .textLightColor,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  Expanded(
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          isChatTab = false;
-                                                          if (offerController
-                                                              .text.isEmpty) {
-                                                            offerController
-                                                                    .text =
-                                                                widget.itemPrice
-                                                                    .toStringAsFixed(
-                                                                        0);
-                                                          }
-                                                        });
-                                                      },
-                                                      child: Container(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                vertical: 8),
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border(
-                                                            bottom: BorderSide(
-                                                              color: !isChatTab
-                                                                  ? context
-                                                                      .color
-                                                                      .territoryColor
-                                                                  : Colors
-                                                                      .transparent,
-                                                              width: 2,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        child: Center(
-                                                          child: CustomText(
-                                                            "Make Offer",
-                                                            fontWeight:
-                                                                !isChatTab
-                                                                    ? FontWeight
-                                                                        .bold
-                                                                    : FontWeight
-                                                                        .normal,
-                                                            color: !isChatTab
-                                                                ? context.color
-                                                                    .territoryColor
-                                                                : context.color
-                                                                    .textLightColor,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
                                             const SizedBox(height: 10),
                                             if (isChatTab) ...[
                                               if (!isBlocked)
@@ -703,111 +602,106 @@ class _ChatScreenState extends State<ChatScreen>
                                                             suffixIconColor: context
                                                                 .color
                                                                 .textLightColor,
-                                                            suffixIcon:
+                                                            suffixIcon: Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
                                                                 IconButton(
-                                                              onPressed:
-                                                                  () async {
-                                                                try {
-                                                                  if (messageAttachment ==
-                                                                      null) {
-                                                                    setState(
-                                                                        () {
-                                                                      isLoading =
-                                                                          true;
-                                                                    });
+                                                                  onPressed:
+                                                                      () async {
+                                                                    try {
+                                                                      if (messageAttachment ==
+                                                                          null) {
+                                                                        setState(
+                                                                            () {
+                                                                          isLoading =
+                                                                              true;
+                                                                        });
 
-                                                                    final FilePickerResult?
-                                                                        pickedAttachment =
-                                                                        await FilePicker
-                                                                            .platform
-                                                                            .pickFiles(
-                                                                      allowMultiple:
-                                                                          false,
-                                                                      type: FileType
-                                                                          .custom,
-                                                                      allowCompression:
-                                                                          true,
-                                                                      allowedExtensions: [
-                                                                        'jpg',
-                                                                        'jpeg',
-                                                                        'png'
-                                                                      ],
-                                                                    );
+                                                                        final FilePickerResult?
+                                                                            pickedAttachment =
+                                                                            await FilePicker.platform.pickFiles(
+                                                                          allowMultiple:
+                                                                              false,
+                                                                          type:
+                                                                              FileType.custom,
+                                                                          allowCompression:
+                                                                              true,
+                                                                          allowedExtensions: [
+                                                                            'jpg',
+                                                                            'jpeg',
+                                                                            'png'
+                                                                          ],
+                                                                        );
 
-                                                                    if (pickedAttachment !=
-                                                                            null &&
-                                                                        pickedAttachment
-                                                                            .files
-                                                                            .isNotEmpty) {
-                                                                      final file = pickedAttachment
-                                                                          .files
-                                                                          .first;
+                                                                        if (pickedAttachment !=
+                                                                                null &&
+                                                                            pickedAttachment.files.isNotEmpty) {
+                                                                          final file = pickedAttachment
+                                                                              .files
+                                                                              .first;
 
-                                                                      if (file.size >
-                                                                          2 *
-                                                                              1024 *
-                                                                              1024) {
-                                                                        if (mounted) {
-                                                                          HelperUtils
-                                                                              .showSnackBarMessage(
-                                                                            context,
-                                                                            "File size should be less than 5MB",
-                                                                          );
+                                                                          if (file.size >
+                                                                              2 * 1024 * 1024) {
+                                                                            if (mounted) {
+                                                                              HelperUtils.showSnackBarMessage(
+                                                                                context,
+                                                                                "File size should be less than 5MB",
+                                                                              );
+                                                                            }
+                                                                            return;
+                                                                          }
+
+                                                                          if (mounted) {
+                                                                            setState(() {
+                                                                              messageAttachment = file;
+                                                                            });
+                                                                          }
                                                                         }
-                                                                        return;
+                                                                      } else {
+                                                                        if (mounted) {
+                                                                          setState(
+                                                                              () {
+                                                                            messageAttachment =
+                                                                                null;
+                                                                          });
+                                                                        }
                                                                       }
-
+                                                                    } catch (e) {
+                                                                      if (mounted) {
+                                                                        HelperUtils
+                                                                            .showSnackBarMessage(
+                                                                          context,
+                                                                          "Failed to pick file: ${e.toString()}",
+                                                                        );
+                                                                      }
+                                                                    } finally {
                                                                       if (mounted) {
                                                                         setState(
                                                                             () {
-                                                                          messageAttachment =
-                                                                              file;
+                                                                          isLoading =
+                                                                              false;
                                                                         });
                                                                       }
                                                                     }
-                                                                  } else {
-                                                                    if (mounted) {
-                                                                      setState(
-                                                                          () {
-                                                                        messageAttachment =
-                                                                            null;
-                                                                      });
-                                                                    }
-                                                                  }
-                                                                } catch (e) {
-                                                                  if (mounted) {
-                                                                    HelperUtils
-                                                                        .showSnackBarMessage(
-                                                                      context,
-                                                                      "Failed to pick file: ${e.toString()}",
-                                                                    );
-                                                                  }
-                                                                } finally {
-                                                                  if (mounted) {
-                                                                    setState(
-                                                                        () {
-                                                                      isLoading =
-                                                                          false;
-                                                                    });
-                                                                  }
-                                                                }
-                                                              },
-                                                              icon: messageAttachment !=
-                                                                      null
-                                                                  ? const Icon(
-                                                                      Icons
-                                                                          .close)
-                                                                  : Transform
-                                                                      .rotate(
-                                                                      angle:
-                                                                          -3.14 /
-                                                                              5.0,
-                                                                      child:
-                                                                          const Icon(
-                                                                        Icons
-                                                                            .attachment,
-                                                                      ),
-                                                                    ),
+                                                                  },
+                                                                  icon: messageAttachment !=
+                                                                          null
+                                                                      ? const Icon(
+                                                                          Icons
+                                                                              .close)
+                                                                      : Transform
+                                                                          .rotate(
+                                                                          angle:
+                                                                              -3.14 / 5.0,
+                                                                          child:
+                                                                              const Icon(
+                                                                            Icons.attachment,
+                                                                          ),
+                                                                        ),
+                                                                ),
+                                                              ],
                                                             ),
                                                             contentPadding:
                                                                 const EdgeInsets
@@ -833,9 +727,8 @@ class _ChatScreenState extends State<ChatScreen>
                                                                     color: context
                                                                         .color
                                                                         .territoryColor)),
-                                                            hintText: "writeHere"
-                                                                .translate(
-                                                                    context),
+                                                            hintText:
+                                                                "Type something .",
                                                           ),
                                                         ),
                                                       ),
@@ -920,6 +813,23 @@ class _ChatScreenState extends State<ChatScreen>
                                                   child: SingleChildScrollView(
                                                     child: Column(
                                                       children: [
+                                                        Align(
+                                                          alignment: Alignment
+                                                              .centerRight,
+                                                          child: IconButton(
+                                                            icon: Icon(
+                                                                Icons.close,
+                                                                color: context
+                                                                    .color
+                                                                    .textLightColor),
+                                                            onPressed: () {
+                                                              setState(() {
+                                                                isChatTab =
+                                                                    true;
+                                                              });
+                                                            },
+                                                          ),
+                                                        ),
                                                         if (MediaQuery.of(
                                                                     context)
                                                                 .viewInsets
@@ -1193,7 +1103,7 @@ class _ChatScreenState extends State<ChatScreen>
             elevation: 0,
             iconTheme: IconThemeData(color: context.color.territoryColor),
             bottom: PreferredSize(
-              preferredSize: Size.fromHeight(60),
+              preferredSize: Size.fromHeight(70),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -1204,7 +1114,7 @@ class _ChatScreenState extends State<ChatScreen>
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: 25, vertical: 0),
                     color: context.color.secondaryColor,
-                    height: 55,
+                    height: 65,
                     child: Row(
                       children: [
                         FittedBox(
@@ -1257,27 +1167,72 @@ class _ChatScreenState extends State<ChatScreen>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Expanded(
-                                  child: Text(
-                                    widget.itemTitle,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    softWrap: true,
-                                    style: TextStyle(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        widget.itemTitle,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        softWrap: true,
+                                        style: TextStyle(
+                                            color:
+                                                context.color.textDefaultColor,
+                                            fontSize: context.font.large),
+                                      ),
+                                      CustomText(
+                                        widget.itemPrice.currencyFormat,
                                         color: context.color.textDefaultColor,
-                                        fontSize: context.font.large),
+                                        fontSize: context.font.small,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                Padding(
-                                  padding:
-                                      EdgeInsetsDirectional.only(start: 15.0),
-                                  child: CustomText(
-                                    widget.itemPrice.currencyFormat,
-                                    // Replace with your item price
-                                    color: context.color.textDefaultColor,
-                                    fontSize: context.font.large,
-                                    fontWeight: FontWeight.bold,
+                                if (widget.isFromBuyerList != false &&
+                                    widget.itemOfferPrice == null)
+                                  InkWell(
+                                    onTap: () {
+                                      setState(() {
+                                        isChatTab = false;
+                                        if (offerController.text.isEmpty) {
+                                          offerController.text = widget
+                                              .itemPrice
+                                              .toStringAsFixed(0);
+                                        }
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                          color: context.color.territoryColor
+                                              .withValues(alpha: 0.17),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          border: Border.all(
+                                              color: context
+                                                  .color.territoryColor
+                                                  .withValues(alpha: 0.3))),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(Icons.local_offer,
+                                              color:
+                                                  context.color.territoryColor,
+                                              size: 16),
+                                          SizedBox(width: 4),
+                                          CustomText("Make Offer",
+                                              color:
+                                                  context.color.territoryColor,
+                                              fontSize: context.font.small,
+                                              fontWeight: FontWeight.bold),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
@@ -1605,10 +1560,17 @@ class _ChatScreenState extends State<ChatScreen>
                                                       MainAxisSize.min,
                                                   children: [
                                                     if (index ==
-                                                        snapshot.data!.length -
-                                                            1)
+                                                            snapshot.data!
+                                                                    .length -
+                                                                1 &&
+                                                        widget.itemOfferPrice !=
+                                                            null)
                                                       offerWidget(),
-                                                    chat
+                                                    chat,
+                                                    if (index == 0 &&
+                                                        widget.itemOfferPrice ==
+                                                            null)
+                                                      offerWidget(),
                                                   ],
                                                 );
                                               },
