@@ -67,6 +67,33 @@ class NotificationService {
     //When the app is terminated, the context will not be available so this will throw an error
     //when notification is received. Hence, isTerminated is used to determine if the app is in
     //background or foreground. If app is background, simply just show the notification without any process.
+
+    // Handle "offer" type (offer accepted / rejected).
+    // If the user is currently in the relevant chat screen, reload messages live
+    // so the offer bubble updates in place (Accepted/Rejected badge) without
+    // requiring the user to leave and re-enter the chat.
+    if (notificationType == "offer" && !isTerminated) {
+      var itemId = message?.data['item_id'];
+      var itemOfferId = message?.data['item_offer_id'];
+
+      if (itemId == currentlyChatItemId && itemOfferId != null) {
+        // Reload chat so the offer bubble reflects its new status live.
+        try {
+          (context as BuildContext)
+              .read<LoadChatMessagesCubit>()
+              .load(itemOfferId: int.parse(itemOfferId));
+        } catch (_) {}
+        // Do NOT show a local notification banner — the UI will update itself.
+        return;
+      }
+      // User is not in that chat: fall through to show local notification below.
+      localNotification.createNotification(
+        isLocked: false,
+        notificationData: message!,
+      );
+      return;
+    }
+
     if (notificationType == "chat" && !isTerminated) {
       var username = message?.data['user_name'];
       var itemImage = message?.data['item_image'];

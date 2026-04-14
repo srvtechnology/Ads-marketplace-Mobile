@@ -50,4 +50,17 @@ class ChangeOfferStatusCubit extends Cubit<ChangeOfferStatusState> {
       emit(ChangeOfferStatusFailure(e.toString()));
     }
   }
+
+  /// Called from the Pusher real-time listener when the server broadcasts an
+  /// offer accept/reject event (type: 'status_change').  Emits the success
+  /// state directly — no API call needed because the server already processed
+  /// it; we just need to update the UI bubble that matches [chatId].
+  void notifyStatusChange({
+    required int chatId,
+    required int itemOfferId,
+    required String status,
+    String message = '',
+  }) {
+    emit(ChangeOfferStatusSuccess(status, message, itemOfferId, chatId));
+  }
 }

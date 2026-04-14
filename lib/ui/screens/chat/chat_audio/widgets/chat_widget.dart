@@ -285,7 +285,7 @@ class ChatMessageState extends State<ChatMessage>
             // However, we can set _isOfferLoading = true WHEN we call the function.
           }
           if (state is ChangeOfferStatusSuccess) {
-            if (state.chatId == widget.id) {
+            if (state.chatId == widget.id || (widget.itemOfferId != 0 && state.itemOfferId == widget.itemOfferId && _isOffer)) {
               setState(() {
                 _offerStatus = state.status;
                 _isOfferLoading = false;

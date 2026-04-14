@@ -118,10 +118,12 @@ class _ChatScreenState extends State<ChatScreen>
   bool isChatTab = true;
   TextEditingController offerController = TextEditingController();
   FocusNode offerFocusNode = FocusNode();
+  late ChangeOfferStatusCubit _changeOfferStatusCubit;
 
   @override
   void initState() {
     super.initState();
+    _changeOfferStatusCubit = ChangeOfferStatusCubit();
     context.read<LoadChatMessagesCubit>().load(
           itemOfferId: widget.itemOfferId,
         );
@@ -137,6 +139,52 @@ class _ChatScreenState extends State<ChatScreen>
         }
 
         if (data['item_offer_id'].toString() == widget.itemOfferId.toString()) {
+          // Backend Pusher payload for offer accept/reject:
+          //   { type: 'status_change', chat_id, item_offer_id, offer_status,
+          //     message, updated_by, updated_by_name, created_at }
+          // We notify ChangeOfferStatusCubit directly so the matching offer
+          // bubble updates its Accepted/Rejected badge in-place — no full
+          // reload, no new bubble added.
+          if (data['type'] == 'status_change') {
+            final chatId = int.tryParse(data['chat_id'].toString());
+            final offerStatus = data['offer_status']?.toString();
+            final statusMessage = data['message']?.toString() ?? '';
+
+            if (mounted && chatId != null && offerStatus != null) {
+              _changeOfferStatusCubit.notifyStatusChange(
+                    chatId: chatId,
+                    itemOfferId: widget.itemOfferId,
+                    status: offerStatus,
+                    message: statusMessage,
+                  );
+            }
+            
+            // Only show message dynamically if it is NOT an offer status change
+            if (data['message_type'] != 'offer_status') {
+              ChatMessageHandler.add(ChatMessage(
+                key: ValueKey(DateTime.now().millisecondsSinceEpoch),
+                id: int.tryParse(data['chat_id'].toString()),
+                senderId: int.tryParse(data['updated_by'].toString()) ?? int.tryParse(data['sender_id'].toString()) ?? 0,
+                itemOfferId: int.tryParse(data['item_offer_id'].toString()) ?? 0,
+                message: statusMessage,
+                file: "",
+                audio: "",
+                createdAt: data['created_at'],
+                updatedAt: data['created_at'],
+                messageType: data['message_type']?.toString() ?? "offer_status",
+                type: data['type'],
+                isSentNow: false,
+              ));
+              
+              if (mounted) {
+                setState(() {
+                  totalMessageCount++;
+                });
+              }
+            }
+            return;
+          }
+
           ChatMessageHandler.add(ChatMessage(
             key: ValueKey(data['id']),
             id: int.tryParse(data['id'].toString()),
@@ -195,6 +243,7 @@ class _ChatScreenState extends State<ChatScreen>
     notificationStreamSubscription.cancel();
     controller.dispose();
     offerFocusNode.dispose();
+    _changeOfferStatusCubit.close();
     super.dispose();
   }
 
@@ -400,8 +449,8 @@ class _ChatScreenState extends State<ChatScreen>
         ChatMessageHandler.flushMessages();
         return;
       },
-      child: BlocProvider(
-        create: (context) => ChangeOfferStatusCubit(),
+      child: BlocProvider.value(
+        value: _changeOfferStatusCubit,
         child: Scaffold(
           backgroundColor: context.color.backgroundColor,
           bottomNavigationBar: Padding(
