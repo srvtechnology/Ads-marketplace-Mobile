@@ -25,7 +25,7 @@ class ChatMessageHandler {
   }
 
   static void loadMessages(List<Widget> chats, BuildContext context,
-      {String? itemStatus}) {
+      {String? itemStatus, bool? isBuyer, VoidCallback? onMakeOffer}) {
     List<Widget> messagesWithDate = [];
     String previousDate = "";
     // Get the current date and time
@@ -54,11 +54,40 @@ class ChatMessageHandler {
 
       // Update ChatMessage with itemStatus if provided
       Widget messageWidget = chats[i];
-      if (itemStatus != null && messageWidget is ChatMessage) {
+      if (messageWidget is ChatMessage) {
         // Create a new ChatMessage with itemStatus
         var messageData = messageWidget.toJson();
-        messageData['item_status'] = itemStatus;
+        if (itemStatus != null) {
+          messageData['item_status'] = itemStatus;
+        }
+        if (isBuyer != null) {
+          messageData['is_buyer'] = isBuyer;
+        }
         messageWidget = ChatMessage.fromJson(messageData);
+
+        // Manually pass the non-serializable callback
+        if (onMakeOffer != null) {
+          var oldMsg = messageWidget;
+          messageWidget = ChatMessage(
+            key: oldMsg.key,
+            id: oldMsg.id,
+            senderId: oldMsg.senderId,
+            itemOfferId: oldMsg.itemOfferId,
+            message: oldMsg.message,
+            file: oldMsg.file,
+            audio: oldMsg.audio,
+            createdAt: oldMsg.createdAt,
+            updatedAt: oldMsg.updatedAt,
+            messageType: oldMsg.messageType,
+            isSentNow: oldMsg.isSentNow,
+            type: oldMsg.type,
+            amount: oldMsg.amount,
+            offerStatus: oldMsg.offerStatus,
+            itemStatus: oldMsg.itemStatus,
+            isBuyer: oldMsg.isBuyer,
+            onMakeOffer: onMakeOffer,
+          );
+        }
       }
 
       // Add message widget

@@ -120,6 +120,15 @@ class _ChatScreenState extends State<ChatScreen>
   FocusNode offerFocusNode = FocusNode();
   late ChangeOfferStatusCubit _changeOfferStatusCubit;
 
+  void _onMakeOffer() {
+    setState(() {
+      isChatTab = false;
+      if (offerController.text.isEmpty) {
+        offerController.text = widget.itemPrice.toStringAsFixed(0);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -174,6 +183,8 @@ class _ChatScreenState extends State<ChatScreen>
                 messageType: data['message_type']?.toString() ?? "offer_status",
                 type: data['type'],
                 isSentNow: false,
+                isBuyer: widget.isFromBuyerList == true && widget.itemOfferPrice == null,
+                onMakeOffer: _onMakeOffer,
               ));
               
               if (mounted) {
@@ -197,6 +208,8 @@ class _ChatScreenState extends State<ChatScreen>
             updatedAt: data['created_at'],
             messageType: data['message_type'],
             isSentNow: false,
+            isBuyer: widget.isFromBuyerList == true && widget.itemOfferPrice == null,
+            onMakeOffer: _onMakeOffer,
           ));
           if (mounted) {
             setState(() {
@@ -1240,48 +1253,6 @@ class _ChatScreenState extends State<ChatScreen>
                                     ],
                                   ),
                                 ),
-                                if (widget.isFromBuyerList != false &&
-                                    widget.itemOfferPrice == null)
-                                  InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        isChatTab = false;
-                                        if (offerController.text.isEmpty) {
-                                          offerController.text = widget
-                                              .itemPrice
-                                              .toStringAsFixed(0);
-                                        }
-                                      });
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 6),
-                                      decoration: BoxDecoration(
-                                          color: context.color.territoryColor
-                                              .withValues(alpha: 0.17),
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          border: Border.all(
-                                              color: context
-                                                  .color.territoryColor
-                                                  .withValues(alpha: 0.3))),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(Icons.local_offer,
-                                              color:
-                                                  context.color.territoryColor,
-                                              size: 16),
-                                          SizedBox(width: 4),
-                                          CustomText("Make Offer",
-                                              color:
-                                                  context.color.territoryColor,
-                                              fontSize: context.font.small,
-                                              fontWeight: FontWeight.bold),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
                               ],
                             ),
                           ),
@@ -1535,6 +1506,8 @@ class _ChatScreenState extends State<ChatScreen>
                             state.messages,
                             context,
                             itemStatus: state.itemStatus?['status']?.toString(),
+                            isBuyer: widget.isFromBuyerList == true && widget.itemOfferPrice == null,
+                            onMakeOffer: _onMakeOffer,
                           );
                           totalMessageCount = state.messages.length;
                           isFetchedFirstTime = true;

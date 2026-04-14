@@ -55,6 +55,9 @@ class ChatMessage extends StatefulWidget {
   final String? offerStatus; // 'A', 'R', 'IP' from API
   final String? itemStatus; // Item status like 'sold out', 'active', etc.
 
+  final bool? isBuyer;
+  final VoidCallback? onMakeOffer;
+
   const ChatMessage(
       {super.key,
       this.id,
@@ -70,7 +73,9 @@ class ChatMessage extends StatefulWidget {
       this.type,
       this.amount,
       this.offerStatus,
-      this.itemStatus});
+      this.itemStatus,
+      this.isBuyer,
+      this.onMakeOffer});
 
   Map toJson() {
     Map data = {};
@@ -90,6 +95,7 @@ class ChatMessage extends StatefulWidget {
     data['amount'] = this.amount;
     data['offer_status'] = this.offerStatus;
     data['item_status'] = this.itemStatus;
+    data['is_buyer'] = this.isBuyer;
     return data;
   }
 
@@ -121,6 +127,7 @@ class ChatMessage extends StatefulWidget {
         type: json['type'],
         amount: amount,
         offerStatus: json['offer_status'],
+        isBuyer: json['is_buyer'],
         itemStatus: json['item_status']);
     return chat;
   }
@@ -801,8 +808,8 @@ class ChatMessageState extends State<ChatMessage>
                                                     : context.color
                                                         .textDefaultColor),
                                           ),
-                                        ],
-                                      ),
+                                          ],
+                                        ),
                           ),
                         ),
                         if (widget.senderId.toString() !=
@@ -857,6 +864,33 @@ class ChatMessageState extends State<ChatMessage>
                       ],
                     ),
                   ),
+                  if (widget.senderId.toString() != HiveUtils.getUserId() && widget.isBuyer == true && !_isOffer) ...[
+                    const SizedBox(height: 5),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.only(end: 20.0),
+                        child: InkWell(
+                          onTap: widget.onMakeOffer,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                                color: context.color.territoryColor.withValues(alpha: 0.17),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: context.color.territoryColor.withValues(alpha: 0.3))),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.local_offer, color: context.color.territoryColor, size: 16),
+                                const SizedBox(width: 4),
+                                CustomText("Make Offer", color: context.color.territoryColor, fontSize: context.font.small, fontWeight: FontWeight.bold),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                   const SizedBox(
                     height: 5,
                   ),
