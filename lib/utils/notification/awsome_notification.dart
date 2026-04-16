@@ -193,15 +193,19 @@ class NotificationController {
     Map<String, String?>? payload = receivedAction.payload;
     if (payload?['type'] == "chat") {
       var username = payload?['user_name'];
-      var itemImage = payload?['item_image'];
-      var itemName = payload?['item_name'];
+      var itemImage = payload?['item_image'] ?? payload?['item_title_image'];
+      var itemName = payload?['item_name'] ?? payload?['item_title'];
       var userProfile = payload?['user_profile'];
-      var senderId = payload?['user_id'];
+      var senderId = payload?['user_id'] ?? payload?['sender_id'];
       var itemId = payload?['item_id'];
       var date = payload?['created_at'];
       var itemOfferId = payload?['item_offer_id'];
       var itemPrice = payload?['item_price'];
-      var itemOfferPrice = payload?['item_offer_amount'];
+      var itemOfferPrice =
+          payload?['item_offer_amount'] ?? payload?['item_offer_price'];
+
+      if (itemOfferId == null || itemPrice == null) return;
+
       Future.delayed(
         Duration.zero,
         () {
@@ -229,8 +233,9 @@ class NotificationController {
                     userId: senderId ?? "",
                     itemId: itemId ?? "",
                     date: date ?? "",
-                    itemOfferId: int.parse(itemOfferId!),
-                    itemPrice: NotificationService.getPrice(itemPrice!)!,
+                    itemOfferId: int.tryParse(itemOfferId.toString()) ?? 0,
+                    itemPrice:
+                        NotificationService.getPrice(itemPrice.toString()) ?? 0,
                     itemOfferPrice:
                         NotificationService.getPrice(itemOfferPrice),
                     buyerId: HiveUtils.getUserId(),
@@ -246,15 +251,18 @@ class NotificationController {
     } else if (payload?['type'] == "offer") {
       if (HiveUtils.isUserAuthenticated()) {
         var username = payload?['user_name'];
-        var itemImage = payload?['item_image'];
-        var itemName = payload?['item_name'];
+        var itemImage = payload?['item_image'] ?? payload?['item_title_image'];
+        var itemName = payload?['item_name'] ?? payload?['item_title'];
         var userProfile = payload?['user_profile'];
-        var senderId = payload?['user_id'];
+        var senderId = payload?['user_id'] ?? payload?['sender_id'];
         var itemId = payload?['item_id'];
         var date = payload?['created_at'];
         var itemOfferId = payload?['item_offer_id'];
         var itemPrice = payload?['item_price'];
-        var itemOfferPrice = payload?['item_offer_amount'];
+        var itemOfferPrice =
+            payload?['item_offer_amount'] ?? payload?['item_offer_price'];
+
+        if (itemOfferId == null || itemPrice == null) return;
 
         Future.delayed(
           Duration.zero,
@@ -283,8 +291,10 @@ class NotificationController {
                       userId: senderId ?? "",
                       itemId: itemId ?? "",
                       date: date ?? "",
-                      itemOfferId: int.parse(itemOfferId!),
-                      itemPrice: NotificationService.getPrice(itemPrice!)!,
+                      itemOfferId: int.tryParse(itemOfferId.toString()) ?? 0,
+                      itemPrice:
+                          NotificationService.getPrice(itemPrice.toString()) ??
+                              0,
                       itemOfferPrice:
                           NotificationService.getPrice(itemOfferPrice),
                       buyerId: HiveUtils.getUserId(),

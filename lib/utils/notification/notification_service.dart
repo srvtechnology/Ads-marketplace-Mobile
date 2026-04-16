@@ -96,30 +96,30 @@ class NotificationService {
 
     if (notificationType == "chat" && !isTerminated) {
       var username = message?.data['user_name'];
-      var itemImage = message?.data['item_image'];
-      var itemName = message?.data['item_name'];
+      var itemImage = message?.data['item_image'] ?? message?.data['item_title_image'];
+      var itemName = message?.data['item_name'] ?? message?.data['item_title'];
       var userProfile = message?.data['user_profile'];
-      var senderId = message?.data['user_id'];
+      var senderId = message?.data['user_id'] ?? message?.data['sender_id'];
       var itemId = message?.data['item_id'];
       var date = message?.data['created_at'];
       var itemOfferId = message?.data['item_offer_id'];
       var itemPrice = message?.data['item_price'];
-      var itemOfferPrice = message?.data['item_offer_amount'];
+      var itemOfferPrice = message?.data['item_offer_amount'] ?? message?.data['item_offer_price'];
       var userType = message?.data['user_type'];
 
       ///Checking if this is user we are chatting with
 
       if (senderId == currentlyChatingWith && itemId == currentlyChatItemId) {
         ChatMessageModal chatMessageModel = ChatMessageModal(
-            id: int.parse(message?.data['id']),
+            id: int.tryParse(message?.data['id']?.toString() ?? "") ?? 0,
             updatedAt: message?.data['updated_at'],
             createdAt: message?.data['created_at'],
-            itemId: int.parse(message?.data['item_id']),
+            itemId: int.tryParse(message?.data['item_id']?.toString() ?? "") ?? 0,
             audio: message?.data['audio'],
             file: message?.data['file'],
             message: message?.data['message'],
             receiverId: int.parse(HiveUtils.getUserId().toString()),
-            senderId: int.parse(message?.data['sender_id']));
+            senderId: int.tryParse(message?.data['sender_id']?.toString() ?? "") ?? int.tryParse(senderId?.toString() ?? "") ?? 0);
 
         ChatMessageHandler.add(BlocProvider(
           create: (context) => SendMessageCubit(),
@@ -219,27 +219,81 @@ class NotificationService {
         if (message == null) {
           return;
         }
-        if (message.notification == null) {
-          handleNotification(message, false, context);
-        }
+        handleNotification(message, false, context);
+        // If it's a click from terminated state, we should also trigger the tap handler
+        // But onTapNotificationHandler is a listener. We should call the inner logic.
+        _handleTap(message, context);
       },
     );
   }
 
-  static void onTapNotificationHandler(context) {
-    onMessageOpen = FirebaseMessaging.onMessageOpenedApp
-        .listen((RemoteMessage message) async {
-      if (message.data['type'] == "chat") {
+  static void _handleTap(RemoteMessage message, BuildContext context) {
+    if (message.data['type'] == "chat") {
+      var username = message.data['user_name'];
+      var itemImage = message.data['item_image'] ?? message.data['item_title_image'];
+      var itemName = message.data['item_name'] ?? message.data['item_title'];
+      var userProfile = message.data['user_profile'];
+      var senderId = message.data['user_id'] ?? message.data['sender_id'];
+      var itemId = message.data['item_id'];
+      var date = message.data['created_at'];
+      var itemOfferId = message.data['item_offer_id'];
+      var itemPrice = message.data['item_price'];
+      var itemOfferPrice = message.data['item_offer_amount'] ?? message.data['item_offer_price'];
+
+      if (itemOfferId == null || itemPrice == null) return;
+
+      Future.delayed(
+        Duration.zero,
+        () {
+          Navigator.push(Constant.navigatorKey.currentContext!,
+              MaterialPageRoute(
+            builder: (context) {
+              return MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (context) => SendMessageCubit(),
+                  ),
+                  BlocProvider(
+                    create: (context) => LoadChatMessagesCubit(),
+                  ),
+                ],
+                child: Builder(builder: (context) {
+                  return ChatScreen(
+                    profilePicture: userProfile ?? "",
+                    userName: username ?? "",
+                    itemImage: itemImage ?? "",
+                    itemTitle: itemName ?? "",
+                    userId: senderId ?? "",
+                    itemId: itemId ?? "",
+                    date: date ?? "",
+                    itemOfferId: int.tryParse(itemOfferId.toString()) ?? 0,
+                    itemPrice: getPrice(itemPrice) ?? 0,
+                    itemOfferPrice: getPrice(itemOfferPrice),
+                    buyerId: HiveUtils.getUserId(),
+                    alreadyReview: false,
+                    isPurchased: 0,
+                  );
+                }),
+              );
+            },
+          ));
+        },
+      );
+    } else if (message.data['type'] == "offer") {
+      if (HiveUtils.isUserAuthenticated()) {
         var username = message.data['user_name'];
-        var itemTitleImage = message.data['item_title_image'];
-        var itemTitle = message.data['item_title'];
+        var itemImage = message.data['item_image'] ?? message.data['item_title_image'];
+        var itemName = message.data['item_name'] ?? message.data['item_title'];
         var userProfile = message.data['user_profile'];
-        var senderId = message.data['sender_id'];
+        var senderId = message.data['user_id'] ?? message.data['sender_id'];
         var itemId = message.data['item_id'];
         var date = message.data['created_at'];
         var itemOfferId = message.data['item_offer_id'];
         var itemPrice = message.data['item_price'];
-        var itemOfferPrice = message.data['item_offer_amount'] ?? null;
+        var itemOfferPrice = message.data['item_offer_amount'] ?? message.data['item_offer_price'];
+
+        if (itemOfferId == null || itemPrice == null) return;
+
         Future.delayed(
           Duration.zero,
           () {
@@ -259,13 +313,13 @@ class NotificationService {
                     return ChatScreen(
                       profilePicture: userProfile ?? "",
                       userName: username ?? "",
-                      itemImage: itemTitleImage ?? "",
-                      itemTitle: itemTitle ?? "",
+                      itemImage: itemImage ?? "",
+                      itemTitle: itemName ?? "",
                       userId: senderId ?? "",
                       itemId: itemId ?? "",
                       date: date ?? "",
-                      itemOfferId: int.parse(itemOfferId),
-                      itemPrice: getPrice(itemPrice)!,
+                      itemOfferId: int.tryParse(itemOfferId.toString()) ?? 0,
+                      itemPrice: getPrice(itemPrice) ?? 0,
                       itemOfferPrice: getPrice(itemOfferPrice),
                       buyerId: HiveUtils.getUserId(),
                       alreadyReview: false,
@@ -277,80 +331,30 @@ class NotificationService {
             ));
           },
         );
-      } else if (message.data['type'] == "offer") {
-        if (HiveUtils.isUserAuthenticated()) {
-          var username = message.data['user_name'];
-          var itemTitleImage = message.data['item_title_image'];
-          var itemTitle = message.data['item_title'];
-          var userProfile = message.data['user_profile'];
-          var senderId = message.data['sender_id'];
-          var itemId = message.data['item_id'];
-          var date = message.data['created_at'];
-          var itemOfferId = message.data['item_offer_id'];
-          var itemPrice = message.data['item_price'];
-          var itemOfferPrice = message.data['item_offer_amount'] ?? null;
-          Future.delayed(
-            Duration.zero,
-            () {
-              Navigator.push(Constant.navigatorKey.currentContext!,
-                  MaterialPageRoute(
-                builder: (context) {
-                  return MultiBlocProvider(
-                    providers: [
-                      BlocProvider(
-                        create: (context) => SendMessageCubit(),
-                      ),
-                      BlocProvider(
-                        create: (context) => LoadChatMessagesCubit(),
-                      ),
-                    ],
-                    child: Builder(builder: (context) {
-                      return ChatScreen(
-                        profilePicture: userProfile ?? "",
-                        userName: username ?? "",
-                        itemImage: itemTitleImage ?? "",
-                        itemTitle: itemTitle ?? "",
-                        userId: senderId ?? "",
-                        itemId: itemId ?? "",
-                        date: date ?? "",
-                        itemOfferId: int.parse(itemOfferId),
-                        itemPrice: getPrice(itemPrice)!,
-                        itemOfferPrice: getPrice(itemOfferPrice),
-                        buyerId: HiveUtils.getUserId(),
-                        alreadyReview: false,
-                        isPurchased: 0,
-                      );
-                    }),
-                  );
-                },
-              ));
-            },
-          );
-        } else {
-          Future.delayed(Duration.zero, () {
-            HelperUtils.goToNextPage(Routes.notificationPage,
-                Constant.navigatorKey.currentContext!, false);
-          });
-        }
-      } else if (message.data['type'] == "item-update") {
+      } else {
         Future.delayed(Duration.zero, () {
-          HelperUtils.goToNextPage(
-            Routes.main,
-            Constant.navigatorKey.currentContext!,
-            false,
-          );
-          MainActivity.globalKey.currentState?.onItemTapped(2);
-          Constant.navigatorKey.currentContext!
-              .read<FetchMyItemsCubit>()
-              .fetchMyItems(
-                getItemsWithStatus: selectItemStatus,
-              );
+          HelperUtils.goToNextPage(Routes.notificationPage,
+              Constant.navigatorKey.currentContext!, false);
         });
-      } else if (message.data["item_id"] != null &&
-          message.data["item_id"] != '') {
-        String id = message.data["item_id"] ?? "";
-        DataOutput<ItemModel> item =
-            await ItemRepository().fetchItemFromItemId(int.parse(id));
+      }
+    } else if (message.data['type'] == "item-update") {
+      Future.delayed(Duration.zero, () {
+        HelperUtils.goToNextPage(
+          Routes.main,
+          Constant.navigatorKey.currentContext!,
+          false,
+        );
+        MainActivity.globalKey.currentState?.onItemTapped(2);
+        Constant.navigatorKey.currentContext!
+            .read<FetchMyItemsCubit>()
+            .fetchMyItems(
+              getItemsWithStatus: selectItemStatus,
+            );
+      });
+    } else if (message.data["item_id"] != null &&
+        message.data["item_id"] != '') {
+      String id = message.data["item_id"] ?? "";
+      ItemRepository().fetchItemFromItemId(int.parse(id)).then((item) {
         Future.delayed(Duration.zero, () {
           Navigator.pushNamed(
               Constant.navigatorKey.currentContext!, Routes.adDetailsScreen,
@@ -358,30 +362,38 @@ class NotificationService {
                 'model': item.modelList[0],
               });
         });
-      } else if (message.data['type'] == "payment") {
-        if (HiveUtils.isUserAuthenticated()) {
-          Future.delayed(Duration.zero, () {
-            Navigator.pushNamed(Constant.navigatorKey.currentContext!,
-                Routes.subscriptionPackageListRoute);
-          });
-        } else {
-          Future.delayed(Duration.zero, () {
-            HelperUtils.goToNextPage(Routes.notificationPage,
-                Constant.navigatorKey.currentContext!, false);
-          });
-        }
+      });
+    } else if (message.data['type'] == "payment") {
+      if (HiveUtils.isUserAuthenticated()) {
+        Future.delayed(Duration.zero, () {
+          Navigator.pushNamed(Constant.navigatorKey.currentContext!,
+              Routes.subscriptionPackageListRoute);
+        });
       } else {
         Future.delayed(Duration.zero, () {
-          HelperUtils.goToNextPage(
-            Routes.main,
-            Constant.navigatorKey.currentContext!,
-            false,
-          );
-          MainActivity.globalKey.currentState?.onItemTapped(1);
+          HelperUtils.goToNextPage(Routes.notificationPage,
+              Constant.navigatorKey.currentContext!, false);
         });
       }
+    } else {
+      Future.delayed(Duration.zero, () {
+        HelperUtils.goToNextPage(
+          Routes.main,
+          Constant.navigatorKey.currentContext!,
+          false,
+        );
+        MainActivity.globalKey.currentState?.onItemTapped(1);
+      });
+    }
+  }
+
+  static void onTapNotificationHandler(context) {
+    onMessageOpen = FirebaseMessaging.onMessageOpenedApp
+        .listen((RemoteMessage message) async {
+      _handleTap(message, context);
     });
   }
+
 
   static Future<void> registerListeners(context) async {
     NotificationSettings settings =

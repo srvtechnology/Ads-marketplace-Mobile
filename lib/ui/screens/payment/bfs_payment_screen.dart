@@ -167,15 +167,22 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
               return Center(child: UiUtils.progress());
             }
 
+            Widget currentStepWidget;
             if (_currentStep == 1 && _arResponse != null) {
-              return _buildBankSelectionStep(context);
+              currentStepWidget = _buildBankSelectionStep(context);
             } else if (_currentStep == 2) {
-              return _buildOtpStep(context);
+              currentStepWidget = _buildOtpStep(context);
             } else if (_currentStep == 3) {
-              return _buildSuccessStep(context);
+              currentStepWidget = _buildSuccessStep(context);
+            } else {
+              currentStepWidget =
+                  Center(child: CustomText("Initializing Payment..."));
             }
 
-            return Center(child: CustomText("Initializing Payment..."));
+            return GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: currentStepWidget,
+            );
           },
         ),
       ),
@@ -261,91 +268,98 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
   }
 
   Widget _buildOtpStep(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.lock_outline,
-              size: 60, color: context.color.territoryColor),
-          SizedBox(height: 20),
-          CustomText("Enter OTP", fontSize: 20, fontWeight: FontWeight.bold),
-          SizedBox(height: 10),
-          CustomText(
-            "An OTP has been sent to your registered mobile number",
-            textAlign: TextAlign.center,
-            color: context.color.textDefaultColor.withOpacity(0.7),
-          ),
-          SizedBox(height: 30),
-          SizedBox(height: 30),
-          TextField(
-            controller: _otpController,
-            decoration: InputDecoration(
-              hintText: "Enter OTP",
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-              filled: true,
-              fillColor: context.color.secondaryColor,
-              counterText: "",
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
+            Icon(Icons.lock_outline,
+                size: 60, color: context.color.territoryColor),
+            const SizedBox(height: 20),
+            CustomText("Enter OTP", fontSize: 20, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            CustomText(
+              "An OTP has been sent to your registered mobile number",
+              textAlign: TextAlign.center,
+              color: context.color.textDefaultColor.withOpacity(0.7),
             ),
-            keyboardType: TextInputType.number,
-            maxLength: 6,
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 24, letterSpacing: 5),
-          ),
-          SizedBox(height: 20),
-          CustomText(
-            "Time remaining: $_otpSecondsRemaining sec",
-            color: _otpSecondsRemaining > 10
-                ? context.color.textDefaultColor
-                : Colors.red,
-            fontWeight: FontWeight.bold,
-          ),
-          SizedBox(height: 30),
-          UiUtils.buildButton(
-            context,
-            onPressed: () {
-              if (_otpSecondsRemaining == 0) return;
+            const SizedBox(height: 40),
+            TextField(
+              controller: _otpController,
+              decoration: InputDecoration(
+                hintText: "Enter OTP",
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                filled: true,
+                fillColor: context.color.secondaryColor,
+                counterText: "",
+              ),
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 24, letterSpacing: 5),
+            ),
+            const SizedBox(height: 20),
+            CustomText(
+              "Time remaining: $_otpSecondsRemaining sec",
+              color: _otpSecondsRemaining > 10
+                  ? context.color.textDefaultColor
+                  : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+            const SizedBox(height: 40),
+            UiUtils.buildButton(
+              context,
+              onPressed: () {
+                if (_otpSecondsRemaining == 0) return;
 
-              if (_otpController.text.isEmpty) {
-                HelperUtils.showSnackBarMessage(context, "Please enter OTP",
-                    type: MessageType.warning);
-                return;
-              }
-              context.read<BfsPaymentCubit>().submitOtp(
-                    orderNo: _arResponse!.orderNo,
-                    otp: _otpController.text,
-                  );
-            },
-            buttonTitle: "Submit Payment",
-            disabledColor: _otpSecondsRemaining == 0 ? Colors.grey : null,
-          ),
-        ],
+                if (_otpController.text.isEmpty) {
+                  HelperUtils.showSnackBarMessage(context, "Please enter OTP",
+                      type: MessageType.warning);
+                  return;
+                }
+                context.read<BfsPaymentCubit>().submitOtp(
+                      orderNo: _arResponse!.orderNo,
+                      otp: _otpController.text,
+                    );
+              },
+              buttonTitle: "Submit Payment",
+              disabledColor: _otpSecondsRemaining == 0 ? Colors.grey : null,
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildSuccessStep(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.check_circle, size: 80, color: Colors.green),
-          SizedBox(height: 20),
-          CustomText("Payment Successful!",
-              fontSize: 24, fontWeight: FontWeight.bold),
-          SizedBox(height: 10),
-          CustomText("Your transaction has been completed."),
-          SizedBox(height: 40),
-          UiUtils.buildButton(
-            context,
-            onPressed: () {
-              Navigator.pop(context, true); // Return success
-            },
-            buttonTitle: "Continue",
-          ),
-        ],
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
+            const Icon(Icons.check_circle, size: 80, color: Colors.green),
+            const SizedBox(height: 20),
+            CustomText("Payment Successful!",
+                fontSize: 24, fontWeight: FontWeight.bold),
+            const SizedBox(height: 10),
+            CustomText("Your transaction has been completed."),
+            const SizedBox(height: 60),
+            UiUtils.buildButton(
+              context,
+              onPressed: () {
+                Navigator.pop(context, true); // Return success
+              },
+              buttonTitle: "Continue",
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
