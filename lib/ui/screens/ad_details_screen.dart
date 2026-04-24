@@ -689,7 +689,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     CustomText(
-                      "${"featureYourItemsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}",
+                      "${"featureYourItemsAttractMore".translate(context)}\n${"clientsAndSellFaster".translate(context)}\n(100Nu for 3days only)",
                       color:
                           context.color.textDefaultColor.withValues(alpha: 0.7),
                       fontSize: context.font.large,
@@ -704,8 +704,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                             builder: (context) => BfsPaymentScreen(
                               paymentType: BfsPaymentType.featuredAd,
                               itemId: model.id!.toString(),
-                              price:
-                                  0.0, // Price will be fetched from AR response
+                              price: 100.0, // Updated price from 10 to 100
                               packageName:
                                   "createFeaturedAd".translate(context),
                             ),
@@ -1512,8 +1511,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                                 create: (context) => SendMessageCubit(),
                               ),
                               BlocProvider(
-                                create: (context) =>
-                                    LoadChatMessagesCubit(),
+                                create: (context) => LoadChatMessagesCubit(),
                               ),
                               BlocProvider(
                                 create: (context) => DeleteMessageCubit(),

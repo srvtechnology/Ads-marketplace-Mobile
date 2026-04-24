@@ -206,7 +206,7 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
             fontWeight: FontWeight.bold,
           ),
           CustomText(
-            "BTN ${_arResponse!.amount.toStringAsFixed(2)}",
+            "Nu ${_arResponse!.amount.toStringAsFixed(2)}",
             fontSize: 20,
             color: context.color.territoryColor,
             fontWeight: FontWeight.bold,

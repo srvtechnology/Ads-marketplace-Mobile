@@ -22,6 +22,7 @@ class BfsPaymentRepository {
       params = {
         'item_id': itemId!,
         'email': email,
+        if (amount != null && amount > 0) 'amount': amount.toInt(),
       };
     } else {
       // Offer payment
