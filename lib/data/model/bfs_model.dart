@@ -7,9 +7,9 @@ class BfsBank {
 
   factory BfsBank.fromJson(Map<String, dynamic> json) {
     return BfsBank(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      status: json['status'] ?? '',
+      id: json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
     );
   }
 }
@@ -49,11 +49,13 @@ class BfsArResponse {
 
     return BfsArResponse(
       success: (bankList as List).isNotEmpty,
-      txnId: responseObj['bfs_bfsTxnId'] ?? '',
-      orderNo: orderNo,
+      txnId: responseObj['bfs_bfsTxnId']?.toString() ?? '',
+      orderNo: orderNo?.toString() ?? '',
       amount: amountVal,
       currency: 'BTN',
-      banks: (bankList).map((e) => BfsBank.fromJson(e)).toList(),
+      banks: (bankList as List)
+          .map((e) => BfsBank.fromJson(Map<String, dynamic>.from(e)))
+          .toList(),
     );
   }
 }
@@ -169,15 +171,15 @@ class BfsDrResponse {
     return BfsDrResponse(
       success: isSuccess,
       isPending: isPending,
-      status: status,
-      txnId: txnObj['bfs_txn_id'] ?? responseObj['bfs_bfsTxnId'] ?? '',
-      authNo: responseObj['bfs_debitAuthCode'] ?? '',
+      status: status?.toString() ?? '',
+      txnId: txnObj['bfs_txn_id']?.toString() ?? responseObj['bfs_bfsTxnId']?.toString() ?? '',
+      authNo: responseObj['bfs_debitAuthCode']?.toString() ?? '',
       amount: double.tryParse(txnObj['amount']?.toString() ??
               responseObj['bfs_txnAmount']?.toString() ??
               '0') ??
           0.0,
-      currency: responseObj['bfs_txnCurrency'] ?? 'BTN',
-      timestamp: responseObj['bfs_bfsTxnTime'] ?? txnObj['created_at'] ?? '',
+      currency: responseObj['bfs_txnCurrency']?.toString() ?? 'BTN',
+      timestamp: responseObj['bfs_bfsTxnTime']?.toString() ?? txnObj['created_at']?.toString() ?? '',
       errorType: errorTypeVal,
     );
   }

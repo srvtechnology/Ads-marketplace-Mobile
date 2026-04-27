@@ -62,6 +62,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
   List<dynamic> mixedItemImageList = [];
   List<int> deleteItemImageList = [];
   late final GlobalKey<FormState> _formKey;
+  bool isFeaturedAd = true;
 
   //Text Controllers
   final TextEditingController adTitleController = TextEditingController();
@@ -219,6 +220,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       "price": adPriceController.text,
                       "contact": adPhoneNumberController.text,
                       "video_link": adAdditionalDetailsController.text,
+                      "is_featured_ad": isFeaturedAd,
                       if (widget.isEdit == true)
                         "delete_item_image_id": deleteItemImageList.join(','),
                       "all_category_ids": widget.isEdit == true
@@ -237,6 +239,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         "price": adPriceController.text,
                         "contact": adPhoneNumberController.text,
                         "video_link": adAdditionalDetailsController.text,
+                        "is_featured_ad": isFeaturedAd,
                         "all_category_ids": widget.isEdit == true
                             ? item!.allCategoryIds
                             : selectedCategoryList.join(','),
@@ -497,6 +500,25 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       ),
                       SizedBox(
                         height: 15,
+                      ),
+                      Row(
+                        children: [
+                          Checkbox(
+                            value: isFeaturedAd,
+                            activeColor: context.color.territoryColor,
+                            onChanged: (value) {
+                              setState(() {
+                                isFeaturedAd = value ?? false;
+                              });
+                            },
+                          ),
+                          Expanded(
+                            child: CustomText(
+                              "Make this a featured ad (100 Nu for 3 days only)",
+                              fontSize: context.font.large,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

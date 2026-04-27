@@ -175,8 +175,30 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
             } else if (_currentStep == 3) {
               currentStepWidget = _buildSuccessStep(context);
             } else {
-              currentStepWidget =
-                  Center(child: CustomText("Initializing Payment..."));
+              currentStepWidget = Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (state is BfsPaymentFailure)
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: CustomText(state.errorMessage,
+                            color: Colors.red, textAlign: TextAlign.center),
+                      ),
+                    if (state is BfsPaymentLoading)
+                      UiUtils.progress()
+                    else ...[
+                      CustomText("Initializing Payment..."),
+                      if (state is BfsPaymentFailure)
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: CustomText("Go Back", showUnderline: true)),
+                    ]
+                  ],
+                ),
+              );
             }
 
             return GestureDetector(

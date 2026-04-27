@@ -20,7 +20,7 @@ class BfsPaymentRepository {
     if (paymentType == BfsPaymentType.featuredAd) {
       url = Api.bfsArApi;
       params = {
-        'item_id': itemId!,
+        'item_id': int.tryParse(itemId!) ?? 0,
         'email': email,
         if (amount != null && amount > 0) 'amount': amount.toInt(),
       };

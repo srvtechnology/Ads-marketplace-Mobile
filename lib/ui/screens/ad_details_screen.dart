@@ -2652,56 +2652,12 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                         ),
                       ),
                     ),
-                  if (model.user!.showPersonalDetails == 1 &&
-                      model.user!.email != null &&
-                      model.user!.email!.isNotEmpty)
-                    InkWell(
-                      onTap: () {
-                        navigateToSellerProfile();
-                      },
-                      child: CustomText(
-                        model.user!.email!,
-                        color: context.color.textLightColor,
-                        fontSize: context.font.small,
-                      ),
-                    ),
+
                 ],
               ),
             ),
           ),
-          if (model.user!.showPersonalDetails == 1 &&
-              model.user!.mobile != null &&
-              model.user!.mobile!.isNotEmpty)
-            setIconButtons(
-              assetName: AppIcons.message,
-              onTap: () {
-                HelperUtils.launchPathURL(
-                  isTelephone: false,
-                  isSMS: true,
-                  isMail: false,
-                  value: formatPhoneNumber(
-                      model.user!.mobile!, Constant.defaultCountryCode),
-                  context: context,
-                );
-              },
-            ),
-          SizedBox(width: 10),
-          if (model.user!.showPersonalDetails == 1 &&
-              model.user!.mobile != null &&
-              model.user!.mobile!.isNotEmpty)
-            setIconButtons(
-              assetName: AppIcons.call,
-              onTap: () {
-                HelperUtils.launchPathURL(
-                  isTelephone: true,
-                  isSMS: false,
-                  isMail: false,
-                  value: formatPhoneNumber(
-                      model.user!.mobile!, Constant.defaultCountryCode),
-                  context: context,
-                );
-              },
-            ),
+
         ],
       ),
     );

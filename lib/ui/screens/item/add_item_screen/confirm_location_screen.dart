@@ -7,6 +7,8 @@ import 'package:eClassify/data/cubits/item/manage_item_cubit.dart';
 import 'package:eClassify/data/helper/widgets.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/ui/screens/item/my_item_tab_screen.dart';
+import 'package:eClassify/data/repositories/bfs_payment_repository.dart';
+import 'package:eClassify/ui/screens/payment/bfs_payment_screen.dart';
 
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -284,11 +286,37 @@ class _ConfirmLocationScreenState extends CloudState<ConfirmLocationScreen>
                   myAdsCubitReference[getCloudData("edit_from")]
                       ?.edit(state.model);
 
+                  Map<String, dynamic> cloudData = getCloudData("with_more_details") ?? {};
+                  if (cloudData['is_featured_ad'] == true && widget.isEdit != true) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BfsPaymentScreen(
+                          paymentType: BfsPaymentType.featuredAd,
+                          itemId: state.model.id!.toString(),
+                          price: 100.0,
+                          packageName: "createFeaturedAd".translate(context),
+                        ),
+                      ),
+                    ).then((result) {
+                      if (result == true) {
+                        HelperUtils.showSnackBarMessage(
+                            context, "paymentSuccessMsg".translate(context),
+                            type: MessageType.success);
+                      }
                       Navigator.pushNamed(context, Routes.successItemScreen,
                           arguments: {
                             'model': state.model,
                             'isEdit': widget.isEdit
                           });
+                    });
+                  } else {
+                    Navigator.pushNamed(context, Routes.successItemScreen,
+                        arguments: {
+                          'model': state.model,
+                          'isEdit': widget.isEdit
+                        });
+                  }
                 }
 
                 if (state is ManageItemFail) {
