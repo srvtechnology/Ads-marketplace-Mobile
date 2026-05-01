@@ -5,6 +5,7 @@ import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_keys.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:eClassify/services/pusher_service.dart';
 
@@ -32,7 +33,8 @@ class HiveUtils {
   }
 
   static String? getUserId() {
-    return Hive.box(HiveKeys.userDetailsBox).get("id").toString();
+    final id = Hive.box(HiveKeys.userDetailsBox).get("id");
+    return id?.toString();
   }
 
   static AppTheme getCurrentTheme() {
@@ -267,32 +269,36 @@ class HiveUtils {
     return Hive.box(HiveKeys.authBox).get(HiveKeys.isUserSkip) ?? false;
   }
 
-  static void logoutUser(context,
+  static Future<void> logoutUser(BuildContext context,
       {required VoidCallback onLogout, bool? isRedirect}) async {
     String? userId = getUserId();
-    if (userId != null && userId.isNotEmpty) {
+    if (userId != null && userId.isNotEmpty && userId != "null") {
       try {
-        await PusherService.disconnect(int.parse(userId));
+        int? id = int.tryParse(userId);
+        if (id != null) {
+          await PusherService.disconnect(id);
+        }
       } catch (e) {
-        print("Error disconnecting pusher: $e");
+        debugPrint("Error disconnecting pusher: $e");
       }
     }
-    await Hive.box(HiveKeys.userDetailsBox).clear();
-    HiveUtils.setUserIsAuthenticated(false);
+    await clear();
 
     onLogout.call();
 
-    Future.delayed(
-      Duration.zero,
-      () {
-        if (isRedirect ?? true) {
-          HelperUtils.killPreviousPages(context, Routes.login, {});
-        }
-      },
-    );
+    if (isRedirect ?? true) {
+      Future.delayed(
+        Duration.zero,
+        () {
+          if (context.mounted) {
+            HelperUtils.killPreviousPages(context, Routes.login, {});
+          }
+        },
+      );
+    }
   }
 
-  static void clear() async {
+  static Future<void> clear() async {
     await Hive.box(HiveKeys.userDetailsBox).clear();
     await Hive.box(HiveKeys.historyBox).clear();
     HiveUtils.setUserIsAuthenticated(false);

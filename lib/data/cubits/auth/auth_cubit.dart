@@ -81,8 +81,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void signOut(BuildContext context) async {
-    if ((state as Authenticated).isAuthenticated) {
-      HiveUtils.logoutUser(context, onLogout: () {});
+    if (state is Authenticated) {
+      await HiveUtils.logoutUser(context, onLogout: () {});
       emit(Unauthenticated());
     }
   }

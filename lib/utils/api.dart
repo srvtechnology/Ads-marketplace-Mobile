@@ -13,6 +13,7 @@ import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/network_request_interseptor.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ApiException implements Exception {
@@ -346,25 +347,23 @@ class Api {
   }
 
   static void userExpired() {
-    HelperUtils.showSnackBarMessage(Constant.navigatorKey.currentContext!,
-        "userIsDeactivated".translate(Constant.navigatorKey.currentContext!),
+    BuildContext? context = Constant.navigatorKey.currentContext;
+    if (context == null) return;
+
+    HelperUtils.showSnackBarMessage(context, "userIsDeactivated".translate(context),
         messageDuration: 3);
     Future.delayed(Duration(seconds: 2), () {
-      HiveUtils.clear();
+      BuildContext? context = Constant.navigatorKey.currentContext;
+      if (context == null) return;
+
       Constant.favoriteItemList.clear();
-      Constant.navigatorKey.currentContext!.read<UserDetailsCubit>().clear();
-      Constant.navigatorKey.currentContext!.read<FavoriteCubit>().resetState();
-      Constant.navigatorKey.currentContext!
-          .read<UpdatedReportItemCubit>()
-          .clearItem();
-      Constant.navigatorKey.currentContext!
-          .read<GetBuyerChatListCubit>()
-          .resetState();
-      Constant.navigatorKey.currentContext!
-          .read<BlockedUsersListCubit>()
-          .resetState();
+      context.read<UserDetailsCubit>().clear();
+      context.read<FavoriteCubit>().resetState();
+      context.read<UpdatedReportItemCubit>().clearItem();
+      context.read<GetBuyerChatListCubit>().resetState();
+      context.read<BlockedUsersListCubit>().resetState();
       HiveUtils.logoutUser(
-        Constant.navigatorKey.currentContext!,
+        context,
         onLogout: () {},
       );
     });

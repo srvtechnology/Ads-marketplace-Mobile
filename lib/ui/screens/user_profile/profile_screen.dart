@@ -1179,7 +1179,6 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   void askToLoginAgain() {
     HelperUtils.showSnackBarMessage(context, 'loginReqMsg'.translate(context));
-    HiveUtils.clear();
     Constant.favoriteItemList.clear();
     context.read<UserDetailsCubit>().clear();
     context.read<FavoriteCubit>().resetState();
@@ -1190,8 +1189,6 @@ class _ProfileScreenState extends State<ProfileScreen>
       context,
       onLogout: () {},
     );
-    Navigator.of(context)
-        .pushNamedAndRemoveUntil(Routes.login, (route) => false);
   }
 
   Future<void> signOut(AuthenticationType? type) async {
@@ -1213,7 +1210,6 @@ class _ProfileScreenState extends State<ProfileScreen>
             if (AuthenticationType.values[i].name ==
                 HiveUtils.getUserDetails().type) {
               signOut(AuthenticationType.values[i]).then((value) {
-                HiveUtils.clear();
                 Constant.favoriteItemList.clear();
                 context.read<UserDetailsCubit>().clear();
                 context.read<FavoriteCubit>().resetState();
@@ -1225,8 +1221,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                   context,
                   onLogout: () {},
                 );
-                Navigator.of(context)
-                    .pushNamedAndRemoveUntil(Routes.login, (route) => false);
               });
             }
           }
@@ -1238,7 +1232,6 @@ class _ProfileScreenState extends State<ProfileScreen>
           if (AuthenticationType.values[i].name ==
               HiveUtils.getUserDetails().type) {
             signOut(AuthenticationType.values[i]).then((value) {
-              HiveUtils.clear();
               Constant.favoriteItemList.clear();
               context.read<UserDetailsCubit>().clear();
               context.read<FavoriteCubit>().resetState();
@@ -1249,8 +1242,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                 context,
                 onLogout: () {},
               );
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(Routes.login, (route) => false);
             });
           }
         }
@@ -1340,8 +1331,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             onAccept: () async {
               Future.delayed(
                 Duration.zero,
-                () {
-                  HiveUtils.clear();
+                () async {
                   Constant.favoriteItemList.clear();
                   context.read<UserDetailsCubit>().clear();
                   context.read<FavoriteCubit>().resetState();
@@ -1349,7 +1339,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                   context.read<GetBuyerChatListCubit>().resetState();
                   context.read<BlockedUsersListCubit>().resetState();
                   context.read<AuthenticationCubit>().signOut();
-                  HiveUtils.logoutUser(
+                  await HiveUtils.logoutUser(
                     context,
                     onLogout: () {},
                   );
