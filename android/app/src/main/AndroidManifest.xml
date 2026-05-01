@@ -87,25 +87,30 @@
                 android:resource="@style/NormalTheme" />
             <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
 
-            <intent-filter android:autoVerify="true">
+            <!-- Custom Scheme Deep Links -->
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-            
-
                 <data
                     android:host="admin.thebhutanmarket.com"
-                    android:pathPattern="/product-details/.*"
                     android:scheme="bhutanmarket" />
+                <data android:pathPattern="/product-details/.*" />
+                <data android:pathPattern="/seller/.*" />
+            </intent-filter>
 
-                <data
-                    android:host="admin.thebhutanmarket.com"
-                    android:pathPattern="/seller/.*"
-                    android:scheme="bhutanmarket" />
-            
+            <!-- Web Deep Links (App Links) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+                <data android:host="admin.thebhutanmarket.com" />
+                <data android:pathPattern="/product-details/.*" />
+                <data android:pathPattern="/seller/.*" />
             </intent-filter>
 
 
