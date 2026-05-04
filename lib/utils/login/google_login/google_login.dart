@@ -43,17 +43,17 @@ class GoogleLogin extends LoginSystem {
         emit(MFail(e.toString()));
       }
 
-      rethrow;
+      return null;
     }
   }
 
-  void signOut() async {
+  @override
+  Future<void> signOut() async {
     if (await _googleSignIn?.isSignedIn() ?? false) {
       _googleSignIn?.signOut();
     }
   }
 
   @override
-  void onEvent(MLoginState state) {
-  }
+  void onEvent(MLoginState state) {}
 }

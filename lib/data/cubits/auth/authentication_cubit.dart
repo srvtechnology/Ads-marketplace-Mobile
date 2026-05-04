@@ -83,6 +83,7 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
         final twilio = await verifyTwilioOtp();
         if (twilio['error'] == true) {
           emit(AuthenticationFail(twilio['message']));
+          return;
         }
         final token = twilio['token']?.toString() ?? '';
         final credentials = twilio['data'];
@@ -231,17 +232,15 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
     mMultiAuthentication.requestVerification();
   }
 
-  void signOut() {
-    if (state is AuthenticationSuccess) {
-      final isGoogleLogin =
-          (state as AuthenticationSuccess).type == AuthenticationType.google;
-      if (isGoogleLogin) {
-        final googleLogin = mMultiAuthentication.systems['google'];
-
-        (googleLogin as GoogleLogin).signOut();
-
-        emit(AuthenticationInitial());
+  Future<void> signOut() async {
+    try {
+      // Disconnect from all systems
+      for (var system in mMultiAuthentication.systems.values) {
+        await system.signOut();
       }
+    } catch (e) {
+      log("Error during provider sign out: $e");
     }
+    emit(AuthenticationInitial());
   }
 }

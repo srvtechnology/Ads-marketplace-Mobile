@@ -1185,6 +1185,7 @@ class _ProfileScreenState extends State<ProfileScreen>
     context.read<UpdatedReportItemCubit>().clearItem();
     context.read<GetBuyerChatListCubit>().resetState();
     context.read<BlockedUsersListCubit>().resetState();
+    context.read<AuthenticationCubit>().signOut();
     HiveUtils.logoutUser(
       context,
       onLogout: () {},
@@ -1193,9 +1194,9 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> signOut(AuthenticationType? type) async {
     if (type == AuthenticationType.google) {
-      _googleSignIn.signOut();
+      await _googleSignIn.signOut();
     } else {
-      _auth.signOut();
+      await _auth.signOut();
     }
   }
 
@@ -1209,18 +1210,20 @@ class _ProfileScreenState extends State<ProfileScreen>
           for (int i = 0; i < AuthenticationType.values.length; i++) {
             if (AuthenticationType.values[i].name ==
                 HiveUtils.getUserDetails().type) {
-              signOut(AuthenticationType.values[i]).then((value) {
+              signOut(AuthenticationType.values[i]).then((value) async {
                 Constant.favoriteItemList.clear();
                 context.read<UserDetailsCubit>().clear();
                 context.read<FavoriteCubit>().resetState();
                 context.read<UpdatedReportItemCubit>().clearItem();
                 context.read<GetBuyerChatListCubit>().resetState();
                 context.read<BlockedUsersListCubit>().resetState();
-
-                HiveUtils.logoutUser(
-                  context,
-                  onLogout: () {},
-                );
+                await context.read<AuthenticationCubit>().signOut();
+                if (context.mounted) {
+                  await HiveUtils.logoutUser(
+                    context,
+                    onLogout: () {},
+                  );
+                }
               });
             }
           }
@@ -1231,17 +1234,20 @@ class _ProfileScreenState extends State<ProfileScreen>
         for (int i = 0; i < AuthenticationType.values.length; i++) {
           if (AuthenticationType.values[i].name ==
               HiveUtils.getUserDetails().type) {
-            signOut(AuthenticationType.values[i]).then((value) {
+            signOut(AuthenticationType.values[i]).then((value) async {
               Constant.favoriteItemList.clear();
               context.read<UserDetailsCubit>().clear();
               context.read<FavoriteCubit>().resetState();
               context.read<UpdatedReportItemCubit>().clearItem();
               context.read<GetBuyerChatListCubit>().resetState();
               context.read<BlockedUsersListCubit>().resetState();
-              HiveUtils.logoutUser(
-                context,
-                onLogout: () {},
-              );
+              await context.read<AuthenticationCubit>().signOut();
+              if (context.mounted) {
+                await HiveUtils.logoutUser(
+                  context,
+                  onLogout: () {},
+                );
+              }
             });
           }
         }
@@ -1325,29 +1331,40 @@ class _ProfileScreenState extends State<ProfileScreen>
       appStoreId: Constant.iOSAppId, microsoftStoreId: 'microsoftStoreId');
 
   void logOutConfirmWidget() {
-    UiUtils.showBlurredDialoge(context,
-        dialoge: BlurredDialogBox(
-            title: "confirmLogoutTitle".translate(context),
-            onAccept: () async {
-              Future.delayed(
-                Duration.zero,
-                () async {
-                  Constant.favoriteItemList.clear();
-                  context.read<UserDetailsCubit>().clear();
-                  context.read<FavoriteCubit>().resetState();
-                  context.read<UpdatedReportItemCubit>().clearItem();
-                  context.read<GetBuyerChatListCubit>().resetState();
-                  context.read<BlockedUsersListCubit>().resetState();
-                  context.read<AuthenticationCubit>().signOut();
-                  await HiveUtils.logoutUser(
-                    context,
-                    onLogout: () {},
-                  );
-                },
-              );
-            },
-            cancelTextColor: context.color.textColorDark,
-            svgImagePath: AppIcons.logoutIcon,
-            content: CustomText("confirmLogOutMsg".translate(context))));
+    UiUtils.showBlurredDialoge(
+      context,
+      dialoge: BlurredDialogBox(
+        title: "confirmLogoutTitle".translate(context),
+        isAcceptContainerPush: true,
+        onAccept: () async {
+          // Clear app state and sessions
+          Constant.favoriteItemList.clear();
+          context.read<UserDetailsCubit>().clear();
+          context.read<FavoriteCubit>().resetState();
+          context.read<UpdatedReportItemCubit>().clearItem();
+          context.read<GetBuyerChatListCubit>().resetState();
+          context.read<BlockedUsersListCubit>().resetState();
+
+          // Sign out from providers and Firebase
+          try {
+            await context.read<AuthenticationCubit>().signOut();
+            await _googleSignIn.signOut();
+            await _auth.signOut();
+          } catch (e) {
+            debugPrint("Error during sign out: $e");
+          }
+
+          if (context.mounted) {
+            await HiveUtils.logoutUser(
+              context,
+              onLogout: () {},
+            );
+          }
+        },
+        cancelTextColor: context.color.textColorDark,
+        svgImagePath: AppIcons.logoutIcon,
+        content: CustomText("confirmLogOutMsg".translate(context)),
+      ),
+    );
   }
 }

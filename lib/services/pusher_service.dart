@@ -12,6 +12,8 @@ class PusherService {
   static Stream<Map<String, dynamic>> get eventsStream =>
       _eventsController.stream;
 
+  static bool _isInitialized = false;
+
   static Future<void> init({
     required int userId,
   }) async {
@@ -26,6 +28,7 @@ class PusherService {
           print("Pusher Error: $message");
         },
       );
+      _isInitialized = true;
     } catch (e) {
       print("Pusher init error (ignored if already initialized): $e");
     }
@@ -65,9 +68,15 @@ class PusherService {
   }
 
   static Future<void> disconnect(int userId) async {
+    if (!_isInitialized) {
+      print("Pusher not initialized, skipping disconnect");
+      return;
+    }
+    
     try {
       await pusher.unsubscribe(channelName: "chat-user-$userId");
       await pusher.disconnect();
+      _isInitialized = false;
     } catch (e) {
       print("Error disconnecting Pusher: $e");
     }

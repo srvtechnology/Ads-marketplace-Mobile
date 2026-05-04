@@ -271,30 +271,28 @@ class HiveUtils {
 
   static Future<void> logoutUser(BuildContext context,
       {required VoidCallback onLogout, bool? isRedirect}) async {
-    String? userId = getUserId();
-    if (userId != null && userId.isNotEmpty && userId != "null") {
-      try {
+    try {
+      String? userId = getUserId();
+      if (userId != null && userId.isNotEmpty && userId != "null") {
         int? id = int.tryParse(userId);
         if (id != null) {
-          await PusherService.disconnect(id);
+          // Fire and forget pusher disconnect to avoid blocking logout
+          PusherService.disconnect(id).catchError((e) {
+            debugPrint("Error disconnecting pusher: $e");
+          });
         }
-      } catch (e) {
-        debugPrint("Error disconnecting pusher: $e");
       }
+    } catch (e) {
+      debugPrint("Error in logoutUser userId logic: $e");
     }
-    await clear();
 
+    await clear();
     onLogout.call();
 
     if (isRedirect ?? true) {
-      Future.delayed(
-        Duration.zero,
-        () {
-          if (context.mounted) {
-            HelperUtils.killPreviousPages(context, Routes.login, {});
-          }
-        },
-      );
+      if (context.mounted) {
+        HelperUtils.killPreviousPages(context, Routes.login, {});
+      }
     }
   }
 

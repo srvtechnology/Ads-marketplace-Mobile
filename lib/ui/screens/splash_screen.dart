@@ -37,20 +37,32 @@ class SplashScreenState extends State<SplashScreen>
 
   @override
   void initState() {
-    //locationPermission();
     super.initState();
-
+    checkConnectivity();
     subscription = Connectivity().onConnectivityChanged.listen((result) {
       setState(() {
         hasInternet = (!result.contains(ConnectivityResult.none));
       });
-      if (hasInternet) {
+      if (hasInternet && !isTimerCompleted && !isSettingsLoaded) {
         context
             .read<FetchSystemSettingsCubit>()
             .fetchSettings(forceRefresh: true);
         startTimer();
       }
     });
+  }
+
+  void checkConnectivity() async {
+    List<ConnectivityResult> result = await Connectivity().checkConnectivity();
+    setState(() {
+      hasInternet = (!result.contains(ConnectivityResult.none));
+    });
+    if (hasInternet) {
+      context
+          .read<FetchSystemSettingsCubit>()
+          .fetchSettings(forceRefresh: true);
+      startTimer();
+    }
   }
 
   @override
@@ -175,6 +187,12 @@ class SplashScreenState extends State<SplashScreen>
                   setState(() {});
                 }
               }
+              if (state is FetchLanguageFailure) {
+                isLanguageLoaded = true;
+                if (mounted) {
+                  setState(() {});
+                }
+              }
             },
             child: BlocListener<FetchSystemSettingsCubit,
                 FetchSystemSettingsState>(
@@ -190,6 +208,9 @@ class SplashScreenState extends State<SplashScreen>
                 }
                 if (state is FetchSystemSettingsFailure) {
                   log('${state.errorMessage}');
+                  isSettingsLoaded = true;
+                  isLanguageLoaded = true;
+                  setState(() {});
                 }
               },
               child: SafeArea(

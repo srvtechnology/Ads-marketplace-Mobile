@@ -35,11 +35,9 @@ void initApp() async {
     };
   }
 
-  if (Firebase.apps.isNotEmpty) {
+  if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform);
-  } else {
-    await Firebase.initializeApp();
   }
 
   FirebaseMessaging.onBackgroundMessage(

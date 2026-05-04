@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:eClassify/data/cubits/auth/authentication_cubit.dart';
 import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
@@ -350,7 +351,8 @@ class Api {
     BuildContext? context = Constant.navigatorKey.currentContext;
     if (context == null) return;
 
-    HelperUtils.showSnackBarMessage(context, "userIsDeactivated".translate(context),
+    HelperUtils.showSnackBarMessage(
+        context, "userIsDeactivated".translate(context),
         messageDuration: 3);
     Future.delayed(Duration(seconds: 2), () {
       BuildContext? context = Constant.navigatorKey.currentContext;
@@ -362,6 +364,7 @@ class Api {
       context.read<UpdatedReportItemCubit>().clearItem();
       context.read<GetBuyerChatListCubit>().resetState();
       context.read<BlockedUsersListCubit>().resetState();
+      context.read<AuthenticationCubit>().signOut();
       HiveUtils.logoutUser(
         context,
         onLogout: () {},

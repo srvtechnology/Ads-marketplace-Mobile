@@ -36,6 +36,8 @@ abstract class LoginSystem {
 
   ///Here will be implementation of the main login method, it will return usercredentials or API response data
   Future<dynamic> login();
+
+  Future<void> signOut() async {}
 }
 
 ///From this we will be able to use this login . [this is for single authentication . if you use this you must have to create instance of every login system individually]

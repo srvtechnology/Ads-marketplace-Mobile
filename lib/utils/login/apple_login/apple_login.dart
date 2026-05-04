@@ -48,14 +48,18 @@ class AppleLogin extends LoginSystem {
       }
       return null;
     } catch (e) {
-
       emit(MFail(e));
-      throw e;
+      return null;
     }
   }
 
   @override
   void onEvent(MLoginState state) {
     print("Login state is $state");
+  }
+
+  @override
+  Future<void> signOut() async {
+    // No specific sign out needed for Apple SDK in this app
   }
 }
