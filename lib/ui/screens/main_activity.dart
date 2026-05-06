@@ -134,14 +134,16 @@ class MainActivityState extends State<MainActivity>
 //This will init page controller
     initPageController();
 
-    if (widget.itemSlug != null) {
-      Navigator.of(context).pushNamed(Routes.adDetailsScreen,
-          arguments: {"slug": widget.itemSlug!});
-    }
-    if (widget.sellerId != null) {
-      Navigator.pushNamed(context, Routes.sellerProfileScreen,
-          arguments: {"sellerId": int.parse(widget.sellerId!)});
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.itemSlug != null) {
+        Navigator.of(context).pushNamed(Routes.adDetailsScreen,
+            arguments: {"slug": widget.itemSlug!});
+      }
+      if (widget.sellerId != null) {
+        Navigator.pushNamed(context, Routes.sellerProfileScreen,
+            arguments: {"sellerId": int.parse(widget.sellerId!)});
+      }
+    });
 
     if (HiveUtils.isUserAuthenticated()) {
       context.read<GetBuyerChatListCubit>().fetch();

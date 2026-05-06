@@ -10,7 +10,7 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>admin.thebhutanmarket.com</string>
+		<string>applinks:admin.thebhutanmarket.com</string>
 	</array>
 	<key>com.apple.developer.icloud-container-identifiers</key>
 	<array/>
