@@ -148,6 +148,8 @@ class Routes {
 
   static String currentRoute = '';
   static String previousRoute = '';
+  static String? pendingItemSlug;
+  static String? pendingSellerId;
 
   static Route onGenerateRouted(RouteSettings routeSettings) {
     previousRoute = currentRoute;
@@ -165,9 +167,9 @@ class Routes {
       HiveUtils.setUserSkip();
 
       if (type == 'product-details') {
-        if (previousRoute.isEmpty) {
-          return MaterialPageRoute(
-              builder: (_) => SplashScreen(itemSlug: value));
+        if (previousRoute.isEmpty || previousRoute == Routes.splash) {
+          pendingItemSlug = value;
+          return MaterialPageRoute(builder: (_) => const Scaffold(backgroundColor: Colors.transparent));
         } else {
           if (currentRoute == adDetailsScreen) {
             Constant.navigatorKey.currentState?.pop();
@@ -177,9 +179,9 @@ class Routes {
           );
         }
       } else if (type == 'seller') {
-        if (previousRoute.isEmpty) {
-          return MaterialPageRoute(
-              builder: (_) => SplashScreen(sellerId: value));
+        if (previousRoute.isEmpty || previousRoute == Routes.splash) {
+          pendingSellerId = value;
+          return MaterialPageRoute(builder: (_) => const Scaffold(backgroundColor: Colors.transparent));
         } else {
           if (currentRoute == sellerProfileScreen) {
             Constant.navigatorKey.currentState?.pop();

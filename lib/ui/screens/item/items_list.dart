@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/item/fetch_item_from_category_cubit.dart';
+import 'package:eClassify/data/model/category_banner_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
@@ -615,8 +616,7 @@ class ItemsListState extends State<ItemsList> {
         }
         return Column(
           children: [
-            Expanded(child: mainChildren(state.itemModel)
-                ),
+            Expanded(child: mainChildren(state.itemModel, state.banner)),
             if (state.isLoadingMore) UiUtils.progress()
           ],
         );
@@ -633,12 +633,17 @@ class ItemsListState extends State<ItemsList> {
     );
   }
 
-  Widget mainChildren(List<ItemModel> items) {
+  Widget mainChildren(List<ItemModel> items, CategoryBannerModel? banner) {
     List<Widget> children = [];
+
+    if (banner != null && banner.isActive == true) {
+      children.add(bannerWidget(banner));
+    }
+
     int gridCount = Constant.nativeAdsAfterItemNumber;
     int total = items.length;
 
-    for (int i = 0; i < total; i += gridCount ) {
+    for (int i = 0; i < total; i += gridCount) {
       if (isList) {
         children.add(_buildListViewSection(
             context, i, min(gridCount, total - i), items));
@@ -657,6 +662,35 @@ class ItemsListState extends State<ItemsList> {
       controller: controller,
       physics: BouncingScrollPhysics(),
       child: Column(children: children),
+    );
+  }
+
+  Widget bannerWidget(CategoryBannerModel banner) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: AspectRatio(
+            aspectRatio: 16 / 7,
+            child: UiUtils.getImage(
+              banner.image!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

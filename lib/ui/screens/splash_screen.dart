@@ -108,59 +108,41 @@ class SplashScreenState extends State<SplashScreen>
         "1") {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed(Routes.maintenanceMode);
+          Navigator.of(context).pushNamedAndRemoveUntil(Routes.maintenanceMode, (route) => false);
         }
       });
     } else if (HiveUtils.isUserFirstTime() == true) {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
-          Navigator.of(context).pushReplacementNamed(Routes.onboarding);
+          Navigator.of(context).pushNamedAndRemoveUntil(Routes.onboarding, (route) => false);
         }
       });
     } else if (HiveUtils.isUserAuthenticated()) {
-      ///User should not navigate automatically to complete profile page after closing the app and re-opening without completing profile
-      ///In that case, user should only be set as authenticated when the user has completed his profile
-      ///and if not, he should be redirected to login page again
-      ///and not complete profile page.
-      // if ((HiveUtils.getUserDetails().name == null ||
-      //         HiveUtils.getUserDetails().name == "") ||
-      //     (HiveUtils.getUserDetails().email == null ||
-      //         HiveUtils.getUserDetails().email == "")) {
-      //   Future.delayed(
-      //     const Duration(seconds: 1),
-      //     () {
-      //       Navigator.pushReplacementNamed(
-      //         context,
-      //         Routes.completeProfile,
-      //         arguments: {
-      //           "from": "login",
-      //         },
-      //       );
-      //     },
-      //   );
-      // } else {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
           //We pass slug only when the user is authenticated otherwise drop the slug
-          Navigator.of(context).pushReplacementNamed(Routes.main, arguments: {
+          Navigator.of(context).pushNamedAndRemoveUntil(Routes.main, (route) => false, arguments: {
             'from': "main",
-            "slug": widget.itemSlug,
-            "sellerId": widget.sellerId
+            "slug": widget.itemSlug ?? Routes.pendingItemSlug,
+            "sellerId": widget.sellerId ?? Routes.pendingSellerId
           });
+          Routes.pendingItemSlug = null;
+          Routes.pendingSellerId = null;
         }
       });
-      //}
     } else {
       Future.delayed(const Duration(seconds: 1), () {
         if (mounted) {
           if (HiveUtils.isUserSkip() == true) {
-            Navigator.of(context).pushReplacementNamed(Routes.main, arguments: {
+            Navigator.of(context).pushNamedAndRemoveUntil(Routes.main, (route) => false, arguments: {
               'from': "main",
-              "slug": widget.itemSlug,
-              "sellerId": widget.sellerId
+              "slug": widget.itemSlug ?? Routes.pendingItemSlug,
+              "sellerId": widget.sellerId ?? Routes.pendingSellerId
             });
+            Routes.pendingItemSlug = null;
+            Routes.pendingSellerId = null;
           } else {
-            Navigator.of(context).pushReplacementNamed(Routes.login);
+            Navigator.of(context).pushNamedAndRemoveUntil(Routes.login, (route) => false);
           }
         }
       });

@@ -1,3 +1,4 @@
+import 'package:eClassify/data/model/category_banner_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
@@ -17,29 +18,36 @@ class FetchItemFromCategorySuccess extends FetchItemFromCategoryState {
   final int page;
   final int total;
   final int? categoryId;
+  final CategoryBannerModel? banner;
 
-  FetchItemFromCategorySuccess(
-      {required this.isLoadingMore,
-      required this.loadingMoreError,
-      required this.itemModel,
-      required this.page,
-      required this.total,
-      this.categoryId});
+  FetchItemFromCategorySuccess({
+    required this.isLoadingMore,
+    required this.loadingMoreError,
+    required this.itemModel,
+    required this.page,
+    required this.total,
+    this.categoryId,
+    this.banner,
+  });
 
-  FetchItemFromCategorySuccess copyWith(
-      {bool? isLoadingMore,
-      bool? loadingMoreError,
-      List<ItemModel>? itemModel,
-      int? page,
-      int? total,
-      int? categoryId}) {
+  FetchItemFromCategorySuccess copyWith({
+    bool? isLoadingMore,
+    bool? loadingMoreError,
+    List<ItemModel>? itemModel,
+    int? page,
+    int? total,
+    int? categoryId,
+    CategoryBannerModel? banner,
+  }) {
     return FetchItemFromCategorySuccess(
-        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
-        loadingMoreError: loadingMoreError ?? this.loadingMoreError,
-        itemModel: itemModel ?? this.itemModel,
-        page: page ?? this.page,
-        total: total ?? this.total,
-        categoryId: categoryId ?? this.categoryId);
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      loadingMoreError: loadingMoreError ?? this.loadingMoreError,
+      itemModel: itemModel ?? this.itemModel,
+      page: page ?? this.page,
+      total: total ?? this.total,
+      categoryId: categoryId ?? this.categoryId,
+      banner: banner ?? this.banner,
+    );
   }
 }
 
@@ -76,6 +84,7 @@ class FetchItemFromCategoryCubit extends Cubit<FetchItemFromCategoryState> {
           page: 1,
           total: result.total,
           categoryId: categoryId,
+          banner: result.banner,
         ),
       );
     } catch (e) {
@@ -119,6 +128,7 @@ class FetchItemFromCategoryCubit extends Cubit<FetchItemFromCategoryState> {
             itemModel: item.itemModel,
             page: (state as FetchItemFromCategorySuccess).page + 1,
             total: result.total,
+            banner: result.banner ?? item.banner,
           ),
         );
       }

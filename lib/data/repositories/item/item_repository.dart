@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:eClassify/data/model/category_banner_model.dart';
 import 'package:eClassify/data/model/data_output.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/model/item_filter_model.dart';
@@ -204,7 +205,15 @@ class ItemRepository {
         .map((e) => ItemModel.fromJson(e))
         .toList();
 
-    return DataOutput(total: response['data']['total'] ?? 0, modelList: items);
+    CategoryBannerModel? banner;
+    if (response['data']['banner'] != null) {
+      banner = CategoryBannerModel.fromJson(response['data']['banner']);
+    }
+
+    return DataOutput(
+        total: response['data']['total'] ?? 0,
+        modelList: items,
+        banner: banner);
   }
 
   Future<DataOutput<ItemModel>> fetchPopularItems(
