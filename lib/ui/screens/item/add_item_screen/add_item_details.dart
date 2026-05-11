@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/custom_field/fetch_custom_fields_cubit.dart';
+import 'package:eClassify/data/cubits/item/fetch_condition_cubit.dart';
+import 'package:eClassify/data/model/item/condition_model.dart';
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/select_category.dart';
@@ -40,8 +42,11 @@ class AddItemDetails extends StatefulWidget {
         settings.arguments as Map<String, dynamic>?;
     return MaterialPageRoute(
       builder: (context) {
-        return BlocProvider(
-          create: (context) => FetchCustomFieldsCubit(),
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (context) => FetchCustomFieldsCubit()),
+            BlocProvider(create: (context) => FetchConditionCubit()),
+          ],
           child: AddItemDetails(
             breadCrumbItems: arguments?['breadCrumbItems'],
             isEdit: arguments?['isEdit'],
@@ -90,6 +95,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
 
   late List selectedCategoryList;
   ItemModel? item;
+  ConditionModel? selectedCondition;
 
   @override
   void initState() {
@@ -97,6 +103,7 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
     _formKey = GlobalKey<FormState>();
     AbstractField.fieldsData.clear();
     AbstractField.files.clear();
+    context.read<FetchConditionCubit>().fetchConditions();
     if (widget.isEdit == true) {
       item = getCloudData('edit_request') as ItemModel;
 
@@ -221,6 +228,8 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       "contact": adPhoneNumberController.text,
                       "video_link": adAdditionalDetailsController.text,
                       "is_featured_ad": isFeaturedAd,
+                      if (selectedCondition?.id != null)
+                        "condition_id": selectedCondition?.id,
                       if (widget.isEdit == true)
                         "delete_item_image_id": deleteItemImageList.join(','),
                       "all_category_ids": widget.isEdit == true
@@ -240,6 +249,8 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                         "contact": adPhoneNumberController.text,
                         "video_link": adAdditionalDetailsController.text,
                         "is_featured_ad": isFeaturedAd,
+                        if (selectedCondition?.id != null)
+                          "condition_id": selectedCondition?.id,
                         "all_category_ids": widget.isEdit == true
                             ? item!.allCategoryIds
                             : selectedCategoryList.join(','),
@@ -435,6 +446,73 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                       itemImagesListener(),
                       SizedBox(
                         height: 10,
+                      ),
+                      BlocBuilder<FetchConditionCubit, FetchConditionState>(
+                        builder: (context, state) {
+                          if (state is FetchConditionSuccess &&
+                              state.conditions.isNotEmpty) {
+                            if (widget.isEdit == true &&
+                                selectedCondition == null) {
+                              try {
+                                selectedCondition = state.conditions.firstWhere(
+                                    (c) => c.id == item?.conditionId);
+                              } catch (e) {}
+                            }
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                CustomText("condition".translate(context)),
+                                SizedBox(height: 10),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: context.color.secondaryColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        width: 1,
+                                        color: context.color.textLightColor
+                                            .withValues(alpha: 0.18),
+                                      )),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    child:
+                                        DropdownButtonFormField<ConditionModel>(
+                                      value: selectedCondition,
+                                      dropdownColor:
+                                          context.color.secondaryColor,
+                                      isExpanded: true,
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                      isDense: true,
+                                      borderRadius: BorderRadius.circular(10),
+                                      style: TextStyle(
+                                        color: context.color.textDefaultColor
+                                            .withValues(alpha: 0.5),
+                                        fontSize: context.font.large,
+                                      ),
+                                      items: state.conditions.map<
+                                              DropdownMenuItem<ConditionModel>>(
+                                          (ConditionModel c) {
+                                        return DropdownMenuItem<ConditionModel>(
+                                          value: c,
+                                          child: CustomText(c.name ?? ""),
+                                        );
+                                      }).toList(),
+                                      onChanged: (ConditionModel? value) {
+                                        setState(() {
+                                          selectedCondition = value;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                              ],
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                       CustomText("price".translate(context)),
                       SizedBox(

@@ -85,6 +85,7 @@ class Api {
   static String updateProfileApi = "update-profile";
   static String getSliderApi = "get-slider";
   static String getCategoriesApi = "get-categories";
+  static String getConditionListApi = "get-condition-list";
   static String getItemApi = "get-item";
   static String getMyItemApi = "my-items";
   static String getNotificationListApi = "get-notification-list";
@@ -181,6 +182,7 @@ class Api {
   static String userid = "userid";
   static String measurement = "measurement";
   static String categoryId = "category_id";
+  static String conditionId = "condition_id";
   static String title = "title";
   static String carpetArea = "carpet_area";
   static String builtUpArea = "built_up_area";

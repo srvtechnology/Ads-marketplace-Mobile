@@ -31,6 +31,7 @@ class ItemModel {
   String? itemType;
   int? userId;
   int? categoryId;
+  int? conditionId;
   bool? isAlreadyOffered;
   bool? isAlreadyReported;
   String? allCategoryIds;
@@ -96,6 +97,7 @@ class ItemModel {
       this.itemType,
       this.userId,
       this.categoryId,
+      this.conditionId,
       this.isAlreadyOffered,
       this.isAlreadyReported,
       this.rejectedReason,
@@ -143,6 +145,7 @@ class ItemModel {
       bool? isAlreadyReported,
       String? allCategoryIds,
       int? categoryId,
+      int? conditionId,
       int? areaId,
       String? area,
       String? city,
@@ -179,6 +182,7 @@ class ItemModel {
       itemType: itemType ?? this.itemType,
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
+      conditionId: conditionId ?? this.conditionId,
       isAlreadyOffered: isAlreadyOffered ?? this.isAlreadyOffered,
       isAlreadyReported: isAlreadyReported ?? this.isAlreadyReported,
       allCategoryIds: allCategoryIds ?? this.allCategoryIds,
@@ -232,6 +236,7 @@ class ItemModel {
     itemType = json['item_type'];
     userId = json['user_id'];
     categoryId = json['category_id'];
+    conditionId = json['condition_id'];
     isAlreadyOffered = json['is_already_offered'];
     isAlreadyReported = json['is_already_reported'];
     allCategoryIds = json['all_category_ids'];
@@ -292,6 +297,7 @@ class ItemModel {
     data['item_type'] = itemType;
     data['user_id'] = userId;
     data['category_id'] = categoryId;
+    data['condition_id'] = conditionId;
     data['is_already_offered'] = isAlreadyOffered;
     data['is_already_reported'] = isAlreadyReported;
     data['all_category_ids'] = allCategoryIds;
@@ -326,7 +332,7 @@ class ItemModel {
 
   @override
   String toString() {
-    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,isAlreadyOffered:$isAlreadyOffered,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review}';
+    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,conditionId:$conditionId,isAlreadyOffered:$isAlreadyOffered,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review}';
   }
 }
 
