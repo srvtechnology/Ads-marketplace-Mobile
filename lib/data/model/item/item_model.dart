@@ -1,6 +1,8 @@
 import 'package:eClassify/data/model/category_model.dart';
 import 'package:eClassify/data/model/custom_field/custom_field_model.dart';
+import 'package:eClassify/data/model/item/condition_model.dart';
 import 'package:eClassify/data/model/seller_ratings_model.dart';
+
 
 class ItemModel {
   int? id;
@@ -32,6 +34,7 @@ class ItemModel {
   int? userId;
   int? categoryId;
   int? conditionId;
+  ConditionModel? condition;
   bool? isAlreadyOffered;
   bool? isAlreadyReported;
   String? allCategoryIds;
@@ -98,6 +101,7 @@ class ItemModel {
       this.userId,
       this.categoryId,
       this.conditionId,
+      this.condition,
       this.isAlreadyOffered,
       this.isAlreadyReported,
       this.rejectedReason,
@@ -146,6 +150,7 @@ class ItemModel {
       String? allCategoryIds,
       int? categoryId,
       int? conditionId,
+      ConditionModel? condition,
       int? areaId,
       String? area,
       String? city,
@@ -183,6 +188,7 @@ class ItemModel {
       userId: userId ?? this.userId,
       categoryId: categoryId ?? this.categoryId,
       conditionId: conditionId ?? this.conditionId,
+      condition: condition ?? this.condition,
       isAlreadyOffered: isAlreadyOffered ?? this.isAlreadyOffered,
       isAlreadyReported: isAlreadyReported ?? this.isAlreadyReported,
       allCategoryIds: allCategoryIds ?? this.allCategoryIds,
@@ -237,6 +243,8 @@ class ItemModel {
     userId = json['user_id'];
     categoryId = json['category_id'];
     conditionId = json['condition_id'];
+    final conditionJson = json['condition'] ?? json['condition_name'];
+    condition = conditionJson != null ? ConditionModel.fromJson(conditionJson) : null;
     isAlreadyOffered = json['is_already_offered'];
     isAlreadyReported = json['is_already_reported'];
     allCategoryIds = json['all_category_ids'];
@@ -298,6 +306,9 @@ class ItemModel {
     data['user_id'] = userId;
     data['category_id'] = categoryId;
     data['condition_id'] = conditionId;
+    if (condition != null) {
+      data['condition_name'] = condition!.toJson();
+    }
     data['is_already_offered'] = isAlreadyOffered;
     data['is_already_reported'] = isAlreadyReported;
     data['all_category_ids'] = allCategoryIds;
@@ -332,7 +343,7 @@ class ItemModel {
 
   @override
   String toString() {
-    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,conditionId:$conditionId,isAlreadyOffered:$isAlreadyOffered,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review}';
+    return 'ItemModel{id: $id, name: $name,slug:$slug, description: $description, price: $price, image: $image, watermarkimage: $watermarkimage, latitude: $latitude, longitude: $longitude, address: $address, contact: $contact, total_likes: $totalLikes,isLiked: $isLike, isFeature: $isFeature,views: $views, type: $type, status: $status, active: $active, videoLink: $videoLink, user: $user, galleryImages: $galleryImages,itemOffers:$itemOffers, category: $category, customFields: $customFields,createdAt:$created,itemType:$itemType,userId:$userId,categoryId:$categoryId,conditionId:$conditionId,condition:$condition,isAlreadyOffered:$isAlreadyOffered,isAlreadyReported:$isAlreadyReported,allCategoryId:$allCategoryIds,rejected_reason:$rejectedReason,area_id:$areaId,area:$area,city:$city,state:$state,country:$country,is_purchased:$isPurchased,review:$review}';
   }
 }
 

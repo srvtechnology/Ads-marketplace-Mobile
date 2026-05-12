@@ -482,6 +482,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     setPriceAndStatus(),
                     if (isAddedByMe) setRejectedReason(),
                     if (model.address != null) setAddress(isDate: true),
+                    if (model.condition != null) setConditionWidget(),
                     const SizedBox(
                       height: 10,
                     ),
@@ -2167,6 +2168,33 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                   color: context.color.textDefaultColor.withValues(alpha: 0.5),
                 ))
               : const SizedBox.shrink()
+        ],
+      ),
+    );
+  }
+
+  Widget setConditionWidget() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: context.color.territoryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(
+                color: context.color.territoryColor.withValues(alpha: 0.3),
+              ),
+            ),
+            child: CustomText(
+              model.condition!.name ?? "",
+              color: context.color.territoryColor,
+              fontSize: context.font.small,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
