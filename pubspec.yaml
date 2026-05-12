@@ -133,11 +133,11 @@ flutter:
 
 flutter_native_splash:
   # Background color for all platforms (except Android 12+)
-  color: "#FFFFFF"
+  color: "#E0565C"
   
   # Image for pre-Android 12 devices
   # Properly sized splash image (centered logo on 960x960 canvas)
-  image: assets/splash/splash_logo.png
+  image: assets/splash/splash.png
   
   # Center the image
   android_gravity: center
@@ -150,7 +150,7 @@ flutter_native_splash:
   # Note: Android 12+ clips the splash to a circle
   # With icon_background_color: image should be 960×960 px, fit within 640px diameter circle
   android_12:
-    color: "#FFFFFF"
-    image: assets/splash/splash_logo.png
+    color: "#E0565C"
+    image: assets/splash/splash.png
     # Add icon background color for better contrast
-    icon_background_color: "#FFFFFF"
+    icon_background_color: "#E0565C"

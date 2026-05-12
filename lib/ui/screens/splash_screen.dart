@@ -205,7 +205,7 @@ class SplashScreenState extends State<SplashScreen>
                     // systemNavigationBarColor: context.color.territoryColor,
                   ),
                   child: Scaffold(
-                    // backgroundColor: context.color.territoryColor,
+                    backgroundColor: const Color(0xFFE0565C),
                     // bottomNavigationBar: Padding(
                     //   padding: const EdgeInsets.symmetric(vertical: 10.0),
                     //   child: UiUtils.getSvg(AppIcons.companyLogo),
@@ -220,7 +220,7 @@ class SplashScreenState extends State<SplashScreen>
                             width: 250,
                             height: 250,
                             child: Image.asset(
-                              "assets/icon.png",
+                              "assets/splash/splash.png",
                               fit: BoxFit.contain,
                             ),
                           ),
