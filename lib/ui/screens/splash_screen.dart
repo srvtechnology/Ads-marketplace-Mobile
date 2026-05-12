@@ -217,10 +217,10 @@ class SplashScreenState extends State<SplashScreen>
                         Align(
                           alignment: AlignmentDirectional.center,
                           child: SizedBox(
-                            width: 250,
-                            height: 250,
+                            width: 350,
+                            height: 350,
                             child: Image.asset(
-                              "assets/splash/splash.png",
+                              "assets/splash/splash_new.png",
                               fit: BoxFit.contain,
                             ),
                           ),
