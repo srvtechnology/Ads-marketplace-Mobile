@@ -682,10 +682,10 @@ class ItemsListState extends State<ItemsList> {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: AspectRatio(
-            aspectRatio: 16 / 7,
+            aspectRatio: 16 / 9,
             child: UiUtils.getImage(
               banner.image!,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
               width: double.infinity,
             ),
           ),

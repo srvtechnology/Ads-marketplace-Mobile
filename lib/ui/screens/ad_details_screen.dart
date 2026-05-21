@@ -153,6 +153,13 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     super.initState();
     if (widget.model != null) {
       initVariables(widget.model!);
+      context
+          .read<FetchItemFromSlugCubit>()
+          .fetchItemFromSlug(slug: widget.model!.slug!);
+    } else if (widget.slug != null) {
+      context
+          .read<FetchItemFromSlugCubit>()
+          .fetchItemFromSlug(slug: widget.slug!);
     }
     pageController.addListener(() {
       setState(() {
@@ -188,7 +195,6 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         areaId: HiveUtils.getAreaId(),
         country: HiveUtils.getCountryName(),
         state: HiveUtils.getStateName());
-    _pageScrollController.addListener(_pageScroll);
   }
 
   void _pageScroll() {
@@ -210,6 +216,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   }
 
   void combineImages() {
+    images.clear();
     images.add(model.image);
     if (model.galleryImages != null && model.galleryImages!.isNotEmpty) {
       for (var element in model.galleryImages!) {
@@ -262,27 +269,20 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               listener: (context, state) {
             if (state is FetchItemFromSlugSuccess) {
               log('success');
-              initVariables(state.item);
+              setState(() {
+                initVariables(state.item);
+              });
             }
           }, builder: (context, state) {
-            if (state is FetchItemFromSlugInitial && widget.slug != null) {
-              context
-                  .read<FetchItemFromSlugCubit>()
-                  .fetchItemFromSlug(slug: widget.slug!);
-              log('fetching item');
-              return Material(
-                child: Center(
-                  child: UiUtils.progress(),
-                ),
-              );
-            } else if (state is FetchItemFromSlugLoading) {
-              log('loading');
-              return Material(
-                child: Center(
-                  child: UiUtils.progress(),
-                ),
-              );
-            } else if (state is FetchItemFromSlugFailure) {
+            if (state is FetchItemFromSlugInitial || state is FetchItemFromSlugLoading) {
+              if (widget.model == null) {
+                return Material(
+                  child: Center(
+                    child: UiUtils.progress(),
+                  ),
+                );
+              }
+            } else if (state is FetchItemFromSlugFailure && widget.model == null) {
               log('failure');
               return SomethingWentWrong();
             }
@@ -482,7 +482,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                     setPriceAndStatus(),
                     if (isAddedByMe) setRejectedReason(),
                     if (model.address != null) setAddress(isDate: true),
-                    if (model.condition != null) setConditionWidget(),
+                    setConditionWidget(),
                     const SizedBox(
                       height: 10,
                     ),
@@ -2174,6 +2174,26 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
   }
 
   Widget setConditionWidget() {
+    if (model.condition == null || model.condition?.name == null || model.condition!.name!.isEmpty) {
+      final state = context.watch<FetchItemFromSlugCubit>().state;
+      if (state is FetchItemFromSlugInitial || state is FetchItemFromSlugLoading) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CustomShimmer(
+                width: 80,
+                height: 22,
+                borderRadius: 4,
+              ),
+            ],
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+    String conditionName = model.condition!.name!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
@@ -2189,7 +2209,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
               ),
             ),
             child: CustomText(
-              model.condition!.name ?? "",
+              conditionName.translate(context),
               color: context.color.territoryColor,
               fontSize: context.font.small,
               fontWeight: FontWeight.w600,
