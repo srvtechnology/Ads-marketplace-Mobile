@@ -479,10 +479,10 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
                           fontSize: context.font.large,
                           maxLines: 2,
                         )),
+                    setConditionWidget(),
                     setPriceAndStatus(),
                     if (isAddedByMe) setRejectedReason(),
                     if (model.address != null) setAddress(isDate: true),
-                    setConditionWidget(),
                     const SizedBox(
                       height: 10,
                     ),
@@ -608,7 +608,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
           ),
           GridListAdapter(
             type: ListUiType.List,
-            height: MediaQuery.of(context).size.height / 3.2,
+            height: MediaQuery.of(context).size.height / 2.85,
             controller: _pageScrollController,
             listAxis: Axis.horizontal,
             listSeparator: (BuildContext p0, int p1) => const SizedBox(
@@ -2183,9 +2183,9 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CustomShimmer(
-                width: 80,
-                height: 22,
-                borderRadius: 4,
+                width: 130,
+                height: 24,
+                borderRadius: 6,
               ),
             ],
           ),
@@ -2200,19 +2200,27 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
-              color: context.color.territoryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: context.color.territoryColor.withValues(alpha: 0.3),
-              ),
+              color: context.color.territoryColor.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(6),
             ),
-            child: CustomText(
-              conditionName.translate(context),
-              color: context.color.territoryColor,
-              fontSize: context.font.small,
-              fontWeight: FontWeight.w600,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CustomText(
+                  "${"condition".translate(context)} : ",
+                  color: context.color.textDefaultColor.withValues(alpha: 0.6),
+                  fontSize: context.font.small - 1,
+                  fontWeight: FontWeight.w500,
+                ),
+                CustomText(
+                  conditionName.translate(context).toUpperCase(),
+                  color: context.color.territoryColor,
+                  fontSize: context.font.small - 1,
+                  fontWeight: FontWeight.w700,
+                ),
+              ],
             ),
           ),
         ],

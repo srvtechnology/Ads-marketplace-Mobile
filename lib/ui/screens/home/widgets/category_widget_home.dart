@@ -2,6 +2,7 @@ import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 import 'package:eClassify/ui/screens/home/home_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/category_home_card.dart';
+import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
 import 'package:eClassify/ui/screens/main_activity.dart';
 import 'package:eClassify/ui/screens/widgets/errors/no_data_found.dart';
 import 'package:eClassify/ui/theme/theme.dart';
@@ -21,64 +22,74 @@ class CategoryWidgetHome extends StatelessWidget {
       builder: (context, state) {
         if (state is FetchCategorySuccess) {
           if (state.categories.isNotEmpty) {
-            return Padding(
-              padding: const EdgeInsets.only(top: 12),
-              child: SizedBox(
-                width: context.screenWidth,
-                height: 103,
-                child: ListView.separated(
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: sidePadding,
-                  ),
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    if (state.categories.length > 10 &&
-                        index == state.categories.length) {
-                      return moreCategory(context);
-                    } else {
-                      return CategoryHomeCard(
-                        title: state.categories[index].name!,
-                        url: state.categories[index].url!,
-                        onTap: () {
-                          if (state.categories[index].children!.isNotEmpty) {
-                            Navigator.pushNamed(
-                                context, Routes.subCategoryScreen,
-                                arguments: {
-                                  "categoryList":
-                                      state.categories[index].children,
-                                  "catName": state.categories[index].name,
-                                  "catId": state.categories[index].id,
-                                  "categoryIds": [
-                                    state.categories[index].id.toString()
-                                  ]
-                                });
-                          } else {
-                            Navigator.pushNamed(context, Routes.itemsList,
-                                arguments: {
-                                  'catID':
-                                      state.categories[index].id.toString(),
-                                  'catName': state.categories[index].name,
-                                  "categoryIds": [
-                                    state.categories[index].id.toString()
-                                  ]
-                                });
-                          }
-                        },
-                      );
-                    }
-                  },
-                  itemCount: state.categories.length > 10
-                      ? state.categories.length + 1
-                      : state.categories.length,
-                  separatorBuilder: (context, index) {
-                    return const SizedBox(
-                      width: 12,
-                    );
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TitleHeader(
+                  title: "categories".translate(context),
+                  onTap: () {
+                    Navigator.pushNamed(context, Routes.categories,
+                        arguments: {"from": Routes.home});
                   },
                 ),
-              ),
+                SizedBox(
+                  width: context.screenWidth,
+                  height: 103,
+                  child: ListView.separated(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: sidePadding,
+                    ),
+                    shrinkWrap: true,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      if (state.categories.length > 10 &&
+                          index == state.categories.length) {
+                        return moreCategory(context);
+                      } else {
+                        return CategoryHomeCard(
+                          title: state.categories[index].name!,
+                          url: state.categories[index].url!,
+                          onTap: () {
+                            if (state.categories[index].children!.isNotEmpty) {
+                              Navigator.pushNamed(
+                                  context, Routes.subCategoryScreen,
+                                  arguments: {
+                                    "categoryList":
+                                        state.categories[index].children,
+                                    "catName": state.categories[index].name,
+                                    "catId": state.categories[index].id,
+                                    "categoryIds": [
+                                      state.categories[index].id.toString()
+                                    ]
+                                  });
+                            } else {
+                              Navigator.pushNamed(context, Routes.itemsList,
+                                  arguments: {
+                                    'catID':
+                                        state.categories[index].id.toString(),
+                                    'catName': state.categories[index].name,
+                                    "categoryIds": [
+                                      state.categories[index].id.toString()
+                                    ]
+                                  });
+                            }
+                          },
+                        );
+                      }
+                    },
+                    itemCount: state.categories.length > 10
+                        ? state.categories.length + 1
+                        : state.categories.length,
+                    separatorBuilder: (context, index) {
+                      return const SizedBox(
+                        width: 12,
+                      );
+                    },
+                  ),
+                ),
+              ],
             );
           } else {
             return Padding(

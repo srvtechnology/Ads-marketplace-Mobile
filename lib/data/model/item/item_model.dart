@@ -242,9 +242,41 @@ class ItemModel {
     itemType = json['item_type'];
     userId = json['user_id'];
     categoryId = json['category_id'];
-    conditionId = json['condition_id'];
+    conditionId = json['condition_id'] != null ? int.tryParse(json['condition_id'].toString()) : null;
     final conditionJson = json['condition'] ?? json['condition_name'];
-    condition = conditionJson != null ? ConditionModel.fromJson(conditionJson) : null;
+    if (conditionJson != null) {
+      condition = ConditionModel.fromJson(conditionJson);
+    } else if (conditionId != null) {
+      String? conditionName;
+      switch (conditionId) {
+        case 1:
+        case 2:
+        case 7:
+          conditionName = "Brand New";
+          break;
+        case 3:
+          conditionName = "Like new";
+          break;
+        case 4:
+          conditionName = "Good";
+          break;
+        case 5:
+          conditionName = "Fair";
+          break;
+        case 6:
+          conditionName = "Poor";
+          break;
+        default:
+          conditionName = null;
+      }
+      if (conditionName != null) {
+        condition = ConditionModel(id: conditionId, name: conditionName);
+      } else {
+        condition = null;
+      }
+    } else {
+      condition = null;
+    }
     isAlreadyOffered = json['is_already_offered'];
     isAlreadyReported = json['is_already_reported'];
     allCategoryIds = json['all_category_ids'];

@@ -47,7 +47,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.1,
+                  height: MediaQuery.of(context).size.height / 2.65,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
@@ -83,7 +83,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.2,
+                  height: MediaQuery.of(context).size.height / 2.7,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
@@ -120,7 +120,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 GridListAdapter(
                   type: ListUiType.Grid,
                   crossAxisCount: 2,
-                  height: MediaQuery.of(context).size.height / 3.2,
+                  height: MediaQuery.of(context).size.height / 2.7,
                   builder: (context, int index, bool) {
                     ItemModel? item = section.sectionData?[index];
 
@@ -150,7 +150,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 3.2,
+                  height: MediaQuery.of(context).size.height / 2.7,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
@@ -309,6 +309,41 @@ class _ItemCardState extends State<ItemCard> {
                           maxLines: 1,
                           firstUpperCaseWidget: true,
                         ),
+                        if (widget.item?.condition != null &&
+                            widget.item?.condition?.name != null &&
+                            widget.item!.condition!.name!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 2.0),
+                            child: Text.rich(
+                              TextSpan(
+                                text: "${"condition".translate(context)} : ",
+                                style: TextStyle(
+                                  color: context.color.textDefaultColor
+                                      .withValues(alpha: 0.5),
+                                  fontSize: (widget.bigCard == true)
+                                      ? context.font.small - 1
+                                      : context.font.smaller - 1,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                children: [
+                                  TextSpan(
+                                    text: widget.item!.condition!.name!
+                                        .translate(context)
+                                        .toUpperCase(),
+                                    style: TextStyle(
+                                      color: context.color.territoryColor,
+                                      fontSize: (widget.bigCard == true)
+                                          ? context.font.small - 1
+                                          : context.font.smaller - 1,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         if (widget.item?.address != "")
                           Row(
                             children: [

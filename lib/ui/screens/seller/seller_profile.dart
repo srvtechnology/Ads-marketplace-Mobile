@@ -418,7 +418,7 @@ class SellerProfileScreenState extends State<SellerProfileScreen>
                     gridDelegate:
                         SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
                             crossAxisCount: 2,
-                            height: MediaQuery.of(context).size.height / 3.2,
+                            height: MediaQuery.of(context).size.height / 2.85,
                             mainAxisSpacing: 7,
                             crossAxisSpacing: 10),
                     itemCount: state.items.length,
