@@ -491,6 +491,12 @@ class _AddItemDetailsState extends CloudState<AddItemDetails> {
                                             .withValues(alpha: 0.5),
                                         fontSize: context.font.large,
                                       ),
+                                      validator: (value) {
+                                        if (value == null) {
+                                          return "pleaseSelectValue".translate(context);
+                                        }
+                                        return null;
+                                      },
                                       items: state.conditions.map<
                                               DropdownMenuItem<ConditionModel>>(
                                           (ConditionModel c) {
