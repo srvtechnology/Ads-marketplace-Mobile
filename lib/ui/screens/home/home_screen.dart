@@ -482,7 +482,7 @@ class AllItemsWidget extends StatelessWidget {
                     builder: (context, int index, bool isGrid) {
                       int itemIndex = index * crossAxisCount;
                       return SizedBox(
-                        height: MediaQuery.sizeOf(context).height / 2.85,
+                        height: MediaQuery.sizeOf(context).height / 2.65,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

@@ -242,7 +242,10 @@ class ItemModel {
     itemType = json['item_type'];
     userId = json['user_id'];
     categoryId = json['category_id'];
-    conditionId = json['condition_id'] != null ? int.tryParse(json['condition_id'].toString()) : null;
+    conditionId = json['condition_id'] != null
+        ? (int.tryParse(json['condition_id'].toString()) ??
+            double.tryParse(json['condition_id'].toString())?.toInt())
+        : null;
     final conditionJson = json['condition'] ?? json['condition_name'];
     if (conditionJson != null) {
       condition = ConditionModel.fromJson(conditionJson);

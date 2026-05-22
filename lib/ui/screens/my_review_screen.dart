@@ -646,14 +646,14 @@ class MyReviewScreenState extends State<MyReviewScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 2.85,
+                height: MediaQuery.of(context).size.height / 2.65,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
                 width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 2.85,
+                height: MediaQuery.of(context).size.height / 2.65,
                 width: context.screenWidth / 2.3,
               ),
             ],
@@ -664,14 +664,14 @@ class MyReviewScreenState extends State<MyReviewScreen>
           Row(
             children: [
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 2.85,
+                height: MediaQuery.of(context).size.height / 2.65,
                 width: context.screenWidth / 2.3,
               ),
               SizedBox(
                 width: 10,
               ),
               CustomShimmer(
-                height: MediaQuery.of(context).size.height / 2.85,
+                height: MediaQuery.of(context).size.height / 2.65,
                 width: context.screenWidth / 2.3,
               ),
             ],

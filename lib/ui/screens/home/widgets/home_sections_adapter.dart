@@ -47,7 +47,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 2.65,
+                  height: MediaQuery.of(context).size.height / 2.55,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
@@ -83,7 +83,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 2.7,
+                  height: MediaQuery.of(context).size.height / 2.65,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,
@@ -120,7 +120,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 GridListAdapter(
                   type: ListUiType.Grid,
                   crossAxisCount: 2,
-                  height: MediaQuery.of(context).size.height / 2.7,
+                  height: MediaQuery.of(context).size.height / 2.65,
                   builder: (context, int index, bool) {
                     ItemModel? item = section.sectionData?[index];
 
@@ -150,7 +150,7 @@ class HomeSectionsAdapter extends StatelessWidget {
                 ),
                 GridListAdapter(
                   type: ListUiType.List,
-                  height: MediaQuery.of(context).size.height / 2.7,
+                  height: MediaQuery.of(context).size.height / 2.65,
                   listAxis: Axis.horizontal,
                   listSeparator: (BuildContext p0, int p1) => const SizedBox(
                     width: 14,

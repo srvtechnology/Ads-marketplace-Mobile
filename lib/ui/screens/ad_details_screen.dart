@@ -608,7 +608,7 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
           ),
           GridListAdapter(
             type: ListUiType.List,
-            height: MediaQuery.of(context).size.height / 2.85,
+            height: MediaQuery.of(context).size.height / 2.65,
             controller: _pageScrollController,
             listAxis: Axis.horizontal,
             listSeparator: (BuildContext p0, int p1) => const SizedBox(
