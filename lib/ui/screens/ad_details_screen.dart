@@ -2197,30 +2197,30 @@ class AdDetailsScreenState extends CloudState<AdDetailsScreen> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CustomText(
+            "${"condition".translate(context).firstUpperCase()}: ",
+            color: context.color.textDefaultColor,
+            fontSize: context.font.small,
+            fontWeight: FontWeight.w500,
+          ),
+          const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: context.color.territoryColor.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(6),
+              border: Border.all(
+                color: context.color.territoryColor.withValues(alpha: 0.3),
+                width: 1.0,
+              ),
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomText(
-                  "${"condition".translate(context)} : ",
-                  color: context.color.textDefaultColor.withValues(alpha: 0.6),
-                  fontSize: context.font.small - 1,
-                  fontWeight: FontWeight.w500,
-                ),
-                CustomText(
-                  conditionName.translate(context).toUpperCase(),
-                  color: context.color.territoryColor,
-                  fontSize: context.font.small - 1,
-                  fontWeight: FontWeight.w700,
-                ),
-              ],
+            child: CustomText(
+              conditionName.translate(context),
+              color: context.color.territoryColor,
+              fontSize: context.font.small - 1,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

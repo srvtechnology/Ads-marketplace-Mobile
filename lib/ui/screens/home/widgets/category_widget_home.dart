@@ -27,7 +27,7 @@ class CategoryWidgetHome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TitleHeader(
-                  title: "categories".translate(context),
+                  title: "browseByCategory".translate(context),
                   onTap: () {
                     Navigator.pushNamed(context, Routes.categories,
                         arguments: {"from": Routes.home});

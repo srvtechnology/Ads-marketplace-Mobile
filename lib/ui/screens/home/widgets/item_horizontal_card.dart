@@ -118,7 +118,7 @@ class ItemHorizontalCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.5),
       child: Container(
-        height: addBottom == null ? 124 : (124 + (additionalHeight ?? 0)),
+        height: addBottom == null ? 134 : (134 + (additionalHeight ?? 0)),
         decoration: BoxDecoration(
             border: Border.all(
                 color: context.color.textLightColor.withValues(alpha: 0.28)),
@@ -142,8 +142,8 @@ class ItemHorizontalCard extends StatelessWidget {
                                 child: UiUtils.getImage(
                                   item.image ?? "",
                                   height: addBottom == null
-                                      ? 122
-                                      : (122 + (additionalHeight ?? 0)),
+                                      ? 132
+                                      : (132 + (additionalHeight ?? 0)),
                                   width: 100 + (additionalImageWidth ?? 0),
                                   fit: BoxFit.contain,
                                 ),
@@ -207,7 +207,47 @@ class ItemHorizontalCard extends StatelessWidget {
                                 color: context.color.textDefaultColor,
                                 maxLines: 2,
                               ),
-                              //SizedBox(height: 5),
+                              if (item.condition != null &&
+                                  item.condition?.name != null &&
+                                  item.condition!.name!.isNotEmpty)
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    CustomText(
+                                      "${"condition".translate(context).firstUpperCase()}: ",
+                                      color: context.color.textDefaultColor,
+                                      fontSize: context.font.smaller - 1,
+                                      fontWeight: FontWeight.w500,
+                                      maxLines: 1,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 5,
+                                        vertical: 1.5,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: context.color.territoryColor
+                                            .withValues(alpha: 0.08),
+                                        border: Border.all(
+                                          color: context.color.territoryColor
+                                              .withValues(alpha: 0.3),
+                                          width: 0.8,
+                                        ),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: CustomText(
+                                        item.condition!.name!
+                                            .translate(context),
+                                        color: context.color.territoryColor,
+                                        fontSize: context.font.smaller - 2,
+                                        fontWeight: FontWeight.w600,
+                                        maxLines: 1,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               if (item.address != "")
                                 Row(
                                   children: [

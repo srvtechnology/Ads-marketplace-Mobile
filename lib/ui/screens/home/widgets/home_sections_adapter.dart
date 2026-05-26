@@ -313,35 +313,48 @@ class _ItemCardState extends State<ItemCard> {
                             widget.item?.condition?.name != null &&
                             widget.item!.condition!.name!.isNotEmpty)
                           Padding(
-                            padding: const EdgeInsets.only(top: 2.0),
-                            child: Text.rich(
-                              TextSpan(
-                                text: "${"condition".translate(context)} : ",
-                                style: TextStyle(
-                                  color: context.color.textDefaultColor
-                                      .withValues(alpha: 0.5),
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomText(
+                                  "${"condition".translate(context).firstUpperCase()}: ",
+                                  color: context.color.textDefaultColor,
                                   fontSize: (widget.bigCard == true)
                                       ? context.font.small - 1
                                       : context.font.smaller - 1,
                                   fontWeight: FontWeight.w500,
+                                  maxLines: 1,
                                 ),
-                                children: [
-                                  TextSpan(
-                                    text: widget.item!.condition!.name!
-                                        .translate(context)
-                                        .toUpperCase(),
-                                    style: TextStyle(
-                                      color: context.color.territoryColor,
-                                      fontSize: (widget.bigCard == true)
-                                          ? context.font.small - 1
-                                          : context.font.smaller - 1,
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                const SizedBox(width: 4),
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: (widget.bigCard == true) ? 6 : 4,
+                                    vertical: (widget.bigCard == true) ? 2 : 1.5,
                                   ),
-                                ],
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                                  decoration: BoxDecoration(
+                                    color: context.color.territoryColor
+                                        .withValues(alpha: 0.08),
+                                    border: Border.all(
+                                      color: context.color.territoryColor
+                                          .withValues(alpha: 0.3),
+                                      width: 0.8,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: CustomText(
+                                    widget.item!.condition!.name!
+                                        .translate(context),
+                                    color: context.color.territoryColor,
+                                    fontSize: (widget.bigCard == true)
+                                        ? context.font.small - 2
+                                        : context.font.smaller - 2,
+                                    fontWeight: FontWeight.w600,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         if (widget.item?.address != "")

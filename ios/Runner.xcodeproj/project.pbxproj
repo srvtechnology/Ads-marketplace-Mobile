@@ -146,8 +146,8 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				13336DA5313E876C9622C689 /* [CP] Embed Pods Frameworks */,
-				9C1554EF6A96767801FC7982 /* [CP] Copy Pods Resources */,
+				2D8666F63CC26DCB4145DD4F /* [CP] Embed Pods Frameworks */,
+				AAF551338464431B4578F1D9 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -209,7 +209,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		13336DA5313E876C9622C689 /* [CP] Embed Pods Frameworks */ = {
+		2D8666F63CC26DCB4145DD4F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -279,7 +279,7 @@
 			shellPath = /bin/sh;
 			shellScript = "/bin/sh \"$FLUTTER_ROOT/packages/flutter_tools/bin/xcode_backend.sh\" build\n";
 		};
-		9C1554EF6A96767801FC7982 /* [CP] Copy Pods Resources */ = {
+		AAF551338464431B4578F1D9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -395,11 +395,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 65;
+				CURRENT_PROJECT_VERSION = 69;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
-				FLUTTER_BUILD_NAME = 2.8.8;
-				FLUTTER_BUILD_NUMBER = 65;
+				FLUTTER_BUILD_NAME = 2.9.1;
+				FLUTTER_BUILD_NUMBER = 69;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -493,7 +493,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.8.8;
+				MARKETING_VERSION = 2.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -634,11 +634,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 65;
+				CURRENT_PROJECT_VERSION = 69;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
-				FLUTTER_BUILD_NAME = 2.8.8;
-				FLUTTER_BUILD_NUMBER = 65;
+				FLUTTER_BUILD_NAME = 2.9.1;
+				FLUTTER_BUILD_NUMBER = 69;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -732,7 +732,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.8.8;
+				MARKETING_VERSION = 2.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -761,11 +761,11 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 65;
+				CURRENT_PROJECT_VERSION = 69;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
-				FLUTTER_BUILD_NAME = 2.8.8;
-				FLUTTER_BUILD_NUMBER = 65;
+				FLUTTER_BUILD_NAME = 2.9.1;
+				FLUTTER_BUILD_NUMBER = 69;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -859,7 +859,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.8.8;
+				MARKETING_VERSION = 2.9.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
