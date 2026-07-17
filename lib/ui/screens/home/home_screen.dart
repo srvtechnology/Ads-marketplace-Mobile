@@ -203,14 +203,20 @@ class HomeScreenState extends State<HomeScreen>
                   if (state is FetchHomeScreenInProgress) {
                     return shimmerEffect();
                   }
+                  
+                  // Render these universally whether sections succeed or fail
+                  List<Widget> baseWidgets = [
+                    const HomeSearchField(),
+                    const SliderWidget(),
+                    const CategoryWidgetHome(),
+                    const BrandWidgetHome(),
+                  ];
+
                   if (state is FetchHomeScreenSuccess) {
                     return Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const HomeSearchField(),
-                        const SliderWidget(),
-                        const CategoryWidgetHome(),
-                        const BrandWidgetHome(),
+                        ...baseWidgets,
                         ...List.generate(state.sections.length, (index) {
                           HomeScreenSection section = state.sections[index];
                           if (state.sections.isNotEmpty) {
@@ -238,7 +244,13 @@ class HomeScreenState extends State<HomeScreen>
                     );
                   }
 
-                  if (state is FetchHomeScreenFail) {}
+                  if (state is FetchHomeScreenFail) {
+                     return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: baseWidgets,
+                     );
+                  }
+                  
                   return SizedBox.shrink();
                 },
               ),

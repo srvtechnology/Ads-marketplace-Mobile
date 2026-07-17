@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/ecommerce/cart_model.dart';
 import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class CartState {}
@@ -25,7 +26,7 @@ class CartCubit extends Cubit<CartState> {
       
       final response = await Api.get(
         url: 'https://ecommerce.thebhutanmarket.com/api/cart', 
-        useBaseUrl: false
+        useBaseUrl: false,
       );
       
       if (response['success'] == true || response['error'] == false) {
@@ -45,6 +46,7 @@ class CartCubit extends Cubit<CartState> {
       final response = await Api.post(
         url: 'https://ecommerce.thebhutanmarket.com/api/cart/add', 
         useBaseUrl: false,
+        useJson: true,
         parameter: {
           'product_id': productId,
           'product_varient_id': productVariantId,
@@ -87,7 +89,7 @@ class CartCubit extends Cubit<CartState> {
     try {
       final response = await Api.delete(
         url: 'https://ecommerce.thebhutanmarket.com/api/cart/remove/$cartItemId', 
-        useBaseUrl: false
+        useBaseUrl: false,
       );
       
       if (response['success'] == true || response['error'] == false) {

@@ -673,6 +673,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                           context: context);
                     },
                   ),
+                  customTile(
+                    context,
+                    title: "My Orders", // Or translate if string is available
+                    svgImagePath: AppIcons.promoted, // using promoted icon as asked
+                    onTap: () async {
+                      UiUtils.checkUser(
+                          onNotGuest: () {
+                            Navigator.pushNamed(context, Routes.ecommerceOrderList,
+                                arguments: {});
+                          },
+                          context: context);
+                    },
+                  ),
                   //if it require the uncomment this option for future
                   // customTile(
                   //   context,

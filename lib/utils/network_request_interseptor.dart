@@ -12,9 +12,10 @@ class NetworkRequestInterceptor extends Interceptor {
         {
           "URL": options.path,
           "Parameters": options.method == "POST"
-              ? (options.data as FormData).fields
+              ? (options.data is FormData ? (options.data as FormData).fields : options.data)
               : options.queryParameters,
           "Method": options.method,
+          "Token": options.headers["Authorization"],
           "_total_api_calls": totalAPICallTimes
         }.toString(),
         name: "Request-API");

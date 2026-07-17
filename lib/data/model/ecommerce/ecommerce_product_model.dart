@@ -21,6 +21,15 @@ class EcommerceVariantModel {
           : (json['name'] is String ? json['name'] : null),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'product_id': productId,
+      'price': price,
+      'variant_name': variantName,
+    };
+  }
 }
 
 class EcommerceProductModel {
@@ -60,5 +69,19 @@ class EcommerceProductModel {
           : (json['image'] is String ? json['image'] : ''),
       variants: (json['variants'] as List?)?.map((e) => EcommerceVariantModel.fromJson(e)).toList() ?? [],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'ecommerce_category_id': ecommerceCategoryId,
+      'ecommerce_subcategory_id': ecommerceSubcategoryId,
+      'platform_id': platformId,
+      'images': images,
+      'image_url': imageUrl,
+      'variants': variants.map((v) => v.toJson()).toList(),
+    };
   }
 }

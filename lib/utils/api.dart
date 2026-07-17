@@ -71,7 +71,7 @@ class Api {
   static const String setNewPasswordApi = 'set-new-password-api';
 
   static const String _placeApiBaseUrl =
-      "https://admin.thebhutanmarket.com/api/place/";
+      "https://ecommerce.thebhutanmarket.com/api/place/";
   static String placeApiKey = "key";
   static const String input = "input";
   static const String types = "types";
@@ -275,6 +275,7 @@ class Api {
     dynamic parameter,
     Options? options,
     bool? useBaseUrl,
+    bool? useJson,
   }) async {
     try {
       final Dio dio = Dio();
@@ -284,39 +285,45 @@ class Api {
 
       dio.interceptors.add(NetworkRequestInterceptor());
 
-      late FormData formData;
+      dynamic requestData;
+      String contentType = "multipart/form-data";
 
-      if (parameter is Map<String, dynamic>) {
-        Map<String, dynamic> formMap = {};
-
-        parameter.forEach((key, value) {
-          if (value is File) {
-            formMap[key] = MultipartFile.fromFileSync(value.path,
-                filename: value.path.split('/').last);
-          } else if (value is List<File>) {
-            formMap[key] = value
-                .map((file) => MultipartFile.fromFileSync(file.path,
-                    filename: file.path.split('/').last))
-                .toList();
-          } else {
-            formMap[key] = value;
-          }
-        });
-
-        formData = FormData.fromMap(
-          formMap,
-          ListFormat.multiCompatible,
-        );
+      if (useJson == true) {
+        requestData = parameter;
+        contentType = "application/json";
       } else {
-        throw ArgumentError(
-            'Invalid parameter type. Expected Map<String, dynamic>.');
+        if (parameter is Map<String, dynamic>) {
+          Map<String, dynamic> formMap = {};
+
+          parameter.forEach((key, value) {
+            if (value is File) {
+              formMap[key] = MultipartFile.fromFileSync(value.path,
+                  filename: value.path.split('/').last);
+            } else if (value is List<File>) {
+              formMap[key] = value
+                  .map((file) => MultipartFile.fromFileSync(file.path,
+                      filename: file.path.split('/').last))
+                  .toList();
+            } else {
+              formMap[key] = value;
+            }
+          });
+
+          requestData = FormData.fromMap(
+            formMap,
+            ListFormat.multiCompatible,
+          );
+        } else {
+          throw ArgumentError(
+              'Invalid parameter type. Expected Map<String, dynamic>.');
+        }
       }
 
       final response = await dio.post(
         ((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
-        data: formData,
+        data: requestData,
         options: Options(
-          contentType: "multipart/form-data",
+          contentType: contentType,
           headers: headers(),
         ),
       );
@@ -330,9 +337,7 @@ class Api {
       return Map.from(resp);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        if (!url.contains("ecommerce.thebhutanmarket.com")) {
-          userExpired();
-        }
+        userExpired();
       }
 
       if (e.response?.statusCode == 503) {
@@ -342,7 +347,9 @@ class Api {
       throw ApiException(
         e.error is SocketException
             ? "no-internet"
-            : "Something went wrong with error ${e.response?.statusCode}",
+            : e.response?.statusCode == 401 
+                ? "Please login to perform this action" 
+                : "Something went wrong with error ${e.response?.statusCode}",
       );
     } on ApiException catch (e) {
       throw ApiException(e.errorMessage);
@@ -399,9 +406,7 @@ class Api {
       return Map.from(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        if (!url.contains("ecommerce.thebhutanmarket.com")) {
-          userExpired();
-        }
+        userExpired();
       }
       if (e.response?.statusCode == 503) {
         throw "server-not-available";
@@ -409,7 +414,9 @@ class Api {
 
       throw ApiException(e.error is SocketException
           ? "no-internet"
-          : "Something went wrong with error ${e.response?.statusCode}");
+          : e.response?.statusCode == 401 
+              ? "Please login to perform this action" 
+              : "Something went wrong with error ${e.response?.statusCode}");
     } on ApiException catch (e) {
       throw ApiException(e.errorMessage);
     } catch (e, st) {
@@ -440,9 +447,7 @@ class Api {
       return Map.from(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        if (!url.contains("ecommerce.thebhutanmarket.com")) {
-          userExpired();
-        }
+        userExpired();
       }
       if (e.response?.statusCode == 503) {
         throw "server-not-available";
@@ -450,7 +455,9 @@ class Api {
 
       throw ApiException(e.error is SocketException
           ? "no-internet"
-          : "Something went wrong with error ${e.response?.statusCode}");
+          : e.response?.statusCode == 401 
+              ? "Please login to perform this action" 
+              : "Something went wrong with error ${e.response?.statusCode}");
     } on ApiException catch (e) {
       throw ApiException(e.errorMessage);
     } catch (e, st) {

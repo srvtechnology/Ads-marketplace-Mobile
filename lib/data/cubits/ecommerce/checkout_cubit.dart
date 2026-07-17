@@ -1,5 +1,6 @@
 import 'package:eClassify/data/model/ecommerce/checkout_model.dart';
 import 'package:eClassify/utils/api.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class CheckoutState {}
@@ -52,6 +53,7 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       final response = await Api.post(
         url: 'https://ecommerce.thebhutanmarket.com/api/checkout', 
         useBaseUrl: false,
+        useJson: true,
         parameter: params,
       );
       

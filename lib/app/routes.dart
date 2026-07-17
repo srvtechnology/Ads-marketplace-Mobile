@@ -18,6 +18,8 @@ import 'package:eClassify/ui/screens/ecommerce/ecommerce_product_list_screen.dar
 import 'package:eClassify/ui/screens/ecommerce/ecommerce_product_details_screen.dart';
 import 'package:eClassify/ui/screens/ecommerce/cart_screen.dart';
 import 'package:eClassify/ui/screens/ecommerce/checkout_screen.dart';
+import 'package:eClassify/ui/screens/ecommerce/ecommerce_order_list_screen.dart';
+import 'package:eClassify/ui/screens/ecommerce/ecommerce_order_details_screen.dart';
 import 'package:eClassify/ui/screens/home/change_language_screen.dart';
 import 'package:eClassify/ui/screens/home/search_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/categoryFilterScreen.dart';
@@ -88,6 +90,8 @@ class Routes {
   static const String ecommerceProductDetails = 'ecommerceProductDetails';
   static const String ecommerceCart = 'ecommerceCart';
   static const String ecommerceCheckout = 'ecommerceCheckout';
+  static const String ecommerceOrderList = 'ecommerceOrderList';
+  static const String ecommerceOrderDetails = 'ecommerceOrderDetails';
   static const String noInternet = '/noInternet';
   static const chooseAddress = 'chooseAddress';
   static const itemsList = 'itemsList';
@@ -238,6 +242,10 @@ class Routes {
         return CartScreen.route(routeSettings);
       case ecommerceCheckout:
         return EcommerceCheckoutScreen.route(routeSettings);
+      case ecommerceOrderList:
+        return EcommerceOrderListScreen.route(routeSettings);
+      case ecommerceOrderDetails:
+        return EcommerceOrderDetailsScreen.route(routeSettings);
       case subCategoryScreen:
         return SubCategoryScreen.route(routeSettings);
       case categoryFilterScreen:

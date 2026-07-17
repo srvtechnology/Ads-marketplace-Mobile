@@ -2,11 +2,11 @@ import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_categories_cubit
 import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_subcategories_cubit.dart';
 import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_products_cubit.dart';
 import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
-import 'package:eClassify/data/model/ecommerce/ecommerce_category_model.dart';
 import 'package:eClassify/data/model/ecommerce/ecommerce_product_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
+import 'package:eClassify/utils/hive_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:eClassify/app/routes.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +44,9 @@ class _EcommerceProductListScreenState extends State<EcommerceProductListScreen>
   @override
   void initState() {
     super.initState();
-    context.read<CartCubit>().fetchCart();
+    if (HiveUtils.isUserAuthenticated()) {
+      context.read<CartCubit>().fetchCart();
+    }
     context.read<FetchEcommerceCategoriesCubit>().fetchCategories();
     _fetchProducts();
 
@@ -85,7 +87,12 @@ class _EcommerceProductListScreenState extends State<EcommerceProductListScreen>
                   child: const Icon(Icons.shopping_cart_outlined),
                 ),
                 onPressed: () {
-                  Navigator.pushNamed(context, Routes.ecommerceCart);
+                  UiUtils.checkUser(
+                    context: context,
+                    onNotGuest: () {
+                      Navigator.pushNamed(context, Routes.ecommerceCart);
+                    },
+                  );
                 },
               );
             },

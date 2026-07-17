@@ -13,11 +13,11 @@ class Constant {
   static String playstoreURLAndroid = "";
   static String appstoreURLios = "";
   static const String termsConditionsUrl =
-      "https://admin.thebhutanmarket.com/terms-conditions";
+      "https://ecommerce.thebhutanmarket.com/terms-conditions";
   static const String privacyPolicyUrl =
-      "https://admin.thebhutanmarket.com/privacy-policy";
+      "https://ecommerce.thebhutanmarket.com/privacy-policy";
   static const String deleteAccountUrl =
-      "https://admin.thebhutanmarket.com/delete-account";
+      "https://ecommerce.thebhutanmarket.com/delete-account";
   static String iOSAppId = '';
   static const String shareappText = AppSettings.shareAppText;
 

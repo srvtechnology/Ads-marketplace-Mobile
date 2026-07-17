@@ -42,7 +42,13 @@ class _EcommerceProductDetailsScreenState extends State<EcommerceProductDetailsS
       HelperUtils.showSnackBarMessage(context, 'Please select a variant', type: MessageType.error);
       return;
     }
-    context.read<CartCubit>().addToCart(product.id, _selectedVariantId!, _qty);
+    
+    UiUtils.checkUser(
+      context: context,
+      onNotGuest: () {
+        context.read<CartCubit>().addToCart(product.id, _selectedVariantId!, _qty);
+      },
+    );
   }
 
   @override
