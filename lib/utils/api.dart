@@ -330,7 +330,9 @@ class Api {
       return Map.from(resp);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        userExpired();
+        if (!url.contains("ecommerce.thebhutanmarket.com")) {
+          userExpired();
+        }
       }
 
       if (e.response?.statusCode == 503) {
@@ -397,7 +399,9 @@ class Api {
       return Map.from(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        userExpired();
+        if (!url.contains("ecommerce.thebhutanmarket.com")) {
+          userExpired();
+        }
       }
       if (e.response?.statusCode == 503) {
         throw "server-not-available";
@@ -436,7 +440,9 @@ class Api {
       return Map.from(response.data);
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
-        userExpired();
+        if (!url.contains("ecommerce.thebhutanmarket.com")) {
+          userExpired();
+        }
       }
       if (e.response?.statusCode == 503) {
         throw "server-not-available";

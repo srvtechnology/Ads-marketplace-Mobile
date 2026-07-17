@@ -13,6 +13,11 @@ import 'package:eClassify/ui/screens/faqs_screen.dart';
 import 'package:eClassify/ui/screens/favorite_screen.dart';
 import 'package:eClassify/ui/screens/filter_screen.dart';
 import 'package:eClassify/ui/screens/home/category_list.dart';
+import 'package:eClassify/ui/screens/home/brand_list.dart';
+import 'package:eClassify/ui/screens/ecommerce/ecommerce_product_list_screen.dart';
+import 'package:eClassify/ui/screens/ecommerce/ecommerce_product_details_screen.dart';
+import 'package:eClassify/ui/screens/ecommerce/cart_screen.dart';
+import 'package:eClassify/ui/screens/ecommerce/checkout_screen.dart';
 import 'package:eClassify/ui/screens/home/change_language_screen.dart';
 import 'package:eClassify/ui/screens/home/search_screen.dart';
 import 'package:eClassify/ui/screens/home/widgets/categoryFilterScreen.dart';
@@ -77,8 +82,13 @@ class Routes {
   static const home = 'Home';
   static const addItem = 'addItem';
   static const waitingScreen = 'waitingScreen';
-  static const categories = 'Categories';
-  static const addresses = 'address';
+  static const String categories = '/categories';
+  static const String brands = '/brands';
+  static const String ecommerceProductList = 'ecommerceProductList';
+  static const String ecommerceProductDetails = 'ecommerceProductDetails';
+  static const String ecommerceCart = 'ecommerceCart';
+  static const String ecommerceCheckout = 'ecommerceCheckout';
+  static const String noInternet = '/noInternet';
   static const chooseAddress = 'chooseAddress';
   static const itemsList = 'itemsList';
   static const contactUs = 'ContactUs';
@@ -218,6 +228,16 @@ class Routes {
 
       case categories:
         return CategoryList.route(routeSettings);
+      case brands:
+        return BrandListScreen.route(routeSettings);
+      case ecommerceProductList:
+        return EcommerceProductListScreen.route(routeSettings);
+      case ecommerceProductDetails:
+        return EcommerceProductDetailsScreen.route(routeSettings);
+      case ecommerceCart:
+        return CartScreen.route(routeSettings);
+      case ecommerceCheckout:
+        return EcommerceCheckoutScreen.route(routeSettings);
       case subCategoryScreen:
         return SubCategoryScreen.route(routeSettings);
       case categoryFilterScreen:

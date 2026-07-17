@@ -67,6 +67,13 @@ import 'package:eClassify/data/cubits/system/notification_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/cubits/utility/fetch_transactions_cubit.dart';
 import 'package:eClassify/data/cubits/utility/item_edit_global.dart';
+import 'package:eClassify/data/cubits/brands/fetch_brands_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_categories_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_subcategories_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_products_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/fetch_product_details_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/checkout_cubit.dart';
 import 'package:eClassify/data/repositories/bfs_payment_repository.dart';
 import 'package:eClassify/data/repositories/favourites_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -146,5 +153,12 @@ class RegisterCubits {
     BlocProvider(create: (context) => RenewItemCubit()),
     BlocProvider(create: (context) => FetchTransactionsCubit()),
     BlocProvider(create: (context) => BfsPaymentCubit(BfsPaymentRepository())),
+    BlocProvider(create: (context) => FetchBrandsCubit()),
+    BlocProvider(create: (context) => FetchEcommerceCategoriesCubit()),
+    BlocProvider(create: (context) => FetchEcommerceSubcategoriesCubit()),
+    BlocProvider(create: (context) => FetchEcommerceProductsCubit()),
+    BlocProvider(create: (context) => FetchProductDetailsCubit()),
+    BlocProvider(create: (context) => CartCubit()),
+    BlocProvider(create: (context) => CheckoutCubit()),
   ];
 }

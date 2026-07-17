@@ -10,6 +10,7 @@ import 'package:eClassify/data/cubits/home/fetch_home_all_items_cubit.dart';
 import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
+import 'package:eClassify/data/cubits/brands/fetch_brands_cubit.dart';
 import 'package:eClassify/data/helper/designs.dart';
 import 'package:eClassify/data/model/home/home_screen_section.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
@@ -17,6 +18,7 @@ import 'package:eClassify/data/model/system_settings_model.dart';
 import 'package:eClassify/ui/screens/ad_banner_screen.dart';
 import 'package:eClassify/ui/screens/home/slider_widget.dart';
 import 'package:eClassify/ui/screens/home/widgets/category_widget_home.dart';
+import 'package:eClassify/ui/screens/home/widgets/brand_widget_home.dart';
 import 'package:eClassify/ui/screens/home/widgets/grid_list_adapter.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_search.dart';
 import 'package:eClassify/ui/screens/home/widgets/home_sections_adapter.dart';
@@ -79,6 +81,7 @@ class HomeScreenState extends State<HomeScreen>
           context,
         );
     context.read<FetchCategoryCubit>().fetchCategories();
+    context.read<FetchBrandsCubit>().fetchBrands();
     context.read<FetchHomeScreenCubit>().fetch(
           city: HiveUtils.getCityName(),
           country: HiveUtils.getCountryName(),
@@ -173,6 +176,7 @@ class HomeScreenState extends State<HomeScreen>
                   context,
                 );
             context.read<FetchCategoryCubit>().fetchCategories();
+            context.read<FetchBrandsCubit>().fetchBrands();
             context.read<FetchHomeScreenCubit>().fetch(
                   city: HiveUtils.getCityName(),
                   country: HiveUtils.getCountryName(),
@@ -206,6 +210,7 @@ class HomeScreenState extends State<HomeScreen>
                         const HomeSearchField(),
                         const SliderWidget(),
                         const CategoryWidgetHome(),
+                        const BrandWidgetHome(),
                         ...List.generate(state.sections.length, (index) {
                           HomeScreenSection section = state.sections[index];
                           if (state.sections.isNotEmpty) {
