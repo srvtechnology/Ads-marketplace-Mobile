@@ -477,6 +477,26 @@ class UiUtils {
 
   static Widget imageType(String url,
       {double? width, double? height, BoxFit? fit, Color? color}) {
+    if (url.startsWith('assets/')) {
+      if (url.toLowerCase().endsWith('.svg')) {
+        return getSvg(
+          url,
+          fit: fit,
+          height: height,
+          width: width,
+          color: color,
+        );
+      } else {
+        return Image.asset(
+          url,
+          width: width,
+          height: height,
+          fit: fit,
+          color: color,
+        );
+      }
+    }
+
     String? extension = mime(url);
 
     if (extension == "image/svg+xml") {

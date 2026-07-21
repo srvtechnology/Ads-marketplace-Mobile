@@ -117,6 +117,7 @@ flutter:
     - assets/svg/payment/
     - assets/
     - assets/splash/
+    - assets/brands_logo/
 
 
   fonts:
