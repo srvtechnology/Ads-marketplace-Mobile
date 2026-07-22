@@ -1,16 +1,11 @@
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/data/cubits/brands/fetch_brands_cubit.dart';
-import 'package:eClassify/data/model/brand_model.dart';
 import 'package:eClassify/ui/screens/item/add_item_screen/widgets/category.dart';
 
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BrandListScreen extends StatefulWidget {
   final String? from;
@@ -29,17 +24,57 @@ class BrandListScreen extends StatefulWidget {
 }
 
 class _BrandListScreenState extends State<BrandListScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // Fetch if not already loaded
-    if (context.read<FetchBrandsCubit>().state is FetchBrandsInitial) {
-      context.read<FetchBrandsCubit>().fetchBrands();
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
+    final List<Map<String, String>> staticBrands = [
+      {
+        'name': 'Amazon',
+        'image': 'assets/brands_logo/amazon.png',
+        'url': 'https://www.amazon.in',
+      },
+      {
+        'name': 'FLIPKART',
+        'image': 'assets/brands_logo/flipkart.png',
+        'url': 'https://www.flipkart.com',
+      },
+      {
+        'name': 'Myntra',
+        'image': 'assets/brands_logo/myntra.png',
+        'url': 'https://www.myntra.com',
+      },
+      {
+        'name': 'Decathlon',
+        'image': 'assets/brands_logo/Decathlon.jpeg',
+        'url': 'https://www.decathlon.in/',
+      },
+      {
+        'name': 'Firstcry',
+        'image': 'assets/brands_logo/firstcry.png',
+        'url': 'https://www.firstcry.com/',
+      },
+      {
+        'name': 'IKEA',
+        'image': 'assets/brands_logo/ikea.png',
+        'url': 'https://www.ikea.com/in/en/',
+      },
+      {
+        'name': 'Sephora',
+        'image': 'assets/brands_logo/sephora.png',
+        'url': 'https://sephora.in/',
+      },
+      {
+        'name': 'Uniqlo',
+        'image': 'assets/brands_logo/uniqlo.png',
+        'url': 'https://www.uniqlo.com/in/en/',
+      },
+      {
+        'name': 'Zara',
+        'image': 'assets/brands_logo/Zara.png',
+        'url': 'https://www.zara.com/in/',
+      },
+    ];
+
     return AnnotatedRegion(
       value: UiUtils.getSystemUiOverlayStyle(
           context: context, statusBarColor: context.color.secondaryColor),
@@ -50,60 +85,67 @@ class _BrandListScreenState extends State<BrandListScreen> {
           showBackButton: true,
           title: "Brands",
         ),
-        body: BlocBuilder<FetchBrandsCubit, FetchBrandsState>(
-          builder: (context, state) {
-            if (state is FetchBrandsInProgress) {
-              return UiUtils.progress();
-            }
-            if (state is FetchBrandsSuccess) {
-              return Column(
-                children: [
-                  Expanded(
-                    child: GridView.builder(
-                      shrinkWrap: true,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 15,
-                        vertical: 15,
+        body: GridView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 15,
+            vertical: 15,
+          ),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
+            crossAxisCount: 3,
+            height: MediaQuery.of(context).size.height * 0.18,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+          ),
+          itemBuilder: (context, index) {
+            final brand = staticBrands[index];
+            return GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  Routes.brandWebViewScreen,
+                  arguments: {
+                    'title': brand['name'],
+                    'url': brand['url'],
+                  },
+                );
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  color: context.color.secondaryColor,
+                  border: Border.all(
+                      color: context.color.textLightColor.withValues(alpha: 0.23)),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: UiUtils.imageType(
+                          brand['image']!,
+                          fit: BoxFit.contain,
+                        ),
                       ),
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCountAndFixedHeight(
-                        crossAxisCount: 3,
-                        height: MediaQuery.of(context).size.height * 0.18,
-                        crossAxisSpacing: 14,
-                        mainAxisSpacing: 14,
-                      ),
-                      itemBuilder: (context, index) {
-                        BrandModel brand = state.brands[index];
-                        return CategoryCard(
-                          onTap: () {
-                            Navigator.pushNamed(
-                              context,
-                              Routes.ecommerceProductList,
-                              arguments: {
-                                'platformId': brand.id,
-                                'brandName': brand.name,
-                              },
-                            );
-                          },
-                          title: brand.name,
-                          url: brand.image,
-                        );
-                      },
-                      itemCount: state.brands.length,
                     ),
-                  ),
-                ],
-              );
-            }
-
-            if (state is FetchBrandsFailure) {
-              return Center(
-                child: Text(state.errorMessage),
-              );
-            }
-
-            return Container();
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12.0),
+                      child: Text(
+                        brand['name']!,
+                        maxLines: 1,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: context.color.textColorDark,
+                          fontSize: context.font.small,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
+          itemCount: staticBrands.length,
         ),
       ),
     );

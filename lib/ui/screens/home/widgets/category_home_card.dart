@@ -41,7 +41,7 @@ class CategoryHomeCard extends StatelessWidget {
                       height: 70,
                       width: double.infinity,
                       color: context.color.secondaryColor,
-                      child: UiUtils.imageType(url, fit: BoxFit.cover),
+                      child: UiUtils.imageType(url, fit: BoxFit.contain),
                     ),
                   ),
                 ] else ...[
@@ -62,7 +62,7 @@ class CategoryHomeCard extends StatelessWidget {
                           // color: Colors.blue,
                           width: 48,
                           height: 48,
-                          child: UiUtils.imageType(url, fit: BoxFit.cover),
+                          child: UiUtils.imageType(url, fit: BoxFit.contain),
                         ),
                       ),
                     ),

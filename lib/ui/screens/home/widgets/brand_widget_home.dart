@@ -26,6 +26,36 @@ class BrandWidgetHome extends StatelessWidget {
         'image': 'assets/brands_logo/myntra.png',
         'url': 'https://www.myntra.com',
       },
+      {
+        'name': 'Decathlon',
+        'image': 'assets/brands_logo/Decathlon.jpeg',
+        'url': 'https://www.decathlon.in/',
+      },
+      {
+        'name': 'Firstcry',
+        'image': 'assets/brands_logo/firstcry.png',
+        'url': 'https://www.firstcry.com/',
+      },
+      {
+        'name': 'IKEA',
+        'image': 'assets/brands_logo/ikea.png',
+        'url': 'https://www.ikea.com/in/en/',
+      },
+      {
+        'name': 'Sephora',
+        'image': 'assets/brands_logo/sephora.png',
+        'url': 'https://sephora.in/',
+      },
+      {
+        'name': 'Uniqlo',
+        'image': 'assets/brands_logo/uniqlo.png',
+        'url': 'https://www.uniqlo.com/in/en/',
+      },
+      {
+        'name': 'Zara',
+        'image': 'assets/brands_logo/Zara.png',
+        'url': 'https://www.zara.com/in/',
+      },
     ];
 
     return Column(
