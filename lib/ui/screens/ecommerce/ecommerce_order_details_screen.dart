@@ -6,7 +6,7 @@ import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class EcommerceOrderDetailsScreen extends StatefulWidget {
   final int orderId;
@@ -57,27 +57,20 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
   }
 
   Widget _buildOrderDetails(BuildContext context, EcommerceOrderModel order) {
-    String formattedDate = '';
-    if (order.createdAt != null) {
-      try {
-        DateTime parsedDate = DateTime.parse(order.createdAt!);
-        formattedDate = DateFormat('MMM dd, yyyy - hh:mm a').format(parsedDate.toLocal());
-      } catch (e) {
-        formattedDate = order.createdAt!;
-      }
-    }
+    final paymentDetail = order.paymentDetail;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Order Header Summary
           _buildInfoCard(
             context,
-            title: 'Order Information',
+            title: 'Order Summary',
             children: [
-              _buildInfoRow(context, 'Order ID', order.orderNo ?? ''),
-              _buildInfoRow(context, 'Date', formattedDate),
+              _buildInfoRow(context, 'Order ID', '#${order.orderId ?? order.id ?? ''}'),
+              _buildInfoRow(context, 'Placed On', order.placedOn ?? order.createdAt ?? 'N/A'),
               _buildInfoRow(context, 'Status', _getStatusText(order.status)),
               _buildInfoRow(context, 'Payment Mode', order.paymentMode ?? 'Unknown'),
               if (order.remarks != null && order.remarks!.isNotEmpty)
@@ -85,31 +78,29 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
             ],
           ),
           const SizedBox(height: 16),
+
+          // Customer & Shipping Info
           _buildInfoCard(
             context,
-            title: 'Shipping Address',
+            title: 'Shipping & Contact Details',
             children: [
-              CustomText(order.shippingAddress ?? 'No Address', color: context.color.textColorDark),
+              if (order.name != null && order.name!.isNotEmpty)
+                _buildInfoRow(context, 'Customer Name', order.name!),
+              if (order.mobile != null && order.mobile!.isNotEmpty)
+                _buildInfoRow(context, 'Mobile', '${order.countryCode ?? "+975"} ${order.mobile}'),
+              if (order.email != null && order.email!.isNotEmpty)
+                _buildInfoRow(context, 'Email', order.email!),
+              _buildInfoRow(context, 'Shipping Address', order.shippingAddress ?? 'N/A'),
               if (order.shippingZipcode != null && order.shippingZipcode!.isNotEmpty)
-                CustomText('Zip: ${order.shippingZipcode}', color: context.color.textLightColor),
+                _buildInfoRow(context, 'Zipcode', order.shippingZipcode!),
               if (order.shippingLandmark != null && order.shippingLandmark!.isNotEmpty)
-                CustomText('Landmark: ${order.shippingLandmark}', color: context.color.textLightColor),
+                _buildInfoRow(context, 'Landmark', order.shippingLandmark!),
             ],
           ),
           const SizedBox(height: 16),
-          _buildInfoCard(
-            context,
-            title: 'Billing Address',
-            children: [
-              CustomText(order.billingAddress ?? 'No Address', color: context.color.textColorDark),
-              if (order.billingZipcode != null && order.billingZipcode!.isNotEmpty)
-                CustomText('Zip: ${order.billingZipcode}', color: context.color.textLightColor),
-              if (order.billingLandmark != null && order.billingLandmark!.isNotEmpty)
-                CustomText('Landmark: ${order.billingLandmark}', color: context.color.textLightColor),
-            ],
-          ),
-          const SizedBox(height: 16),
-          CustomText('Items', fontSize: context.font.large, fontWeight: FontWeight.bold),
+
+          // Items List
+          Text('Ordered Items', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.color.textDefaultColor)),
           const SizedBox(height: 12),
           ListView.separated(
             shrinkWrap: true,
@@ -121,25 +112,49 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
               return _buildItemCard(context, item);
             },
           ),
-          const SizedBox(height: 24),
-          _buildInfoCard(
-            context,
-            title: 'Order Summary',
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CustomText('Total Amount', fontWeight: FontWeight.bold, fontSize: context.font.large),
-                  CustomText(
-                    '\$${order.totalAmount ?? '0.00'}',
-                    fontWeight: FontWeight.bold,
-                    fontSize: context.font.large,
-                    color: context.color.territoryColor,
-                  ),
-                ],
-              ),
-            ],
-          ),
+          const SizedBox(height: 16),
+
+          // Payment Detail Breakdown
+          if (paymentDetail != null)
+            _buildInfoCard(
+              context,
+              title: 'Payment Details Breakdown',
+              children: [
+                _buildPaymentRow('Items Subtotal', 'Nu. ${paymentDetail.itemsSubtotal.toStringAsFixed(2)}', context),
+                _buildPaymentRow('Service Charge', 'Nu. ${paymentDetail.totalServiceCharge.toStringAsFixed(2)}', context),
+                _buildPaymentRow('Delivery Charge', 'Nu. ${paymentDetail.totalDeliveryCharge.toStringAsFixed(2)}', context),
+                _buildPaymentRow('Shipment Charge', 'Nu. ${paymentDetail.totalShipmentCharge.toStringAsFixed(2)}', context),
+                _buildPaymentRow('GST Amount', 'Nu. ${paymentDetail.totalGstAmount.toStringAsFixed(2)}', context),
+                const Divider(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Grand Total', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.color.textDefaultColor)),
+                    Text(
+                      'Nu. ${paymentDetail.grandTotal.toStringAsFixed(2)}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.color.territoryColor),
+                    ),
+                  ],
+                ),
+              ],
+            )
+          else
+            _buildInfoCard(
+              context,
+              title: 'Payment Summary',
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Total Amount', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.color.textDefaultColor)),
+                    Text(
+                      'Nu. ${order.totalAmount ?? '0.00'}',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: context.color.territoryColor),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           const SizedBox(height: 32),
         ],
       ),
@@ -152,11 +167,10 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.color.secondaryColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.color.borderColor.withValues(alpha: 0.3)),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -165,8 +179,10 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CustomText(title, fontWeight: FontWeight.bold, fontSize: context.font.normal),
-          const Divider(height: 24),
+          Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: context.color.textDefaultColor)),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
+          const SizedBox(height: 12),
           ...children,
         ],
       ),
@@ -175,17 +191,16 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
 
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
+      padding: const EdgeInsets.only(bottom: 6.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(flex: 2, child: CustomText(label, color: context.color.textLightColor)),
+          Expanded(flex: 2, child: Text(label, style: TextStyle(fontSize: 13, color: context.color.textLightColor))),
           Expanded(
             flex: 3,
-            child: CustomText(
+            child: Text(
               value,
-              color: context.color.textColorDark,
-              fontWeight: FontWeight.w500,
+              style: TextStyle(fontSize: 13, color: context.color.textDefaultColor, fontWeight: FontWeight.w600),
               textAlign: TextAlign.end,
             ),
           ),
@@ -194,81 +209,140 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
     );
   }
 
+  Widget _buildPaymentRow(String label, String amount, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 13, color: context.color.textLightColor)),
+          Text(amount, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.color.textDefaultColor)),
+        ],
+      ),
+    );
+  }
+
   Widget _buildItemCard(BuildContext context, EcommerceOrderItemModel item) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.color.secondaryColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.color.borderColor.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: SizedBox(
-              width: 70,
-              height: 70,
-              child: UiUtils.imageType(item.product?.imageUrl ?? '', fit: BoxFit.cover),
-            ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CustomText(
-                  item.product?.name ?? 'Product',
-                  fontWeight: FontWeight.w600,
-                  fontSize: context.font.normal,
-                  maxLines: 2,
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: SizedBox(
+                  width: 65,
+                  height: 65,
+                  child: UiUtils.imageType(item.image ?? item.product?.imageUrl ?? '', fit: BoxFit.cover),
                 ),
-                if (item.variant != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4.0),
-                    child: CustomText(
-                      item.variant?.variantName ?? '',
-                      fontSize: context.font.small,
-                      color: context.color.textLightColor,
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CustomText(
-                      'Qty: ${item.qty ?? 1}',
-                      fontSize: context.font.small,
-                      fontWeight: FontWeight.w500,
+                    Text(
+                      item.title ?? item.product?.name ?? 'Product',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: context.color.textDefaultColor,
+                      ),
                     ),
-                    CustomText(
-                      '\$${item.price ?? '0.00'}',
-                      fontSize: context.font.normal,
-                      fontWeight: FontWeight.bold,
-                      color: context.color.territoryColor,
+                    if (item.variantDetails != null && item.variantDetails!.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Text(
+                          item.variantDetails!,
+                          style: TextStyle(fontSize: 12, color: context.color.textLightColor),
+                        ),
+                      ),
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Qty: ${item.qty ?? 1}', style: TextStyle(fontSize: 13, color: context.color.textLightColor)),
+                        Text(
+                          'Nu. ${item.finalAmount > 0 ? item.finalAmount.toStringAsFixed(2) : (item.price ?? "0.00")}',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: context.color.territoryColor),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          if (item.sourceUrl != null && item.sourceUrl!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Divider(height: 1),
+            const SizedBox(height: 6),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: InkWell(
+                onTap: () async {
+                  final Uri uri = Uri.parse(item.sourceUrl!);
+                  if (await canLaunchUrl(uri)) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.link, size: 16, color: context.color.territoryColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      'View Original Product Source',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: context.color.territoryColor,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
   String _getStatusText(String? status) {
-    if (status == null) return 'Unknown';
+    if (status == null) return 'Awaiting';
     switch (status.toUpperCase()) {
       case 'AA':
-        return 'Active';
-      case 'PP':
-        return 'Pending';
+        return 'Awaiting';
+      case 'AP':
+        return 'Approved';
+      case 'RE':
+        return 'Reserved';
+      case 'SHIPPED':
+        return 'Shipped';
+      case 'OUT':
+        return 'Out for Delivery';
+      case 'DELIVERED':
+        return 'Delivered';
+      case 'CAN':
       case 'CC':
         return 'Cancelled';
-      case 'DD':
-        return 'Delivered';
       default:
         return status;
     }

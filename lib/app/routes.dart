@@ -63,7 +63,6 @@ import 'package:eClassify/data/cubits/bank_details_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/data/repositories/bank_details_repository.dart';
 import 'package:eClassify/ui/screens/brands/brand_webview_screen.dart';
-import 'package:eClassify/ui/screens/brands/imported_product_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
@@ -160,7 +159,6 @@ class Routes {
   static const payStackWebViewScreen = '/payStackWebViewScreen';
   static const webViewScreen = '/webViewScreen';
   static const brandWebViewScreen = '/brandWebViewScreen';
-  static const importedProductScreen = '/importedProductScreen';
 
   static const playground = 'playground';
 
@@ -272,8 +270,6 @@ class Routes {
         return WebViewScreen.route(routeSettings);
       case brandWebViewScreen:
         return BrandWebViewScreen.route(routeSettings);
-      case importedProductScreen:
-        return ImportedProductScreen.route(routeSettings);
       case filterScreen:
         return FilterScreen.route(routeSettings);
       case notificationPage:

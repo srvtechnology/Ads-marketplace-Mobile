@@ -78,7 +78,9 @@ class _EcommerceProductListScreenState extends State<EcommerceProductListScreen>
             builder: (context, state) {
               int cartItemCount = 0;
               if (state is CartSuccess) {
-                cartItemCount = state.cart.items.length;
+                cartItemCount = state.cart.totalItemsCount > 0 
+                    ? state.cart.totalItemsCount 
+                    : state.cart.items.fold(0, (sum, i) => sum + i.qty);
               }
               return IconButton(
                 icon: Badge(

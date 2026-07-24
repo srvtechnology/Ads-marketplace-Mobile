@@ -5,6 +5,9 @@ import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:eClassify/app/routes.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
+import 'package:eClassify/utils/helper_utils.dart';
 
 class BrandWebViewScreen extends StatefulWidget {
   final String title;
@@ -34,6 +37,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
   @override
   void initState() {
     super.initState();
+
+    Future.microtask(() {
+      if (mounted) {
+        context.read<CartCubit>().fetchCart(isSilent: true);
+      }
+    });
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
@@ -193,6 +202,116 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     );
   }
 
+  Future<void> _addToCart(BuildContext context, Map<String, dynamic> product) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const Center(
+          child: Material(
+            color: Colors.transparent,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Adding to Cart...', style: TextStyle(color: Colors.white, fontSize: 16)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    double priceNum = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    if (priceNum <= 0) {
+      Navigator.of(context).pop(); // hide progress modal
+      final TextEditingController priceCtrl = TextEditingController();
+      final bool? confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text('Enter Product Price', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Price could not be automatically detected. Please enter the product price (in ₹):', style: TextStyle(fontSize: 13, color: context.color.textLightColor)),
+              const SizedBox(height: 12),
+              TextField(
+                controller: priceCtrl,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'e.g. 1749',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: context.color.territoryColor),
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text('Confirm', style: TextStyle(color: context.color.buttonColor)),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || priceCtrl.text.trim().isEmpty) {
+        return;
+      }
+      product['price'] = priceCtrl.text.trim();
+      
+      // Re-show progress dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => Center(child: UiUtils.progress()),
+      );
+    }
+
+    final success = await context.read<CartCubit>().addScrapedProductToCart(product);
+    if (context.mounted) {
+      Navigator.of(context).pop(); // hide progress
+      if (success) {
+        HelperUtils.showSnackBarMessage(context, "Added to Cart successfully", type: MessageType.success);
+        // Prompt to go to cart
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Added to Cart'),
+            content: const Text('Do you want to view your cart?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Continue Shopping'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                  Navigator.pushNamed(context, Routes.ecommerceCart);
+                },
+                child: const Text('View Cart'),
+              ),
+            ],
+          ),
+        );
+      }
+      else {
+        String msg = "Failed to add product to cart";
+        final state = context.read<CartCubit>().state;
+        if (state is CartFailure) {
+          msg = state.errorMessage;
+        }
+        HelperUtils.showSnackBarMessage(context, msg, type: MessageType.error);
+      }
+    }
+  }
+
   Future<void> _scrapeProductDetails(BuildContext context) async {
     // Show a loading indicator while scraping
     showDialog(
@@ -229,9 +348,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         if (mounted) Navigator.of(context).pop();
 
         if (mounted) {
-          Navigator.pushNamed(context, Routes.importedProductScreen, arguments: {
-            'productData': result.toString(),
-          });
+          String dataStr = result.toString();
+          if (dataStr.startsWith('"') && dataStr.endsWith('"')) {
+            dataStr = dataStr.substring(1, dataStr.length - 1).replaceAll('\\"', '"');
+          }
+          final product = jsonDecode(dataStr);
+          _addToCart(context, product);
         }
       } catch (e) {
         if (mounted) Navigator.of(context).pop();
@@ -443,9 +565,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
                             Navigator.of(dialogContext).pop();
 
-                            Navigator.pushNamed(context, Routes.importedProductScreen, arguments: {
-                              'productData': jsonEncode(product),
-                            });
+                            _addToCart(context, product);
                           },
                           child: const Text(
                             "Confirm & Import",
@@ -673,15 +793,17 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                               Map sizePrices = product['sizePrices'] as Map;
                               String key = sVal.toUpperCase();
                               if (sizePrices.containsKey(key) && sizePrices[key].toString().isNotEmpty) {
-                                product['price'] = sizePrices[key].toString();
+                                double sizeP = double.tryParse(sizePrices[key].toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+                                double currentP = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
+                                if (sizeP > 100 && (currentP == 0 || (sizeP <= currentP * 1.3 && sizeP >= currentP * 0.3))) {
+                                  product['price'] = sizeP.toStringAsFixed(0);
+                                }
                               }
                             }
 
                             Navigator.of(dialogContext).pop();
 
-                            Navigator.pushNamed(context, Routes.importedProductScreen, arguments: {
-                              'productData': jsonEncode(product),
-                            });
+                            _addToCart(context, product);
                           },
                           child: const Text(
                             "Confirm & Import",
@@ -892,47 +1014,153 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               
               if (sNameMatch) {
                   var sName = sNameMatch[1].toUpperCase();
-                  if (sPriceMatch) {
+                  var lowerBtn = btnText.toLowerCase();
+                  var isDiscountText = lowerBtn.includes('off') || lowerBtn.includes('save') || lowerBtn.includes('discount') || lowerBtn.includes('less');
+                  if (sPriceMatch && !isDiscountText) {
                       sizePrices[sName] = sPriceMatch[1].replace(/[^0-9]/g, '');
                   }
                   
                   var cls = (sizeBtns[i].className || '').toLowerCase();
                   var parentCls = (sizeBtns[i].parentElement ? sizeBtns[i].parentElement.className || '' : '').toLowerCase();
                   if (cls.includes('active') || cls.includes('selected') || parentCls.includes('active') || parentCls.includes('selected')) {
-                      if (sPriceMatch) activeSizePrice = sPriceMatch[1].replace(/[^0-9]/g, '');
+                      if (sPriceMatch && !isDiscountText) activeSizePrice = sPriceMatch[1].replace(/[^0-9]/g, '');
                   }
               }
           }
           product.sizePrices = sizePrices;
           
-          var pdpPriceEl = document.querySelector('.pdp-price strong') || 
-                           document.querySelector('.pdp-price') || 
-                           document.querySelector('.pdp-selling-price') ||
-                           document.querySelector('.pdp-discount-container .pdp-price');
           var mainPdpPrice = '';
-          if (pdpPriceEl) {
-              var pMatch = pdpPriceEl.innerText.match(/₹\s*([0-9,]+)/) || pdpPriceEl.innerText.match(/([0-9,]{3,})/);
-              if (pMatch) mainPdpPrice = pMatch[1].replace(/[^0-9]/g, '');
+
+          // 1. Native Myntra State Object (100% accurate discounted price from styleData & sizes)
+          try {
+              var myntraObj = window.__myntraData__ || window.pdpData;
+              if (myntraObj && myntraObj.pdpData && myntraObj.pdpData.styleData) {
+                  var styleData = myntraObj.pdpData.styleData;
+                  if (styleData.name && !product.title) {
+                      product.title = (styleData.brandName ? styleData.brandName + ' ' : '') + styleData.name;
+                  }
+                  var dPrice = styleData.discountedPrice || (styleData.price ? styleData.price.discounted : null);
+                  if (!dPrice && styleData.sizes && Array.isArray(styleData.sizes)) {
+                      var dPrices = [];
+                      for (var s = 0; s < styleData.sizes.length; s++) {
+                          var sz = styleData.sizes[s];
+                          if (sz.discountedPrice && parseInt(sz.discountedPrice, 10) > 0) {
+                              dPrices.push(parseInt(sz.discountedPrice, 10));
+                          }
+                          if (sz.size && sz.discountedPrice && parseInt(sz.discountedPrice, 10) > 0) {
+                              sizePrices[sz.size.toUpperCase()] = sz.discountedPrice.toString().replace(/[^0-9]/g, '');
+                          }
+                      }
+                      if (dPrices.length > 0) {
+                          dPrice = Math.min.apply(null, dPrices);
+                      }
+                  }
+                  if (dPrice && parseInt(dPrice, 10) > 0) {
+                      mainPdpPrice = dPrice.toString().replace(/[^0-9]/g, '');
+                  }
+              }
+          } catch (_) {}
+
+          // 2. DOM Selling Price Extraction (Directly target PDP selling price elements)
+          if (!mainPdpPrice) {
+              var pdpPriceEl = document.querySelector('.pdp-price strong') || 
+                               document.querySelector('.pdp-price') || 
+                               document.querySelector('.pdp-discount-container .pdp-price strong') ||
+                               document.querySelector('.pdp-discount-container .pdp-price') ||
+                               document.querySelector('.pdp-selling-price') || 
+                               document.querySelector('span.pdp-price');
+              if (pdpPriceEl) {
+                  var pText = pdpPriceEl.innerText || pdpPriceEl.textContent || '';
+                  var pMatch = pText.match(/₹\s*([0-9,]+)/) || pText.match(/([0-9,]{3,})/);
+                  if (pMatch) {
+                      var pNum = parseInt(pMatch[1].replace(/[^0-9]/g, ''), 10);
+                      if (pNum > 0) mainPdpPrice = pNum.toString();
+                  }
+              }
           }
-          
-          var finalPrice = activeSizePrice || mainPdpPrice;
-          
-          if (!finalPrice) {
-              var maxFontSize = 0;
-              var biggestPrice = '';
-              for (var i = 0; i < Math.min(els.length, 300); i++) {
-                  var text = els[i].innerText;
-                  if (text && text.trim().match(/^₹\s*[0-9,]+$/)) {
-                      var style = window.getComputedStyle(els[i]);
-                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
-                      var fSize = parseInt(style.fontSize, 10) || 0;
-                      if (fSize > maxFontSize && fSize > 0) {
-                          maxFontSize = fSize;
-                          biggestPrice = text;
+
+          // 3. DOM Container Clone & Element Scan (Filter out MRP / strikethrough nodes)
+          if (!mainPdpPrice) {
+              var priceContainer = document.querySelector('.pdp-price-info') || 
+                                   document.querySelector('.pdp-discount-container') || 
+                                   document.querySelector('.pdp-price');
+              if (priceContainer) {
+                  var clone = priceContainer.cloneNode(true);
+                  var mrpEls = clone.querySelectorAll('.pdp-mrp, s, strike, del, [class*="mrp"], [class*="strike"], [class*="cross"]');
+                  for (var mIdx = 0; mIdx < mrpEls.length; mIdx++) {
+                      mrpEls[mIdx].remove();
+                  }
+                  var cMatches = clone.innerText.match(/₹\s*([0-9,]+)/g);
+                  if (cMatches) {
+                      var cList = [];
+                      for (var idx = 0; idx < cMatches.length; idx++) {
+                          var cVal = parseInt(cMatches[idx].replace(/[^0-9]/g, ''), 10);
+                          if (cVal > 0) cList.push(cVal);
+                      }
+                      if (cList.length > 0) {
+                          mainPdpPrice = Math.min.apply(null, cList).toString();
                       }
                   }
               }
-              finalPrice = biggestPrice ? biggestPrice.replace(/[^0-9]/g, '') : '';
+          }
+
+          // 4. Global DOM Element Scanner (Find lowest non-strikethrough price figure)
+          if (!mainPdpPrice) {
+              var allElements = document.querySelectorAll('h1, h2, h3, h4, span, div, p, strong, b');
+              var validP = [];
+              for (var eIdx = 0; eIdx < Math.min(allElements.length, 500); eIdx++) {
+                  var el = allElements[eIdx];
+                  var text = el.innerText ? el.innerText.trim() : '';
+                  if (text && text.length < 30) {
+                      var m = text.match(/^₹\s*([0-9,]+)$/) || text.match(/^([0-9,]{3,})$/);
+                      if (m) {
+                          var style = window.getComputedStyle(el);
+                          if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
+                          var cls = (el.className || '') + ' ' + (el.parentElement ? el.parentElement.className || '' : '');
+                          if (cls.toLowerCase().includes('mrp') || cls.toLowerCase().includes('strike') || cls.toLowerCase().includes('cross')) continue;
+                          
+                          var pVal = parseInt(m[1].replace(/[^0-9]/g, ''), 10);
+                          if (pVal > 0) validP.push(pVal);
+                      }
+                  }
+              }
+              if (validP.length > 0) {
+                  mainPdpPrice = Math.min.apply(null, validP).toString();
+              }
+          }
+          
+          var finalPrice = mainPdpPrice;
+          if (activeSizePrice && mainPdpPrice) {
+              var aNum = parseInt(activeSizePrice, 10);
+              var mNum = parseInt(mainPdpPrice, 10);
+              if (aNum > 0 && mNum > 0 && aNum <= mNum * 1.3) {
+                  finalPrice = activeSizePrice;
+              }
+          } else if (!finalPrice && activeSizePrice) {
+              finalPrice = activeSizePrice;
+          }
+          
+          // 4. Substring Font-size Scanner Fallback
+          if (!finalPrice) {
+              var maxFontSize = 0;
+              var bestPrice = '';
+              for (var i = 0; i < Math.min(els.length, 300); i++) {
+                  var text = els[i].innerText ? els[i].innerText.trim() : '';
+                  var m = text.match(/₹\s*([0-9,]+)/) || text.match(/INR\s*([0-9,]+)/i);
+                  if (m) {
+                      var style = window.getComputedStyle(els[i]);
+                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
+                      var cls = (els[i].className || '') + ' ' + (els[i].parentElement ? els[i].parentElement.className || '' : '');
+                      if (cls.toLowerCase().includes('mrp') || cls.toLowerCase().includes('strike') || cls.toLowerCase().includes('cross')) continue;
+                      
+                      var fSize = parseInt(style.fontSize, 10) || 0;
+                      if (fSize > maxFontSize && fSize > 0) {
+                          maxFontSize = fSize;
+                          bestPrice = m[1].replace(/[^0-9]/g, '');
+                      }
+                  }
+              }
+              finalPrice = bestPrice;
           }
           
           product.price = finalPrice;
@@ -1625,7 +1853,56 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     return Scaffold(
       backgroundColor: context.color.primaryColor,
       appBar: UiUtils.buildAppBar(context,
-          showBackButton: true, title: widget.title),
+          showBackButton: true, 
+          title: widget.title,
+          actions: [
+            BlocBuilder<CartCubit, CartState>(
+              builder: (context, state) {
+                int count = 0;
+                if (state is CartSuccess) {
+                  count = state.cart.totalItemsCount > 0 
+                      ? state.cart.totalItemsCount 
+                      : state.cart.items.fold(0, (sum, i) => sum + i.qty);
+                }
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.shopping_cart_outlined, color: context.color.textDefaultColor),
+                      onPressed: () {
+                        Navigator.pushNamed(context, Routes.ecommerceCart);
+                      },
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ]),
       body: Stack(
         children: [
           WebViewWidget(controller: _controller),

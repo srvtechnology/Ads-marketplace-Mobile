@@ -1,6 +1,5 @@
 import 'package:eClassify/data/model/ecommerce/checkout_model.dart';
 import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class CheckoutState {}
@@ -24,12 +23,14 @@ class CheckoutCubit extends Cubit<CheckoutState> {
     required String mobile,
     required String shippingAddress,
     required String paymentMode,
+    String countryCode = '+975',
     String? email,
     String? shippingZipcode,
     String? shippingLandmark,
     String? billingAddress,
     String? billingZipcode,
     String? billingLandmark,
+    String status = 'AA',
     String? remarks,
   }) async {
     try {
@@ -37,9 +38,11 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       
       Map<String, dynamic> params = {
         'name': name,
+        'country_code': countryCode,
         'mobile': mobile,
         'shipping_address': shippingAddress,
         'payment_mode': paymentMode,
+        'status': status,
       };
       
       if (email != null && email.isNotEmpty) params['email'] = email;
@@ -58,7 +61,11 @@ class CheckoutCubit extends Cubit<CheckoutState> {
       );
       
       if (response['success'] == true || response['error'] == false) {
-        EcommerceCheckoutModel data = EcommerceCheckoutModel.fromJson(response['data']);
+        Map<String, dynamic> responseData = response['data'] is Map<String, dynamic> 
+            ? response['data'] 
+            : {'order_id': response['message'] ?? ''};
+        
+        EcommerceCheckoutModel data = EcommerceCheckoutModel.fromJson(responseData);
         emit(CheckoutSuccess(data));
       } else {
         emit(CheckoutFailure(response['message']?.toString() ?? "Checkout failed"));
