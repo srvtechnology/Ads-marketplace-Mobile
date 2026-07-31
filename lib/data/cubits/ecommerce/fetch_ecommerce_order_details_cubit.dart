@@ -1,7 +1,6 @@
 import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/constant.dart';
-import 'package:eClassify/utils/hive_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchEcommerceOrderDetailsState {}
@@ -38,7 +37,7 @@ class FetchEcommerceOrderDetailsCubit extends Cubit<FetchEcommerceOrderDetailsSt
         useBaseUrl: false,
       );
 
-      if (result['error'] == false) {
+      if (result['error'] == false || result['success'] == true) {
         if (result['data'] != null) {
           EcommerceOrderModel order = EcommerceOrderModel.fromJson(result['data']);
           emit(FetchEcommerceOrderDetailsSuccess(order));

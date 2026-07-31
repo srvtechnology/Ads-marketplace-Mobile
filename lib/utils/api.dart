@@ -138,6 +138,17 @@ class Api {
   static String bfsOfferArApi = "bfs/ar";
   static String bfsOfferDrApi = "bfs/dr";
 
+  // BFS Checkout Payment Endpoints (3-Step Flow)
+  static String bfsCheckoutArApi = "checkoutar";
+  static String bfsCheckoutAeApi = "checkoutae";
+  static String bfsCheckoutDrApi = "checkoutdr";
+
+  // Cart & Checkout Endpoints
+  static String cartAddApi = "cart/add";
+  static String cartApi = "cart";
+  static String checkoutApi = "checkout";
+  static String ordersApi = "orders";
+
   static String sendMessageApi = "send-message";
   static String getChatListApi = "chat-list";
   static String itemOfferApi = "item-offer";
@@ -385,8 +396,10 @@ class Api {
 
   static Future<Map<String, dynamic>> delete(
       {required String url,
+      dynamic parameter,
       Map<String, dynamic>? queryParameters,
-      bool? useBaseUrl}) async {
+      bool? useBaseUrl,
+      bool? useJson}) async {
     try {
       final Dio dio = Dio();
 
@@ -397,10 +410,14 @@ class Api {
 
       final response = await dio.delete(
           ((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
+          data: parameter,
           queryParameters: queryParameters,
-          options: Options(headers: headers()));
+          options: Options(
+            headers: headers(),
+            contentType: useJson == true ? "application/json" : null,
+          ));
 
-      if (response.data['error'] == true) {
+      if (response.data is Map && response.data['error'] == true) {
         throw ApiException(response.data['message'].toString());
       }
       return Map.from(response.data);
@@ -421,6 +438,55 @@ class Api {
       throw ApiException(e.errorMessage);
     } catch (e, st) {
       throw ApiException(st.toString());
+    }
+  }
+
+  static Future<Map<String, dynamic>> put(
+      {required String url,
+      dynamic parameter,
+      Options? options,
+      bool? useBaseUrl,
+      bool? useJson}) async {
+    try {
+      final Dio dio = Dio();
+
+      dio.httpClientAdapter = IOHttpClientAdapter();
+      dio.interceptors.add(NetworkRequestInterceptor());
+
+      final response = await dio.put(
+        ((useBaseUrl ?? true) ? Constant.baseUrl : "") + url,
+        data: parameter,
+        options: Options(
+          contentType: useJson == true ? "application/json" : "multipart/form-data",
+          headers: headers(),
+        ),
+      );
+
+      var resp = response.data;
+      if (resp is Map && resp['error'] == true) {
+        throw ApiException(resp['message'].toString());
+      }
+
+      return Map.from(resp);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        userExpired();
+      }
+      if (e.response?.statusCode == 503) {
+        throw "server-not-available";
+      }
+
+      throw ApiException(
+        e.error is SocketException
+            ? "no-internet"
+            : e.response?.statusCode == 401
+                ? "Please login to perform this action"
+                : "Something went wrong with error ${e.response?.statusCode}",
+      );
+    } on ApiException catch (e) {
+      throw ApiException(e.errorMessage);
+    } catch (e) {
+      throw ApiException(e.toString());
     }
   }
 

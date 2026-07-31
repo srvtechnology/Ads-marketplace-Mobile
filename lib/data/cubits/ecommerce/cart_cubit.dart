@@ -1,7 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/ecommerce/cart_model.dart';
 import 'package:eClassify/utils/api.dart';
-import 'package:eClassify/utils/network_request_interseptor.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class CartState {}
@@ -27,7 +25,7 @@ class CartCubit extends Cubit<CartState> {
       }
       
       final response = await Api.get(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart', 
+        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartApi}', 
         useBaseUrl: false,
       );
       
@@ -50,7 +48,7 @@ class CartCubit extends Cubit<CartState> {
     try {
       emit(CartInProgress());
       final response = await Api.post(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart/add', 
+        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartAddApi}', 
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -94,7 +92,7 @@ class CartCubit extends Cubit<CartState> {
       String variants = (productData['variants'] ?? '').toString().trim();
 
       final response = await Api.post(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart/add', 
+        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartAddApi}', 
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -169,22 +167,18 @@ class CartCubit extends Cubit<CartState> {
 
     bool success = false;
 
-    // 1. Try PUT /api/cart/items/{cart_item_id}
+    // 1. PUT /api/cart/items/{cart_item_id}
     try {
-      final Dio dio = Dio();
-      dio.interceptors.add(NetworkRequestInterceptor());
-      final response = await dio.put(
-        'https://ecommerce.thebhutanmarket.com/api/cart/items/$cartItemId',
-        data: {
+      final response = await Api.put(
+        url: 'https://ecommerce.thebhutanmarket.com/api/cart/items/$cartItemId',
+        useBaseUrl: false,
+        useJson: true,
+        parameter: {
           'quantity': qty,
           if (isSelected != null) 'is_selected': isSelected,
         },
-        options: Options(
-          headers: Api.headers(),
-          contentType: 'application/json',
-        ),
       );
-      if (response.statusCode == 200) {
+      if (response['success'] == true || response['error'] == false) {
         success = true;
       }
     } catch (_) {}
@@ -232,21 +226,17 @@ class CartCubit extends Cubit<CartState> {
 
     bool success = false;
 
-    // 1. Try DELETE /api/cart/items with payload {"cart_item_ids": [...]}
+    // 1. DELETE /api/cart/items with payload {"cart_item_ids": [...]}
     try {
-      final Dio dio = Dio();
-      dio.interceptors.add(NetworkRequestInterceptor());
-      final response = await dio.delete(
-        'https://ecommerce.thebhutanmarket.com/api/cart/items',
-        data: {
+      final response = await Api.delete(
+        url: 'https://ecommerce.thebhutanmarket.com/api/cart/items',
+        useBaseUrl: false,
+        useJson: true,
+        parameter: {
           'cart_item_ids': cartItemIds,
         },
-        options: Options(
-          headers: Api.headers(),
-          contentType: 'application/json',
-        ),
       );
-      if (response.statusCode == 200) {
+      if (response['success'] == true || response['error'] == false) {
         success = true;
       }
     } catch (_) {}

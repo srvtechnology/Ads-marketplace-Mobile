@@ -3,13 +3,14 @@ import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
 import 'package:eClassify/data/cubits/ecommerce/checkout_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
 import 'package:eClassify/ui/theme/theme.dart';
-import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:eClassify/data/repositories/bfs_payment_repository.dart';
+import 'package:eClassify/ui/screens/payment/bfs_payment_screen.dart';
 
 class EcommerceCheckoutScreen extends StatefulWidget {
   const EcommerceCheckoutScreen({super.key});
@@ -76,20 +77,53 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
 
   void _submitCheckout() {
     if (_formKey.currentState!.validate()) {
-      context.read<CheckoutCubit>().checkout(
-        name: _nameController.text.trim(),
-        countryCode: _countryCodeController.text.trim(),
-        mobile: _mobileController.text.trim(),
-        shippingAddress: _shippingAddressController.text.trim(),
-        paymentMode: _paymentMode,
-        email: _emailController.text.trim(),
-        shippingZipcode: _shippingZipcodeController.text.trim(),
-        shippingLandmark: _shippingLandmarkController.text.trim(),
-        billingAddress: _isBillingSameAsShipping ? _shippingAddressController.text.trim() : _billingAddressController.text.trim(),
-        billingZipcode: _isBillingSameAsShipping ? _shippingZipcodeController.text.trim() : _billingZipcodeController.text.trim(),
-        billingLandmark: _isBillingSameAsShipping ? _shippingLandmarkController.text.trim() : _billingLandmarkController.text.trim(),
-        remarks: _remarksController.text.trim(),
-      );
+      if (_paymentMode == 'ONLINE' || _paymentMode == 'BFS') {
+        double grandTotal = 0.0;
+        final cartState = context.read<CartCubit>().state;
+        if (cartState is CartSuccess) {
+          grandTotal = cartState.cart.grandTotal;
+        }
+
+        final customerDetails = {
+          'name': _nameController.text.trim(),
+          'country_code': _countryCodeController.text.trim(),
+          'mobile': _mobileController.text.trim(),
+          'shipping_address': _shippingAddressController.text.trim(),
+          'email': _emailController.text.trim(),
+          'shipping_zipcode': _shippingZipcodeController.text.trim(),
+          'shipping_landmark': _shippingLandmarkController.text.trim(),
+          'billing_address': _isBillingSameAsShipping ? _shippingAddressController.text.trim() : _billingAddressController.text.trim(),
+          'billing_zipcode': _isBillingSameAsShipping ? _shippingZipcodeController.text.trim() : _billingZipcodeController.text.trim(),
+          'billing_landmark': _isBillingSameAsShipping ? _shippingLandmarkController.text.trim() : _billingLandmarkController.text.trim(),
+        };
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => BfsPaymentScreen(
+              paymentType: BfsPaymentType.cartCheckout,
+              price: grandTotal,
+              packageName: "Cart Order Payment",
+              customerDetails: customerDetails,
+            ),
+          ),
+        );
+      } else {
+        context.read<CheckoutCubit>().checkout(
+          name: _nameController.text.trim(),
+          countryCode: _countryCodeController.text.trim(),
+          mobile: _mobileController.text.trim(),
+          shippingAddress: _shippingAddressController.text.trim(),
+          paymentMode: _paymentMode,
+          email: _emailController.text.trim(),
+          shippingZipcode: _shippingZipcodeController.text.trim(),
+          shippingLandmark: _shippingLandmarkController.text.trim(),
+          billingAddress: _isBillingSameAsShipping ? _shippingAddressController.text.trim() : _billingAddressController.text.trim(),
+          billingZipcode: _isBillingSameAsShipping ? _shippingZipcodeController.text.trim() : _billingZipcodeController.text.trim(),
+          billingLandmark: _isBillingSameAsShipping ? _shippingLandmarkController.text.trim() : _billingLandmarkController.text.trim(),
+          remarks: _remarksController.text.trim(),
+        );
+      }
     }
   }
 
@@ -156,17 +190,20 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
                 ],
               ),
 
-              CheckboxListTile(
-                title: Text('Billing address same as shipping', style: TextStyle(fontSize: 14, color: context.color.textDefaultColor)),
-                value: _isBillingSameAsShipping,
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
-                activeColor: context.color.territoryColor,
-                onChanged: (value) {
-                  setState(() {
-                    _isBillingSameAsShipping = value ?? true;
-                  });
-                },
+              Material(
+                color: Colors.transparent,
+                child: CheckboxListTile(
+                  title: Text('Billing address same as shipping', style: TextStyle(fontSize: 14, color: context.color.textDefaultColor)),
+                  value: _isBillingSameAsShipping,
+                  controlAffinity: ListTileControlAffinity.leading,
+                  contentPadding: EdgeInsets.zero,
+                  activeColor: context.color.territoryColor,
+                  onChanged: (value) {
+                    setState(() {
+                      _isBillingSameAsShipping = value ?? true;
+                    });
+                  },
+                ),
               ),
 
               if (!_isBillingSameAsShipping) ...[
@@ -252,10 +289,11 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
   }
 
   Widget _buildPaymentModeSelector() {
-    return Container(
-      decoration: BoxDecoration(
-        color: context.color.secondaryColor,
-        border: Border.all(color: context.color.borderColor),
+    return Material(
+      color: context.color.secondaryColor,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: context.color.borderColor),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -271,14 +309,6 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
           RadioListTile<String>(
             title: Text('Pay Online', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
             value: 'ONLINE',
-            groupValue: _paymentMode,
-            activeColor: context.color.territoryColor,
-            onChanged: (value) => setState(() => _paymentMode = value!),
-          ),
-          Divider(height: 1, color: context.color.borderColor),
-          RadioListTile<String>(
-            title: Text('BFS Payment Gateway', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
-            value: 'BFS',
             groupValue: _paymentMode,
             activeColor: context.color.territoryColor,
             onChanged: (value) => setState(() => _paymentMode = value!),

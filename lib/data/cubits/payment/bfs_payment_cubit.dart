@@ -40,6 +40,7 @@ class BfsPaymentCubit extends Cubit<BfsPaymentState> {
     String? offerId,
     required String email,
     double? amount,
+    Map<String, dynamic>? customerDetails,
   }) async {
     emit(BfsPaymentLoading());
     _paymentType = paymentType; // Store for later use
@@ -50,6 +51,7 @@ class BfsPaymentCubit extends Cubit<BfsPaymentState> {
         offerId: offerId,
         email: email,
         amount: amount,
+        customerDetails: customerDetails,
       );
       emit(BfsPaymentArSuccess(response));
     } catch (e) {
@@ -68,6 +70,7 @@ class BfsPaymentCubit extends Cubit<BfsPaymentState> {
         orderNo: orderNo,
         bankId: bankId,
         accountNo: accountNo,
+        paymentType: _paymentType ?? BfsPaymentType.featuredAd,
       );
       if (response.success) {
         emit(BfsPaymentAeSuccess(response));

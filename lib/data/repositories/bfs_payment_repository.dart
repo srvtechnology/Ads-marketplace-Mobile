@@ -4,6 +4,7 @@ import 'package:eClassify/utils/api.dart';
 enum BfsPaymentType {
   featuredAd,
   offer,
+  cartCheckout,
 }
 
 class BfsPaymentRepository {
@@ -13,11 +14,17 @@ class BfsPaymentRepository {
     String? offerId,
     required String email,
     double? amount,
+    Map<String, dynamic>? customerDetails,
   }) async {
     String url;
     Map<String, dynamic> params;
 
-    if (paymentType == BfsPaymentType.featuredAd) {
+    if (paymentType == BfsPaymentType.cartCheckout) {
+      url = Api.bfsCheckoutArApi;
+      params = customerDetails ?? {
+        'email': email,
+      };
+    } else if (paymentType == BfsPaymentType.featuredAd) {
       url = Api.bfsArApi;
       params = {
         'item_id': int.tryParse(itemId!) ?? 0,
@@ -33,7 +40,7 @@ class BfsPaymentRepository {
       };
     }
 
-    final result = await Api.post(url: url, parameter: params);
+    final result = await Api.post(url: url, parameter: params, useJson: true);
     return BfsArResponse.fromJson(result);
   }
 
@@ -41,9 +48,15 @@ class BfsPaymentRepository {
     required String orderNo,
     required String bankId,
     required String accountNo,
+    BfsPaymentType paymentType = BfsPaymentType.featuredAd,
   }) async {
+    String url = paymentType == BfsPaymentType.cartCheckout
+        ? Api.bfsCheckoutAeApi
+        : Api.bfsAeApi;
+
     final result = await Api.post(
-      url: Api.bfsAeApi,
+      url: url,
+      useJson: true,
       parameter: {
         'order_no': orderNo,
         'bank_id': bankId,
@@ -58,12 +71,18 @@ class BfsPaymentRepository {
     required String otp,
     required BfsPaymentType paymentType,
   }) async {
-    String url = paymentType == BfsPaymentType.featuredAd
-        ? Api.bfsDrApi
-        : Api.bfsOfferDrApi;
+    String url;
+    if (paymentType == BfsPaymentType.cartCheckout) {
+      url = Api.bfsCheckoutDrApi;
+    } else if (paymentType == BfsPaymentType.featuredAd) {
+      url = Api.bfsDrApi;
+    } else {
+      url = Api.bfsOfferDrApi;
+    }
 
     final result = await Api.post(
       url: url,
+      useJson: true,
       parameter: {
         'order_no': orderNo,
         'otp': otp,
@@ -75,6 +94,7 @@ class BfsPaymentRepository {
   Future<Map<String, dynamic>> checkStatus({required String orderNo}) async {
     final result = await Api.post(
       url: Api.bfsAsApi,
+      useJson: true,
       parameter: {
         'order_no': orderNo,
       },

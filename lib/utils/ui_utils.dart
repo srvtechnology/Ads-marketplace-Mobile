@@ -290,6 +290,7 @@ class UiUtils {
 
   static PreferredSize buildAppBar(BuildContext context,
       {String? title,
+      Widget? titleWidget,
       bool? showBackButton,
       List<Widget>? actions,
       List<Widget>? bottom,
@@ -354,14 +355,15 @@ class UiUtils {
                         ),
                       ],
                       Expanded(
-                        child: CustomText(
-                          title ?? "",
-                          overflow: TextOverflow.ellipsis,
-                          softWrap: true,
-                          color: context.color.textDefaultColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 18,
-                        ),
+                        child: titleWidget ??
+                            CustomText(
+                              title ?? "",
+                              overflow: TextOverflow.ellipsis,
+                              softWrap: true,
+                              color: context.color.textDefaultColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18,
+                            ),
                       ),
                       if (actions != null) ...actions,
                     ],

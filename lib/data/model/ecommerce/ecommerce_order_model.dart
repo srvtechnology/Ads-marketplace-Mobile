@@ -29,6 +29,41 @@ class EcommerceOrderPaymentDetailModel {
   }
 }
 
+class BfsTransactionModel {
+  final int? id;
+  final String? bfsTxnId;
+  final String? status;
+  final String? bankId;
+  final String? accountNo;
+  final double amount;
+  final String? responseCode;
+  final String? responseDesc;
+
+  BfsTransactionModel({
+    this.id,
+    this.bfsTxnId,
+    this.status,
+    this.bankId,
+    this.accountNo,
+    this.amount = 0.0,
+    this.responseCode,
+    this.responseDesc,
+  });
+
+  factory BfsTransactionModel.fromJson(Map<String, dynamic> json) {
+    return BfsTransactionModel(
+      id: json['id'],
+      bfsTxnId: json['bfs_txn_id']?.toString(),
+      status: json['status']?.toString(),
+      bankId: json['bank_id']?.toString(),
+      accountNo: json['account_no']?.toString(),
+      amount: double.tryParse(json['amount']?.toString() ?? '0') ?? 0.0,
+      responseCode: json['response_code']?.toString(),
+      responseDesc: json['response_desc']?.toString(),
+    );
+  }
+}
+
 class EcommerceOrderModel {
   final int? id;
   final int? customerId;
@@ -52,6 +87,7 @@ class EcommerceOrderModel {
   final String? createdAt;
   final String? updatedAt;
   final EcommerceOrderPaymentDetailModel? paymentDetail;
+  final BfsTransactionModel? bfsTransaction;
   final List<EcommerceOrderItemModel> items;
 
   EcommerceOrderModel({
@@ -77,6 +113,7 @@ class EcommerceOrderModel {
     this.createdAt,
     this.updatedAt,
     this.paymentDetail,
+    this.bfsTransaction,
     this.items = const [],
   });
 
@@ -105,6 +142,9 @@ class EcommerceOrderModel {
       updatedAt: json['updated_at'],
       paymentDetail: json['payment_detail'] != null && json['payment_detail'] is Map
           ? EcommerceOrderPaymentDetailModel.fromJson(json['payment_detail'])
+          : null,
+      bfsTransaction: json['bfs_transaction'] != null && json['bfs_transaction'] is Map
+          ? BfsTransactionModel.fromJson(json['bfs_transaction'])
           : null,
       items: (json['items'] as List?)
               ?.map((e) => EcommerceOrderItemModel.fromJson(e))

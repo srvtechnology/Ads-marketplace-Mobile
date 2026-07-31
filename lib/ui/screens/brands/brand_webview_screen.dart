@@ -1854,7 +1854,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       backgroundColor: context.color.primaryColor,
       appBar: UiUtils.buildAppBar(context,
           showBackButton: true, 
-          title: widget.title,
+          titleWidget: Image.asset(
+            'assets/kora.png',
+            height: 28,
+            fit: BoxFit.contain,
+            alignment: Alignment.centerLeft,
+          ),
           actions: [
             BlocBuilder<CartCubit, CartState>(
               builder: (context, state) {
@@ -1928,7 +1933,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               ),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: context.color.territoryColor, // Global theme color
+                  backgroundColor: context.color.forthColor, // Global theme color
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

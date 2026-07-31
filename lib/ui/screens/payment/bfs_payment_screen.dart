@@ -12,12 +12,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
 
+import 'package:eClassify/app/routes.dart';
+import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
+
 class BfsPaymentScreen extends StatefulWidget {
   final BfsPaymentType paymentType;
   final String? itemId;
   final String? offerId;
   final double price;
   final String packageName;
+  final Map<String, dynamic>? customerDetails;
 
   const BfsPaymentScreen({
     Key? key,
@@ -26,6 +30,7 @@ class BfsPaymentScreen extends StatefulWidget {
     this.offerId,
     required this.price,
     required this.packageName,
+    this.customerDetails,
   }) : super(key: key);
 
   static Route route(RouteSettings routeSettings) {
@@ -35,8 +40,9 @@ class BfsPaymentScreen extends StatefulWidget {
         paymentType: arguments['paymentType'] ?? BfsPaymentType.featuredAd,
         itemId: arguments['itemId'],
         offerId: arguments['offerId'],
-        price: arguments['price'],
-        packageName: arguments['packageName'],
+        price: arguments['price'] ?? 0.0,
+        packageName: arguments['packageName'] ?? 'Cart Checkout',
+        customerDetails: arguments['customerDetails'],
       ),
     );
   }
@@ -85,8 +91,9 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
           paymentType: widget.paymentType,
           itemId: widget.itemId,
           offerId: widget.offerId,
-          email: HiveUtils.getUserDetails().email ?? "customer@gmail.com",
+          email: widget.customerDetails?['email'] ?? HiveUtils.getUserDetails().email ?? "customer@gmail.com",
           amount: widget.price,
+          customerDetails: widget.customerDetails,
         ),
       child: Scaffold(
         appBar: AppBar(
@@ -236,17 +243,22 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
           SizedBox(height: 30),
           CustomText("Select Your Bank", fontWeight: FontWeight.bold),
           SizedBox(height: 10),
-          ..._arResponse!.banks.map((bank) => RadioListTile<String>(
-                title: CustomText(bank.name),
-                value: bank.id,
-                groupValue: _selectedBankId,
-                activeColor: context.color.territoryColor,
-                onChanged: (value) {
-                  setState(() {
-                    _selectedBankId = value;
-                  });
-                },
-              )),
+          Material(
+            color: Colors.transparent,
+            child: Column(
+              children: _arResponse!.banks.map((bank) => RadioListTile<String>(
+                    title: CustomText(bank.name),
+                    value: bank.id,
+                    groupValue: _selectedBankId,
+                    activeColor: context.color.territoryColor,
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedBankId = value;
+                      });
+                    },
+                  )).toList(),
+            ),
+          ),
           SizedBox(height: 20),
           CustomText("Account Number", fontWeight: FontWeight.bold),
           SizedBox(height: 10),
@@ -375,7 +387,16 @@ class _BfsPaymentScreenState extends State<BfsPaymentScreen> {
             UiUtils.buildButton(
               context,
               onPressed: () {
-                Navigator.pop(context, true); // Return success
+                if (widget.paymentType == BfsPaymentType.cartCheckout) {
+                  context.read<CartCubit>().fetchCart();
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Routes.ecommerceOrderList,
+                    (route) => route.isFirst,
+                  );
+                } else {
+                  Navigator.pop(context, true); // Return success
+                }
               },
               buttonTitle: "Continue",
             ),
