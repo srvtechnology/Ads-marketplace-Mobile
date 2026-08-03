@@ -4,7 +4,7 @@ import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/custom_text.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
-import 'package:eClassify/utils/helper_utils.dart';
+// import 'package:eClassify/utils/helper_utils.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +26,8 @@ class EcommerceOrderListScreen extends StatefulWidget {
 }
 
 class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
+  /*
+  // Cancel Order functionality commented out
   void _showCancelOrderDialog(BuildContext context, int orderId) {
     final TextEditingController remarksController = TextEditingController();
     showDialog(
@@ -72,6 +74,7 @@ class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
       ),
     );
   }
+  */
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +123,7 @@ class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
   }
 
   Widget _buildOrderCard(BuildContext context, EcommerceOrderModel order) {
-    bool canCancel = order.status == 'AA' || order.status == 'AP' || order.status == 'PP';
+    // bool canCancel = order.status == 'AA' || order.status == 'AP' || order.status == 'PP'; // Commented out with cancel order functionality
 
     return GestureDetector(
       onTap: () {
@@ -223,12 +226,15 @@ class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
                   icon: Icon(Icons.visibility_outlined, size: 16, color: context.color.territoryColor),
                   label: Text('View Details', style: TextStyle(color: context.color.territoryColor, fontSize: 13, fontWeight: FontWeight.bold)),
                 ),
+                /*
+                // Cancel Order button commented out
                 if (canCancel && order.id != null)
                   TextButton.icon(
                     onPressed: () => _showCancelOrderDialog(context, order.id!),
                     icon: Icon(Icons.cancel_outlined, size: 16, color: context.color.forthColor),
                     label: Text('Cancel Order', style: TextStyle(color: context.color.forthColor, fontSize: 13, fontWeight: FontWeight.bold)),
                   ),
+                */
               ],
             ),
           ],

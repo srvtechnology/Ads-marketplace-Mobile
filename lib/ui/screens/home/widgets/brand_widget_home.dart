@@ -12,36 +12,6 @@ class BrandWidgetHome extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Map<String, String>> staticBrands = [
       {
-        'name': 'Amazon',
-        'image': 'assets/brands_logo/amazon.png',
-        'url': 'https://www.amazon.in',
-      },
-      {
-        'name': 'FLIPKART',
-        'image': 'assets/brands_logo/flipkart.png',
-        'url': 'https://www.flipkart.com',
-      },
-      {
-        'name': 'Myntra',
-        'image': 'assets/brands_logo/myntra.png',
-        'url': 'https://www.myntra.com',
-      },
-      {
-        'name': 'Decathlon',
-        'image': 'assets/brands_logo/Decathlon.jpeg',
-        'url': 'https://www.decathlon.in/',
-      },
-      {
-        'name': 'Firstcry',
-        'image': 'assets/brands_logo/firstcry.png',
-        'url': 'https://www.firstcry.com/',
-      },
-      {
-        'name': 'IKEA',
-        'image': 'assets/brands_logo/ikea.png',
-        'url': 'https://www.ikea.com/in/en/',
-      },
-      {
         'name': 'Sephora',
         'image': 'assets/brands_logo/sephora.png',
         'url': 'https://sephora.in/',
@@ -56,6 +26,51 @@ class BrandWidgetHome extends StatelessWidget {
         'image': 'assets/brands_logo/Zara.png',
         'url': 'https://www.zara.com/in/',
       },
+      {
+        'name': 'IKEA',
+        'image': 'assets/brands_logo/ikea.png',
+        'url': 'https://www.ikea.com/in/en/',
+      },
+      {
+        'name': 'Amazon',
+        'image': 'assets/brands_logo/amazon.png',
+        'url': 'https://www.amazon.in',
+      },
+      {
+        'name': 'FLIPKART',
+        'image': 'assets/brands_logo/flipkart.png',
+        'url': 'https://www.flipkart.com',
+      },
+      {
+        'name': 'Myntra',
+        'image': 'assets/brands_logo/myntra.jpg',
+        'url': 'https://www.myntra.com',
+      },
+      {
+        'name': 'Decathlon',
+        'image': 'assets/brands_logo/Decathlon.jpeg',
+        'url': 'https://www.decathlon.in/',
+      },
+      {
+        'name': 'Firstcry',
+        'image': 'assets/brands_logo/firstcry.png',
+        'url': 'https://www.firstcry.com/',
+      },
+      // {
+      //   'name': 'Snitch',
+      //   'image': 'assets/brands_logo/Snitch.png',
+      //   'url': 'https://www.snitch.com/',
+      // },
+      // {
+      //   'name': 'Rare Rabbit',
+      //   'image': 'assets/brands_logo/rare_rabbit.jpeg',
+      //   'url': 'https://thehouseofrare.com/',
+      // },
+      // {
+      //   'name': 'The Bear House',
+      //   'image': 'assets/brands_logo/the_bear houses.jpeg',
+      //   'url': 'https://thebearhouse.com/',
+      // },
     ];
 
     return Column(

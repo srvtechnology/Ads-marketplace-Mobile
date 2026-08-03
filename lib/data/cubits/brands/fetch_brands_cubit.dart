@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/brand_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchBrandsState {}
@@ -26,7 +27,7 @@ class FetchBrandsCubit extends Cubit<FetchBrandsState> {
       emit(FetchBrandsInProgress());
       
       final Dio dio = Dio();
-      final response = await dio.get('https://ecommerce.thebhutanmarket.com/api/ecommerce/platforms');
+      final response = await dio.get('${AppSettings.ecommerceHostUrl}/api/ecommerce/platforms');
       
       if (response.statusCode == 200) {
         List data = [];

@@ -1,4 +1,5 @@
 import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,7 +31,7 @@ class FetchEcommerceOrderDetailsCubit extends Cubit<FetchEcommerceOrderDetailsSt
 
       final String baseUrl = Constant.isDemoModeOn
           ? 'http://127.0.0.1:8000/api'
-          : 'https://ecommerce.thebhutanmarket.com/api';
+          : '${AppSettings.ecommerceHostUrl}/api';
           
       final result = await Api.get(
         url: '$baseUrl/orders/$orderId',

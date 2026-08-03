@@ -1,4 +1,5 @@
 import 'package:eClassify/data/model/ecommerce/cart_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,7 +26,7 @@ class CartCubit extends Cubit<CartState> {
       }
       
       final response = await Api.get(
-        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartApi}', 
+        url: '${AppSettings.ecommerceHostUrl}/api/${Api.cartApi}', 
         useBaseUrl: false,
       );
       
@@ -48,7 +49,7 @@ class CartCubit extends Cubit<CartState> {
     try {
       emit(CartInProgress());
       final response = await Api.post(
-        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartAddApi}', 
+        url: '${AppSettings.ecommerceHostUrl}/api/${Api.cartAddApi}', 
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -92,7 +93,7 @@ class CartCubit extends Cubit<CartState> {
       String variants = (productData['variants'] ?? '').toString().trim();
 
       final response = await Api.post(
-        url: 'https://ecommerce.thebhutanmarket.com/api/${Api.cartAddApi}', 
+        url: '${AppSettings.ecommerceHostUrl}/api/${Api.cartAddApi}', 
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -123,7 +124,7 @@ class CartCubit extends Cubit<CartState> {
   Future<EcommerceCartItemBreakdownModel?> fetchCartItemDetails(int cartItemId) async {
     try {
       final response = await Api.get(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart/items/$cartItemId/details',
+        url: '${AppSettings.ecommerceHostUrl}/api/cart/items/$cartItemId/details',
         useBaseUrl: false,
       );
       if (response['success'] == true && response['data'] != null) {
@@ -170,7 +171,7 @@ class CartCubit extends Cubit<CartState> {
     // 1. PUT /api/cart/items/{cart_item_id}
     try {
       final response = await Api.put(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart/items/$cartItemId',
+        url: '${AppSettings.ecommerceHostUrl}/api/cart/items/$cartItemId',
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -187,7 +188,7 @@ class CartCubit extends Cubit<CartState> {
     if (!success) {
       try {
         final response = await Api.post(
-          url: 'https://ecommerce.thebhutanmarket.com/api/cart/update/$cartItemId',
+          url: '${AppSettings.ecommerceHostUrl}/api/cart/update/$cartItemId',
           useBaseUrl: false,
           useJson: true,
           parameter: {
@@ -229,7 +230,7 @@ class CartCubit extends Cubit<CartState> {
     // 1. DELETE /api/cart/items with payload {"cart_item_ids": [...]}
     try {
       final response = await Api.delete(
-        url: 'https://ecommerce.thebhutanmarket.com/api/cart/items',
+        url: '${AppSettings.ecommerceHostUrl}/api/cart/items',
         useBaseUrl: false,
         useJson: true,
         parameter: {
@@ -245,7 +246,7 @@ class CartCubit extends Cubit<CartState> {
     if (!success && cartItemIds.length == 1) {
       try {
         final response = await Api.delete(
-          url: 'https://ecommerce.thebhutanmarket.com/api/cart/remove/${cartItemIds.first}', 
+          url: '${AppSettings.ecommerceHostUrl}/api/cart/remove/${cartItemIds.first}', 
           useBaseUrl: false,
         );
         if (response['success'] == true || response['error'] == false) {

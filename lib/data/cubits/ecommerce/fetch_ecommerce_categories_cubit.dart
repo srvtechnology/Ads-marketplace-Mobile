@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/ecommerce/ecommerce_category_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchEcommerceCategoriesState {}
@@ -23,7 +24,7 @@ class FetchEcommerceCategoriesCubit extends Cubit<FetchEcommerceCategoriesState>
       emit(FetchEcommerceCategoriesInProgress());
       print('Fetching categories from API...');
       final Dio dio = Dio();
-      final response = await dio.get('https://ecommerce.thebhutanmarket.com/api/ecommerce/categories');
+      final response = await dio.get('${AppSettings.ecommerceHostUrl}/api/ecommerce/categories');
       print('Categories API Response: ${response.data}');
       
       if (response.statusCode == 200 && 

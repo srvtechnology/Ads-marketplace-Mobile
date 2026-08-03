@@ -8,6 +8,7 @@ import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/favorite/favorite_cubit.dart';
 import 'package:eClassify/data/cubits/report/update_report_items_list_cubit.dart';
 import 'package:eClassify/data/cubits/system/user_details.dart';
+import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/error_filter.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
@@ -71,7 +72,7 @@ class Api {
   static const String setNewPasswordApi = 'set-new-password-api';
 
   static const String _placeApiBaseUrl =
-      "https://ecommerce.thebhutanmarket.com/api/place/";
+      "${AppSettings.ecommerceHostUrl}/api/place/";
   static String placeApiKey = "key";
   static const String input = "input";
   static const String types = "types";

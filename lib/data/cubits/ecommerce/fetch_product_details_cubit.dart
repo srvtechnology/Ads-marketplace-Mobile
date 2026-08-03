@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/ecommerce/ecommerce_product_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchProductDetailsState {}
@@ -22,7 +23,7 @@ class FetchProductDetailsCubit extends Cubit<FetchProductDetailsState> {
     try {
       emit(FetchProductDetailsInProgress());
       final Dio dio = Dio();
-      final response = await dio.get('https://ecommerce.thebhutanmarket.com/api/ecommerce/products/$productId');
+      final response = await dio.get('${AppSettings.ecommerceHostUrl}/api/ecommerce/products/$productId');
       
       if (response.statusCode == 200 && 
           (response.data['success'] == true || response.data['error'] == false)) {

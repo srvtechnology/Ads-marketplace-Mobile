@@ -47,47 +47,151 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
+      ..addJavaScriptChannel(
+        'FlutterProductDetector',
+        onMessageReceived: (JavaScriptMessage message) {
+          if (!mounted) return;
+          final bool isProduct = message.message == 'true';
+          if (isProduct != isProductPage) {
+            setState(() {
+              isProductPage = isProduct;
+            });
+          }
+        },
+      )
       ..setNavigationDelegate(
         NavigationDelegate(
-          onProgress: (int progress) {
-            // Update loading bar.
-          },
+          onProgress: (int progress) {},
           onPageStarted: (String url) {
-             _checkIfProductPage(url);
+            _checkIfProductPage(url);
           },
           onPageFinished: (String url) {
-             _checkIfProductPage(url);
+            _checkIfProductPage(url);
             setState(() {
               isLoading = false;
             });
+            // Inject JS monitor for SPA-based brands (Snitch Next.js, Shopify)
+            _injectSpaProductMonitor();
           },
           onUrlChange: (UrlChange change) {
-             if (change.url != null) {
-               _checkIfProductPage(change.url!);
-             }
+            if (change.url != null) {
+              _checkIfProductPage(change.url!);
+            }
           },
         ),
       )
       ..loadRequest(Uri.parse(widget.url));
   }
 
+  /// Injects a JavaScript monitor into the page that intercepts SPA navigation
+  /// (history.pushState / history.replaceState used by Next.js and Shopify)
+  /// and continuously reports product page status back to Flutter via a named JS channel.
+  void _injectSpaProductMonitor() {
+    _controller.runJavaScript(r'''
+      (function() {
+        if (window.__koraMonitorActive) return;
+        window.__koraMonitorActive = true;
+
+        function isProductPageNow() {
+          var url = (window.location.href || '').toLowerCase();
+
+          // 1. Specific & general URL pattern checks
+          if (url.includes('/products/') || url.includes('/products') || url.includes('/product/') || url.includes('/product')) return true;
+          if (url.includes('/dp/') || url.includes('/gp/product/') || url.includes('/p/')) return true;
+          if (url.includes('myntra.com') && (url.includes('/buy') || /\/[0-9]{5,}/.test(url))) return true;
+          if (url.includes('firstcry.com') && url.includes('product-detail')) return true;
+          if (url.includes('zara.com') && (url.includes('-p0') || url.includes('.html'))) return true;
+
+          // 2. Metadata / Shopify object check
+          try {
+            if (window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product) return true;
+          } catch(e) {}
+
+          var ogType = document.querySelector('meta[property="og:type"]');
+          if (ogType && (ogType.content === 'product' || ogType.content === 'og:product')) return true;
+
+          // 3. DOM check: "ADD TO BAG" or "ADD TO CART" buttons on page
+          var btns = document.querySelectorAll('button, a, input[type="submit"], div[role="button"]');
+          for (var i = 0; i < Math.min(btns.length, 120); i++) {
+            var txt = (btns[i].innerText || btns[i].value || '').trim().toUpperCase();
+            if (txt === 'ADD TO BAG' || txt === 'ADD TO CART' || txt === 'BUY NOW' || txt.includes('ADD TO BAG') || txt.includes('ADD TO CART')) {
+              return true;
+            }
+          }
+
+          return false;
+        }
+
+        var lastReportedStatus = null;
+        function reportStatus() {
+          try {
+            var currentStatus = isProductPageNow() ? 'true' : 'false';
+            if (currentStatus !== lastReportedStatus) {
+              lastReportedStatus = currentStatus;
+              FlutterProductDetector.postMessage(currentStatus);
+            }
+          } catch(e) {}
+        }
+
+        // Report immediately
+        reportStatus();
+
+        // Intercept history.pushState & history.replaceState (Next.js & React SPA routing)
+        var _origPushState = history.pushState.bind(history);
+        history.pushState = function() {
+          _origPushState.apply(history, arguments);
+          setTimeout(reportStatus, 200);
+          setTimeout(reportStatus, 600);
+          setTimeout(reportStatus, 1200);
+        };
+
+        var _origReplaceState = history.replaceState.bind(history);
+        history.replaceState = function() {
+          _origReplaceState.apply(history, arguments);
+          setTimeout(reportStatus, 200);
+          setTimeout(reportStatus, 600);
+          setTimeout(reportStatus, 1200);
+        };
+
+        window.addEventListener('popstate', function() {
+          setTimeout(reportStatus, 200);
+          setTimeout(reportStatus, 600);
+        });
+
+        // Periodic check every 1 second to handle delayed dynamic DOM rendering
+        setInterval(reportStatus, 1000);
+      })();
+    ''').catchError((_) {});
+  }
+
   void _checkIfProductPage(String url) {
+    String lowerUrl = url.toLowerCase();
+    
     // Basic check for product pages across platforms
-    bool isAmazonProduct = url.contains('/dp/') || url.contains('/gp/product/');
-    bool isFlipkartProduct = url.contains('flipkart.com') && url.contains('/p/');
-    // Myntra product URLs usually contain a 5+ digit ID or end with /buy
-    bool isMyntraProduct = url.contains('myntra.com') && (url.contains('/buy') || RegExp(r'/[0-9]{5,}').hasMatch(url));
+    bool isAmazonProduct = lowerUrl.contains('/dp/') || lowerUrl.contains('/gp/product/');
+    bool isFlipkartProduct = lowerUrl.contains('flipkart.com') && lowerUrl.contains('/p/');
+    bool isMyntraProduct = lowerUrl.contains('myntra.com') && (lowerUrl.contains('/buy') || RegExp(r'/[0-9]{5,}').hasMatch(lowerUrl));
     
-    bool isDecathlonProduct = url.contains('decathlon.in') && url.contains('/p/');
-    bool isFirstcryProduct = url.contains('firstcry.com') && url.contains('product-detail');
-    bool isIkeaProduct = url.contains('ikea.com') && url.contains('/p/');
-    bool isSephoraProduct = url.contains('sephora.in') && url.contains('/product/');
-    bool isUniqloProduct = url.contains('uniqlo.com') && url.contains('/products/');
-    bool isZaraProduct = url.contains('zara.com') && (url.contains('-p0') || url.contains('.html'));
+    bool isDecathlonProduct = lowerUrl.contains('decathlon.in') && lowerUrl.contains('/p/');
+    bool isFirstcryProduct = lowerUrl.contains('firstcry.com') && lowerUrl.contains('product-detail');
+    bool isIkeaProduct = lowerUrl.contains('ikea.com') && lowerUrl.contains('/p/');
+    bool isSephoraProduct = lowerUrl.contains('sephora.in') && lowerUrl.contains('/product');
+    bool isUniqloProduct = lowerUrl.contains('uniqlo.com') && lowerUrl.contains('/products');
+    bool isZaraProduct = lowerUrl.contains('zara.com') && (lowerUrl.contains('-p0') || lowerUrl.contains('.html'));
     
+    // Snitch, Rare Rabbit, The Bear House product URL checks
+    bool isSnitchProduct = (lowerUrl.contains('snitch.com') || lowerUrl.contains('snitch.co.in')) && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isRareRabbitProduct = lowerUrl.contains('thehouseofrare.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isBearHouseProduct = lowerUrl.contains('thebearhouse.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    
+    // Generic fallback for product URLs
+    bool isGenericProduct = lowerUrl.contains('/products/') || lowerUrl.contains('/product/');
+
     bool isProduct = isAmazonProduct || isFlipkartProduct || isMyntraProduct || 
                      isDecathlonProduct || isFirstcryProduct || isIkeaProduct || 
-                     isSephoraProduct || isUniqloProduct || isZaraProduct;
+                     isSephoraProduct || isUniqloProduct || isZaraProduct ||
+                     isSnitchProduct || isRareRabbitProduct || isBearHouseProduct ||
+                     isGenericProduct;
     
     if (isProduct != isProductPage) {
       setState(() {
@@ -1799,6 +1903,372 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           return JSON.stringify(product);
         })();
       ''';
+    } else if (currentUrl.contains('snitch.com')) {
+      return r'''
+        (function() {
+          var product = {};
+
+          // 1. SHOPIFY NATIVE PRODUCT DATA (most reliable)
+          try {
+            var meta = window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product;
+            if (meta) {
+              product.title = (meta.vendor ? meta.vendor + ' ' : '') + (meta.title || '');
+              product.brand = 'Snitch';
+              // price from selected variant
+              var selVar = null;
+              if (meta.variants && meta.variants.length > 0) {
+                selVar = meta.variants[0];
+                if (window.__st && window.__st.v) {
+                  var selVarId = window.__st.v;
+                  for (var vi = 0; vi < meta.variants.length; vi++) {
+                    if (meta.variants[vi].id == selVarId) { selVar = meta.variants[vi]; break; }
+                  }
+                }
+              }
+              if (selVar && selVar.price) {
+                product.price = Math.round(selVar.price / 100).toString();
+              }
+              // variants
+              var varParts = [];
+              if (selVar) {
+                if (selVar.option1 && selVar.option1 !== 'Default Title') varParts.push(selVar.option1);
+                if (selVar.option2 && selVar.option2 !== 'Default Title') varParts.push(selVar.option2);
+                if (selVar.option3 && selVar.option3 !== 'Default Title') varParts.push(selVar.option3);
+              }
+              product.variants = varParts.join(', ');
+            }
+          } catch(_) {}
+
+          // 2. JSON-LD STRUCTURED DATA
+          if (!product.title || !product.price) {
+            try {
+              var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var i = 0; i < scripts.length; i++) {
+                var data = JSON.parse(scripts[i].innerText);
+                var items = Array.isArray(data) ? data : [data];
+                for (var j = 0; j < items.length; j++) {
+                  var item = items[j];
+                  if (item['@type'] === 'Product' || (item.offers && item.name)) {
+                    if (!product.title && item.name) {
+                      product.title = item.name;
+                    }
+                    if (!product.price && item.offers) {
+                      var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+                      var p = offer.price || offer.lowPrice;
+                      if (p) product.price = String(p).replace(/[^0-9]/g, '');
+                    }
+                    if (!product.image && item.image) {
+                      product.image = Array.isArray(item.image) ? item.image[0] : item.image;
+                    }
+                    break;
+                  }
+                }
+              }
+            } catch(_) {}
+          }
+
+          // 3. DOM FALLBACK
+          if (!product.title) {
+            var titleEl = document.querySelector('h1.product__title') ||
+                          document.querySelector('.product__title h1') ||
+                          document.querySelector('h1.product-title') ||
+                          document.querySelector('h1');
+            product.title = titleEl ? titleEl.innerText.trim() : document.title.replace(/- Snitch.*/i, '').trim();
+          }
+
+          if (!product.price) {
+            var priceEl = document.querySelector('.price-item--sale') ||
+                          document.querySelector('.price-item--regular') ||
+                          document.querySelector('[class*="price-item"]') ||
+                          document.querySelector('.product__price') ||
+                          document.querySelector('[class*="product-price"]');
+            if (priceEl) {
+              var m = priceEl.innerText.match(/(?:Rs\.?|₹|INR)\s*([0-9,]+)/i) || priceEl.innerText.match(/([0-9,]{3,})/);
+              if (m) product.price = m[1].replace(/[^0-9]/g, '');
+            }
+          }
+          if (!product.price) {
+            var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
+            if (ogPrice && ogPrice.content) product.price = ogPrice.content.replace(/[^0-9]/g, '');
+          }
+
+          if (!product.variants) {
+            var variants = [];
+            var colorEl = document.querySelector('[class*="swatch"][class*="active"], [class*="color"][class*="selected"], [class*="colour"][class*="active"]');
+            if (colorEl) {
+              var c = colorEl.getAttribute('data-value') || colorEl.getAttribute('title') || colorEl.innerText.trim();
+              if (c) variants.push('Colour: ' + c.split('\n')[0].trim());
+            }
+            var sizeEl = document.querySelector('[class*="size"][class*="active"], [class*="size"][aria-pressed="true"], button[class*="size"][class*="selected"]');
+            if (!sizeEl) {
+              sizeEl = document.querySelector('input[name*="size"]:checked + label, .variant-button--active');
+            }
+            if (sizeEl) {
+              var s = sizeEl.getAttribute('data-value') || sizeEl.innerText.trim();
+              if (s && s.length < 15) variants.push('Size: ' + s);
+            }
+            product.variants = variants.join(', ');
+          }
+
+          if (!product.image) {
+            var ogImage = document.querySelector('meta[property="og:image"]');
+            product.image = (ogImage && ogImage.content) ? ogImage.content : '';
+          }
+          if (!product.image) {
+            var imgEl = document.querySelector('.product__media img') ||
+                        document.querySelector('.product-single__photo img') ||
+                        document.querySelector('[class*="product-image"] img') ||
+                        document.querySelector('img[src*="snitch"]');
+            if (imgEl) product.image = imgEl.src;
+          }
+
+          product.url = window.location.href;
+          if (!product.brand) product.brand = 'Snitch';
+          return JSON.stringify(product);
+        })();
+      ''';
+    } else if (currentUrl.contains('thehouseofrare.com')) {
+      return r'''
+        (function() {
+          var product = {};
+
+          // 1. SHOPIFY NATIVE PRODUCT DATA (most reliable)
+          try {
+            var meta = window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product;
+            if (meta) {
+              product.title = (meta.vendor ? meta.vendor + ' ' : '') + (meta.title || '');
+              product.brand = 'Rare Rabbit';
+              var selVar = null;
+              if (meta.variants && meta.variants.length > 0) {
+                selVar = meta.variants[0];
+                if (window.__st && window.__st.v) {
+                  var selVarId = window.__st.v;
+                  for (var vi = 0; vi < meta.variants.length; vi++) {
+                    if (meta.variants[vi].id == selVarId) { selVar = meta.variants[vi]; break; }
+                  }
+                }
+              }
+              if (selVar && selVar.price) {
+                product.price = Math.round(selVar.price / 100).toString();
+              }
+              var varParts = [];
+              if (selVar) {
+                if (selVar.option1 && selVar.option1 !== 'Default Title') varParts.push(selVar.option1);
+                if (selVar.option2 && selVar.option2 !== 'Default Title') varParts.push(selVar.option2);
+                if (selVar.option3 && selVar.option3 !== 'Default Title') varParts.push(selVar.option3);
+              }
+              product.variants = varParts.join(', ');
+            }
+          } catch(_) {}
+
+          // 2. JSON-LD STRUCTURED DATA
+          if (!product.title || !product.price) {
+            try {
+              var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var i = 0; i < scripts.length; i++) {
+                var data = JSON.parse(scripts[i].innerText);
+                var items = Array.isArray(data) ? data : [data];
+                for (var j = 0; j < items.length; j++) {
+                  var item = items[j];
+                  if (item['@type'] === 'Product' || (item.offers && item.name)) {
+                    if (!product.title && item.name) product.title = item.name;
+                    if (!product.price && item.offers) {
+                      var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+                      var p = offer.price || offer.lowPrice;
+                      if (p) product.price = String(p).replace(/[^0-9]/g, '');
+                    }
+                    if (!product.image && item.image) {
+                      product.image = Array.isArray(item.image) ? item.image[0] : item.image;
+                    }
+                    break;
+                  }
+                }
+              }
+            } catch(_) {}
+          }
+
+          // 3. DOM FALLBACK
+          if (!product.title) {
+            var titleEl = document.querySelector('h1.product__title') ||
+                          document.querySelector('.product__title h1') ||
+                          document.querySelector('h1.product-title') ||
+                          document.querySelector('h1');
+            product.title = titleEl ? titleEl.innerText.trim() : document.title.replace(/- Rare Rabbit.*/i, '').replace(/- The House of Rare.*/i, '').trim();
+          }
+
+          if (!product.price) {
+            var priceEl = document.querySelector('.price-item--sale') ||
+                          document.querySelector('.price-item--regular') ||
+                          document.querySelector('[class*="price-item"]') ||
+                          document.querySelector('.product__price') ||
+                          document.querySelector('[class*="product-price"]');
+            if (priceEl) {
+              var m = priceEl.innerText.match(/(?:Rs\.?|₹|INR)\s*([0-9,]+)/i) || priceEl.innerText.match(/([0-9,]{3,})/);
+              if (m) product.price = m[1].replace(/[^0-9]/g, '');
+            }
+          }
+          if (!product.price) {
+            var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
+            if (ogPrice && ogPrice.content) product.price = ogPrice.content.replace(/[^0-9]/g, '');
+          }
+
+          if (!product.variants) {
+            var variants = [];
+            var colorEl = document.querySelector('[class*="swatch"][class*="active"], [class*="color"][class*="selected"], [class*="colour"][class*="active"]');
+            if (colorEl) {
+              var c = colorEl.getAttribute('data-value') || colorEl.getAttribute('title') || colorEl.innerText.trim();
+              if (c) variants.push('Colour: ' + c.split('\n')[0].trim());
+            }
+            var sizeEl = document.querySelector('[class*="size"][class*="active"], [class*="size"][aria-pressed="true"], button[class*="size"][class*="selected"]');
+            if (!sizeEl) {
+              sizeEl = document.querySelector('input[name*="size"]:checked + label, .variant-button--active');
+            }
+            if (sizeEl) {
+              var s = sizeEl.getAttribute('data-value') || sizeEl.innerText.trim();
+              if (s && s.length < 15) variants.push('Size: ' + s);
+            }
+            product.variants = variants.join(', ');
+          }
+
+          if (!product.image) {
+            var ogImage = document.querySelector('meta[property="og:image"]');
+            product.image = (ogImage && ogImage.content) ? ogImage.content : '';
+          }
+          if (!product.image) {
+            var imgEl = document.querySelector('.product__media img') ||
+                        document.querySelector('.product-single__photo img') ||
+                        document.querySelector('[class*="product-image"] img') ||
+                        document.querySelector('img[src*="thehouseofrare"]') ||
+                        document.querySelector('img[src*="cdn.shopify"]');
+            if (imgEl) product.image = imgEl.src;
+          }
+
+          product.url = window.location.href;
+          if (!product.brand) product.brand = 'Rare Rabbit';
+          return JSON.stringify(product);
+        })();
+      ''';
+    } else if (currentUrl.contains('thebearhouse.com')) {
+      return r'''
+        (function() {
+          var product = {};
+
+          // 1. SHOPIFY NATIVE PRODUCT DATA (most reliable)
+          try {
+            var meta = window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product;
+            if (meta) {
+              product.title = (meta.vendor ? meta.vendor + ' ' : '') + (meta.title || '');
+              product.brand = 'The Bear House';
+              var selVar = null;
+              if (meta.variants && meta.variants.length > 0) {
+                selVar = meta.variants[0];
+                if (window.__st && window.__st.v) {
+                  var selVarId = window.__st.v;
+                  for (var vi = 0; vi < meta.variants.length; vi++) {
+                    if (meta.variants[vi].id == selVarId) { selVar = meta.variants[vi]; break; }
+                  }
+                }
+              }
+              if (selVar && selVar.price) {
+                product.price = Math.round(selVar.price / 100).toString();
+              }
+              var varParts = [];
+              if (selVar) {
+                if (selVar.option1 && selVar.option1 !== 'Default Title') varParts.push(selVar.option1);
+                if (selVar.option2 && selVar.option2 !== 'Default Title') varParts.push(selVar.option2);
+                if (selVar.option3 && selVar.option3 !== 'Default Title') varParts.push(selVar.option3);
+              }
+              product.variants = varParts.join(', ');
+            }
+          } catch(_) {}
+
+          // 2. JSON-LD STRUCTURED DATA
+          if (!product.title || !product.price) {
+            try {
+              var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var i = 0; i < scripts.length; i++) {
+                var data = JSON.parse(scripts[i].innerText);
+                var items = Array.isArray(data) ? data : [data];
+                for (var j = 0; j < items.length; j++) {
+                  var item = items[j];
+                  if (item['@type'] === 'Product' || (item.offers && item.name)) {
+                    if (!product.title && item.name) product.title = item.name;
+                    if (!product.price && item.offers) {
+                      var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+                      var p = offer.price || offer.lowPrice;
+                      if (p) product.price = String(p).replace(/[^0-9]/g, '');
+                    }
+                    if (!product.image && item.image) {
+                      product.image = Array.isArray(item.image) ? item.image[0] : item.image;
+                    }
+                    break;
+                  }
+                }
+              }
+            } catch(_) {}
+          }
+
+          // 3. DOM FALLBACK
+          if (!product.title) {
+            var titleEl = document.querySelector('h1.product__title') ||
+                          document.querySelector('.product__title h1') ||
+                          document.querySelector('h1.product-title') ||
+                          document.querySelector('h1');
+            product.title = titleEl ? titleEl.innerText.trim() : document.title.replace(/- The Bear House.*/i, '').trim();
+          }
+
+          if (!product.price) {
+            var priceEl = document.querySelector('.price-item--sale') ||
+                          document.querySelector('.price-item--regular') ||
+                          document.querySelector('[class*="price-item"]') ||
+                          document.querySelector('.product__price') ||
+                          document.querySelector('[class*="product-price"]');
+            if (priceEl) {
+              var m = priceEl.innerText.match(/(?:Rs\.?|₹|INR)\s*([0-9,]+)/i) || priceEl.innerText.match(/([0-9,]{3,})/);
+              if (m) product.price = m[1].replace(/[^0-9]/g, '');
+            }
+          }
+          if (!product.price) {
+            var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
+            if (ogPrice && ogPrice.content) product.price = ogPrice.content.replace(/[^0-9]/g, '');
+          }
+
+          if (!product.variants) {
+            var variants = [];
+            var colorEl = document.querySelector('[class*="swatch"][class*="active"], [class*="color"][class*="selected"], [class*="colour"][class*="active"]');
+            if (colorEl) {
+              var c = colorEl.getAttribute('data-value') || colorEl.getAttribute('title') || colorEl.innerText.trim();
+              if (c) variants.push('Colour: ' + c.split('\n')[0].trim());
+            }
+            var sizeEl = document.querySelector('[class*="size"][class*="active"], [class*="size"][aria-pressed="true"], button[class*="size"][class*="selected"]');
+            if (!sizeEl) {
+              sizeEl = document.querySelector('input[name*="size"]:checked + label, .variant-button--active');
+            }
+            if (sizeEl) {
+              var s = sizeEl.getAttribute('data-value') || sizeEl.innerText.trim();
+              if (s && s.length < 15) variants.push('Size: ' + s);
+            }
+            product.variants = variants.join(', ');
+          }
+
+          if (!product.image) {
+            var ogImage = document.querySelector('meta[property="og:image"]');
+            product.image = (ogImage && ogImage.content) ? ogImage.content : '';
+          }
+          if (!product.image) {
+            var imgEl = document.querySelector('.product__media img') ||
+                        document.querySelector('.product-single__photo img') ||
+                        document.querySelector('[class*="product-image"] img') ||
+                        document.querySelector('img[src*="thebearhouse"]') ||
+                        document.querySelector('img[src*="cdn.shopify"]');
+            if (imgEl) product.image = imgEl.src;
+          }
+
+          product.url = window.location.href;
+          if (!product.brand) product.brand = 'The Bear House';
+          return JSON.stringify(product);
+        })();
+      ''';
     } else {
       return r'''
         (function() {
@@ -1934,7 +2404,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.color.forthColor, // Global theme color
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -1942,7 +2412,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                 onPressed: () async {
                   final String? currentUrl = await _controller.currentUrl();
                   if (mounted) {
-                    if (currentUrl != null && (currentUrl.contains('myntra.com') || currentUrl.contains('firstcry.com') || currentUrl.contains('decathlon.in') || currentUrl.contains('sephora.in') || currentUrl.contains('uniqlo.com') || currentUrl.contains('zara.com'))) {
+                    if (currentUrl != null && (currentUrl.contains('myntra.com') || currentUrl.contains('firstcry.com') || currentUrl.contains('decathlon.in') || currentUrl.contains('sephora.in') || currentUrl.contains('uniqlo.com') || currentUrl.contains('zara.com') || currentUrl.contains('snitch.com') || currentUrl.contains('thehouseofrare.com') || currentUrl.contains('thebearhouse.com'))) {
                       _scrapeAndShowSizeColourDialog(context);
                     } else if (currentUrl != null && currentUrl.contains('ikea.com')) {
                       _scrapeProductDetails(context);
@@ -1956,13 +2426,26 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                   children: [
                     Icon(Icons.shopping_cart_outlined, color: context.color.buttonColor), // Theme icon color
                     const SizedBox(width: 8),
-                    Text(
-                      "Import to Bhutan",
-                      style: TextStyle(
-                        color: context.color.buttonColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Order via Kora",
+                          style: TextStyle(
+                            color: context.color.buttonColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          "login does not required",
+                          style: TextStyle(
+                            color: context.color.buttonColor.withValues(alpha: 0.85),
+                            fontSize: 11,
+                            fontWeight: FontWeight.normal,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

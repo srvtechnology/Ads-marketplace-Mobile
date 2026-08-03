@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:eClassify/data/model/ecommerce/ecommerce_product_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class FetchEcommerceProductsState {}
@@ -54,7 +55,7 @@ class FetchEcommerceProductsCubit extends Cubit<FetchEcommerceProductsState> {
       
       final Dio dio = Dio();
       final response = await dio.get(
-        'https://ecommerce.thebhutanmarket.com/api/ecommerce/products',
+        '${AppSettings.ecommerceHostUrl}/api/ecommerce/products',
         queryParameters: {
           if (platformId != null) 'platform_id': platformId,
           if (categoryId != null) 'ecommerce_category_id': categoryId,
@@ -92,7 +93,7 @@ class FetchEcommerceProductsCubit extends Cubit<FetchEcommerceProductsState> {
         
         final Dio dio = Dio();
         final response = await dio.get(
-          'https://ecommerce.thebhutanmarket.com/api/ecommerce/products',
+          '${AppSettings.ecommerceHostUrl}/api/ecommerce/products',
           queryParameters: {
             if (currentPlatformId != null) 'platform_id': currentPlatformId,
             if (currentCategoryId != null) 'ecommerce_category_id': currentCategoryId,

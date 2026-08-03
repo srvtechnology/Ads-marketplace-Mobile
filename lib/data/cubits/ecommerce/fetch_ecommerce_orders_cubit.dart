@@ -1,4 +1,5 @@
 import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
+import 'package:eClassify/settings.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -28,7 +29,7 @@ class FetchEcommerceOrdersCubit extends Cubit<FetchEcommerceOrdersState> {
       emit(FetchEcommerceOrdersInProgress());
 
       final result = await Api.get(
-        url: 'https://ecommerce.thebhutanmarket.com/api/orders',
+        url: '${AppSettings.ecommerceHostUrl}/api/orders',
         useBaseUrl: false,
       );
 
@@ -53,7 +54,7 @@ class FetchEcommerceOrdersCubit extends Cubit<FetchEcommerceOrdersState> {
   Future<bool> cancelOrder(int orderId, String remarks) async {
     try {
       final result = await Api.post(
-        url: 'https://ecommerce.thebhutanmarket.com/api/orders/$orderId/cancel',
+        url: '${AppSettings.ecommerceHostUrl}/api/orders/$orderId/cancel',
         useBaseUrl: false,
         useJson: true,
         parameter: {
