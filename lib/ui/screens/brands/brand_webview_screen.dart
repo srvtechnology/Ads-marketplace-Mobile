@@ -8,6 +8,7 @@ import 'package:eClassify/app/routes.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
 import 'package:eClassify/utils/helper_utils.dart';
+import 'package:eClassify/ui/screens/brands/coming_soon_screen.dart';
 
 class BrandWebViewScreen extends StatefulWidget {
   final String title;
@@ -20,6 +21,16 @@ class BrandWebViewScreen extends StatefulWidget {
 
   static Route route(RouteSettings routeSettings) {
     Map arguments = routeSettings.arguments as Map;
+    if (arguments['isComingSoon'] == true ||
+        arguments['isComingSoon'] == 'true' ||
+        arguments['url'] == 'coming_soon') {
+      return MaterialPageRoute(
+        builder: (_) => ComingSoonScreen(
+          title: arguments['title'] as String,
+          image: arguments['image'] as String?,
+        ),
+      );
+    }
     return MaterialPageRoute(
       builder: (_) => BrandWebViewScreen(
         title: arguments['title'] as String,
@@ -2438,7 +2449,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                           ),
                         ),
                         Text(
-                          "login does not required",
+                          "login not required",
                           style: TextStyle(
                             color: context.color.buttonColor.withValues(alpha: 0.85),
                             fontSize: 11,

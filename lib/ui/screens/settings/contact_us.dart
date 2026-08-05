@@ -79,7 +79,13 @@ class ContactUsState extends State<ContactUs> {
                 customTile(context, title: "callBtnLbl".translate(context),
                     onTap: () async {
                   var number1 = state.companyData.companyTel1;
+                  if (number1 == "7001769472" || number1 == null || number1.isEmpty) {
+                    number1 = "+975 17110547";
+                  }
                   var number2 = state.companyData.companyTel2;
+                  if (number2 == "7001769472") {
+                    number2 = "+975 17110547";
+                  }
 
                   UiUtils.showBlurredDialoge(context,
                       dialoge: BlurredDialogBox(
@@ -156,8 +162,9 @@ class ContactUsState extends State<ContactUs> {
   }
 
   Widget contentWidget(ProfileSettingFetchSuccess state, BuildContext context) {
+    String htmlData = state.data.toString().replaceAll("7001769472", "+975 17110547");
     return HtmlWidget(
-      state.data.toString(),
+      htmlData,
       onTapUrl: (url) =>
           launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       customStylesBuilder: (element) {

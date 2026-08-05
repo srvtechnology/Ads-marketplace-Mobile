@@ -38,7 +38,9 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
   late TextEditingController _billingLandmarkController;
   late TextEditingController _remarksController;
 
-  String _paymentMode = 'COD'; // Default to COD
+  // Cash on Delivery (COD) option commented out and hidden. Default payment mode set to ONLINE.
+  // String _paymentMode = 'COD';
+  String _paymentMode = 'ONLINE';
   bool _isBillingSameAsShipping = true;
 
   @override
@@ -298,6 +300,8 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
       ),
       child: Column(
         children: [
+          // Cash on Delivery (COD) option commented out and hidden
+          /*
           RadioListTile<String>(
             title: Text('Cash on Delivery (COD)', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
             value: 'COD',
@@ -306,6 +310,7 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
             onChanged: (value) => setState(() => _paymentMode = value!),
           ),
           Divider(height: 1, color: context.color.borderColor),
+          */
           RadioListTile<String>(
             title: Text('Pay Online', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
             value: 'ONLINE',

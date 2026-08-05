@@ -1,5 +1,4 @@
 import 'package:eClassify/app/routes.dart';
-import 'package:eClassify/ui/screens/item/add_item_screen/widgets/category.dart';
 
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/custom_silver_grid_delegate.dart';
@@ -73,21 +72,27 @@ class _BrandListScreenState extends State<BrandListScreen> {
         'image': 'assets/brands_logo/firstcry.png',
         'url': 'https://www.firstcry.com/',
       },
-      // {
-      //   'name': 'Snitch',
-      //   'image': 'assets/brands_logo/Snitch.png',
-      //   'url': 'https://www.snitch.com/',
-      // },
-      // {
-      //   'name': 'Rare Rabbit',
-      //   'image': 'assets/brands_logo/rare_rabbit.jpeg',
-      //   'url': 'https://thehouseofrare.com/',
-      // },
-      // {
-      //   'name': 'The Bear House',
-      //   'image': 'assets/brands_logo/the_bear houses.jpeg',
-      //   'url': 'https://thebearhouse.com/',
-      // },
+      {
+        'name': 'Snitch',
+        'image': 'assets/brands_logo/Snitch.png',
+        'url': 'https://www.snitch.com/',
+      },
+      {
+        'name': 'Rare Rabbit',
+        'image': 'assets/brands_logo/rare_rabbit.jpeg',
+        'url': 'https://thehouseofrare.com/',
+      },
+      {
+        'name': 'The Bear House',
+        'image': 'assets/brands_logo/the_bear houses.jpeg',
+        'url': 'https://thebearhouse.com/',
+      },
+      {
+        'name': 'H&M',
+        'image': 'assets/brands_logo/hm.png',
+        'url': 'coming_soon',
+        'isComingSoon': 'true',
+      },
     ];
 
     return AnnotatedRegion(
@@ -116,14 +121,25 @@ class _BrandListScreenState extends State<BrandListScreen> {
             final brand = staticBrands[index];
             return GestureDetector(
               onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  Routes.brandWebViewScreen,
-                  arguments: {
-                    'title': brand['name'],
-                    'url': brand['url'],
-                  },
-                );
+                if (brand['isComingSoon'] == 'true' || brand['url'] == 'coming_soon') {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.comingSoonScreen,
+                    arguments: {
+                      'title': brand['name'],
+                      'image': brand['image'],
+                    },
+                  );
+                } else {
+                  Navigator.pushNamed(
+                    context,
+                    Routes.brandWebViewScreen,
+                    arguments: {
+                      'title': brand['name'],
+                      'url': brand['url'],
+                    },
+                  );
+                }
               },
               child: Container(
                 decoration: BoxDecoration(

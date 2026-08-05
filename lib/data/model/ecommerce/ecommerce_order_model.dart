@@ -68,6 +68,7 @@ class EcommerceOrderModel {
   final int? id;
   final int? customerId;
   final String? orderId;
+  final String? deliveryOtp;
   final String? name;
   final String? email;
   final String? countryCode;
@@ -94,6 +95,7 @@ class EcommerceOrderModel {
     this.id,
     this.customerId,
     this.orderId,
+    this.deliveryOtp,
     this.name,
     this.email,
     this.countryCode,
@@ -122,6 +124,7 @@ class EcommerceOrderModel {
       id: json['id'],
       customerId: json['customer_id'],
       orderId: json['order_id']?.toString() ?? json['order_no']?.toString(),
+      deliveryOtp: json['delivery_otp']?.toString() ?? json['otp']?.toString(),
       name: json['name'],
       email: json['email'],
       countryCode: json['country_code']?.toString(),
@@ -158,6 +161,7 @@ class EcommerceOrderModel {
       'id': id,
       'customer_id': customerId,
       'order_id': orderId,
+      'delivery_otp': deliveryOtp,
       'name': name,
       'email': email,
       'country_code': countryCode,

@@ -2,6 +2,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/category/fetch_category_cubit.dart';
 import 'package:eClassify/data/cubits/chat/blocked_users_list_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
@@ -152,7 +153,7 @@ class HomeScreenState extends State<HomeScreen>
       child: Scaffold(
         appBar: AppBar(
           elevation: 0,
-          leadingWidth: double.maxFinite,
+          leadingWidth: 180,
           leading: Padding(
             padding: EdgeInsetsDirectional.only(
                 start: sidePadding, end: sidePadding),
@@ -164,6 +165,21 @@ class HomeScreenState extends State<HomeScreen>
             // TODO: Location feature commented out
             // child: const LocationWidget()
           ),
+          actions: [
+            Padding(
+              padding: EdgeInsetsDirectional.only(end: sidePadding),
+              child: IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.contactUs);
+                },
+                icon: Icon(
+                  Icons.support_agent,
+                  color: context.color.textColorDark,
+                  size: 28,
+                ),
+              ),
+            ),
+          ],
           backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         ),
         backgroundColor: context.color.primaryColor,

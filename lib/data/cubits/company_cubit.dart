@@ -44,10 +44,15 @@ class CompanyCubit extends Cubit<CompanyState> {
       if (!response[Api.error]) {
         var data = response['data'];
 
+        var tel1 = data['company_tel1'];
+        if (tel1 == "7001769472") {
+          tel1 = "+975 17110547";
+        }
+
         companyData = Company(
             companyEmail: data['company_email'],
             companyName: data['company_name'],
-            companyTel1: data['company_tel1'],
+            companyTel1: tel1,
             companyTel2: data['company_tel2']);
       } else {
         throw CustomException(response[Api.message]);

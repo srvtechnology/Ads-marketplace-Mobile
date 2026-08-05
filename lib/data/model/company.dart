@@ -19,7 +19,7 @@ class Company {
 
     companyEmail = json['company_email'];
 
-    companyTel1 = json['company_tel1'];
+    companyTel1 = json['company_tel1'] == "7001769472" ? "+975 17110547" : json['company_tel1'];
     companyTel2 = json['company_tel2'];
   }
 

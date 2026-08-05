@@ -56,21 +56,27 @@ class BrandWidgetHome extends StatelessWidget {
         'image': 'assets/brands_logo/firstcry.png',
         'url': 'https://www.firstcry.com/',
       },
-      // {
-      //   'name': 'Snitch',
-      //   'image': 'assets/brands_logo/Snitch.png',
-      //   'url': 'https://www.snitch.com/',
-      // },
-      // {
-      //   'name': 'Rare Rabbit',
-      //   'image': 'assets/brands_logo/rare_rabbit.jpeg',
-      //   'url': 'https://thehouseofrare.com/',
-      // },
-      // {
-      //   'name': 'The Bear House',
-      //   'image': 'assets/brands_logo/the_bear houses.jpeg',
-      //   'url': 'https://thebearhouse.com/',
-      // },
+      {
+        'name': 'Snitch',
+        'image': 'assets/brands_logo/Snitch.png',
+        'url': 'https://www.snitch.com/',
+      },
+      {
+        'name': 'Rare Rabbit',
+        'image': 'assets/brands_logo/rare_rabbit.jpeg',
+        'url': 'https://thehouseofrare.com/',
+      },
+      {
+        'name': 'The Bear House',
+        'image': 'assets/brands_logo/the_bear houses.jpeg',
+        'url': 'https://thebearhouse.com/',
+      },
+      {
+        'name': 'H&M',
+        'image': 'assets/brands_logo/hm.png',
+        'url': 'coming_soon',
+        'isComingSoon': 'true',
+      },
     ];
 
     return Column(
@@ -100,14 +106,25 @@ class BrandWidgetHome extends StatelessWidget {
                 title: brand['name']!,
                 url: brand['image']!,
                 onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    Routes.brandWebViewScreen,
-                    arguments: {
-                      'title': brand['name'],
-                      'url': brand['url'],
-                    },
-                  );
+                  if (brand['isComingSoon'] == 'true' || brand['url'] == 'coming_soon') {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.comingSoonScreen,
+                      arguments: {
+                        'title': brand['name'],
+                        'image': brand['image'],
+                      },
+                    );
+                  } else {
+                    Navigator.pushNamed(
+                      context,
+                      Routes.brandWebViewScreen,
+                      arguments: {
+                        'title': brand['name'],
+                        'url': brand['url'],
+                      },
+                    );
+                  }
                 },
               );
             },
