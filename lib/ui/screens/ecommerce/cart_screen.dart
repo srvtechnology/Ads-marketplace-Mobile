@@ -64,6 +64,7 @@ class _CartScreenState extends State<CartScreen> {
             String orderId = breakdown?.cartItemId != 0 ? breakdown?.cartItemId.toString() ?? item.id.toString() : item.id.toString();
             String placedOn = breakdown?.placedOn ?? item.importedDate ?? '2026-07-24';
             String platform = breakdown?.platform ?? item.platform ?? item.product?.description ?? 'Amazon';
+            String variantsStr = (breakdown?.variants != null && breakdown!.variants!.isNotEmpty) ? breakdown.variants! : item.displayVariants;
 
             return Container(
               decoration: BoxDecoration(
@@ -194,6 +195,16 @@ class _CartScreenState extends State<CartScreen> {
                                     color: context.color.textDefaultColor,
                                   ),
                                 ),
+                                if (variantsStr.isNotEmpty) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    variantsStr,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: context.color.textLightColor,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 4),
                                 Text(
                                   'Qty: ${breakdown?.quantity ?? item.qty}',
@@ -480,6 +491,18 @@ class _CartScreenState extends State<CartScreen> {
                                         color: context.color.textDefaultColor,
                                       ),
                                     ),
+                                    if (item.displayVariants.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        item.displayVariants,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: context.color.textLightColor,
+                                        ),
+                                      ),
+                                    ],
                                     const SizedBox(height: 4),
                                     Text(
                                       '${cart.currency}${itemPrice.toStringAsFixed(2)}',

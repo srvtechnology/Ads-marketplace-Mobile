@@ -9,6 +9,7 @@ class EcommerceCartItemBreakdownModel {
   final String image;
   final int quantity;
   final String currency;
+  final String? variants;
   final double itemTotal;
   final double serviceCharges;
   final double deliveryCharges;
@@ -25,6 +26,7 @@ class EcommerceCartItemBreakdownModel {
     required this.image,
     required this.quantity,
     required this.currency,
+    this.variants,
     required this.itemTotal,
     required this.serviceCharges,
     required this.deliveryCharges,
@@ -44,6 +46,7 @@ class EcommerceCartItemBreakdownModel {
       image: json['image']?.toString() ?? '',
       quantity: json['quantity'] ?? 1,
       currency: json['currency']?.toString() ?? 'Nu. ',
+      variants: json['variants']?.toString() ?? json['variant_details']?.toString(),
       itemTotal: double.tryParse(payment['item_total']?.toString() ?? '0') ?? 0.0,
       serviceCharges: double.tryParse(payment['service_charges']?.toString() ?? '0') ?? 0.0,
       deliveryCharges: double.tryParse(payment['delivery_charges']?.toString() ?? '0') ?? 0.0,
@@ -64,6 +67,7 @@ class EcommerceCartItemModel {
   final bool isSelected;
   final EcommerceProductModel? product;
   final EcommerceVariantModel? variant;
+  final String? variants;
   final String? platform;
   final String? url;
   final String? importedDate;
@@ -78,10 +82,19 @@ class EcommerceCartItemModel {
     this.isSelected = true,
     this.product,
     this.variant,
+    this.variants,
     this.platform,
     this.url,
     this.importedDate,
   });
+
+  String get displayVariants {
+    final String? v = variants ?? variant?.variantName;
+    if (v != null && v.trim().isNotEmpty) {
+      return v.trim();
+    }
+    return '';
+  }
 
   factory EcommerceCartItemModel.fromJson(Map<String, dynamic> json) {
     return EcommerceCartItemModel(
@@ -113,6 +126,7 @@ class EcommerceCartItemModel {
               price: double.tryParse((json['price'] ?? json['unit_price'] ?? 0).toString()) ?? 0.0,
               variantName: json['variants'].toString(),
             ) : null),
+      variants: json['variants']?.toString() ?? json['variant_details']?.toString(),
       platform: json['platform']?.toString(),
       url: json['url']?.toString(),
       importedDate: json['imported_date']?.toString(),

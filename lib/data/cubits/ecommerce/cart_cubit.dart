@@ -150,6 +150,7 @@ class CartCubit extends Cubit<CartState> {
             isSelected: isSelected ?? item.isSelected,
             product: item.product,
             variant: item.variant,
+            variants: item.variants,
             platform: item.platform,
             url: item.url,
             importedDate: item.importedDate,

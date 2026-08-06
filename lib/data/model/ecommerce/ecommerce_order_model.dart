@@ -232,6 +232,14 @@ class EcommerceOrderItemModel {
     this.variant,
   });
 
+  String? get displayVariantDetails {
+    final String? v = variantDetails ?? variant?.variantName;
+    if (v != null && v.trim().isNotEmpty && v.trim().toLowerCase() != 'null') {
+      return v.trim();
+    }
+    return null;
+  }
+
   factory EcommerceOrderItemModel.fromJson(Map<String, dynamic> json) {
     String? itemTitle = json['title']?.toString() ?? json['name']?.toString();
     String? itemImage = json['image']?.toString() ?? json['image_url']?.toString();
@@ -239,12 +247,21 @@ class EcommerceOrderItemModel {
         ? json['quantity']
         : (json['qty'] is String ? int.tryParse(json['qty']) ?? 1 : json['qty'] ?? 1);
 
+    String? vDetails = json['variant_details']?.toString() ?? 
+        json['variants']?.toString() ?? 
+        json['variant_name']?.toString() ??
+        (json['variant'] is Map ? (json['variant']['variant_name'] ?? json['variant']['name'])?.toString() : null);
+
+    if (vDetails?.trim().toLowerCase() == 'null' || vDetails?.trim().isEmpty == true) {
+      vDetails = null;
+    }
+
     return EcommerceOrderItemModel(
       id: json['id'] ?? json['item_id'],
       itemId: json['item_id'] ?? json['id'],
       orderId: json['order_id'],
       productId: json['product_id'],
-      productVariantId: json['product_varient_id'],
+      productVariantId: json['product_varient_id'] ?? json['product_variant_id'],
       title: itemTitle,
       platform: json['platform']?.toString(),
       sourceUrl: json['source_url']?.toString(),
@@ -252,7 +269,7 @@ class EcommerceOrderItemModel {
       price: (json['unit_price'] ?? json['price'])?.toString(),
       qty: quantity,
       subtotal: (json['final_amount'] ?? json['subtotal'])?.toString(),
-      variantDetails: json['variant_details']?.toString(),
+      variantDetails: vDetails,
       serviceCharge: double.tryParse(json['service_charge']?.toString() ?? '0') ?? 0.0,
       deliveryCharge: double.tryParse(json['delivery_charge']?.toString() ?? '0') ?? 0.0,
       shipmentCharge: double.tryParse(json['shipment_charge']?.toString() ?? '0') ?? 0.0,
@@ -274,11 +291,11 @@ class EcommerceOrderItemModel {
             ) : null),
       variant: json['variant'] != null && json['variant'] is Map
           ? EcommerceVariantModel.fromJson(json['variant'])
-          : (json['variant_details'] != null ? EcommerceVariantModel(
-              id: json['product_varient_id'] ?? 0,
+          : (vDetails != null ? EcommerceVariantModel(
+              id: json['product_varient_id'] ?? json['product_variant_id'] ?? 0,
               productId: json['product_id'] ?? 0,
               price: double.tryParse((json['unit_price'] ?? json['price'] ?? 0).toString()) ?? 0.0,
-              variantName: json['variant_details'].toString(),
+              variantName: vDetails,
             ) : null),
     );
   }

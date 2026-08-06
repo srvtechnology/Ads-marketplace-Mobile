@@ -266,11 +266,11 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
                         color: context.color.textDefaultColor,
                       ),
                     ),
-                    if (item.variantDetails != null && item.variantDetails!.isNotEmpty)
+                    if (item.displayVariantDetails != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 4.0),
                         child: Text(
-                          item.variantDetails!,
+                          item.displayVariantDetails!,
                           style: TextStyle(fontSize: 12, color: context.color.textLightColor),
                         ),
                       ),
