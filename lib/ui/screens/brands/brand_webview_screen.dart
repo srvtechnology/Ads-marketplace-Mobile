@@ -57,6 +57,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setUserAgent(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1')
       ..setBackgroundColor(const Color(0x00000000))
       ..addJavaScriptChannel(
         'FlutterProductDetector',
@@ -112,16 +114,27 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           if (url.includes('myntra.com') && (url.includes('/buy') || /\/[0-9]{5,}/.test(url))) return true;
           if (url.includes('firstcry.com') && url.includes('product-detail')) return true;
           if (url.includes('zara.com') && (url.includes('-p0') || url.includes('.html'))) return true;
+          // Lacoste (Magento): use DOM check below — URL alone is not reliable (category pages also end in .html)
 
-          // 2. Metadata / Shopify object check
+          // 2. Shopify check (non-Lacoste pages only)
           try {
             if (window.ShopifyAnalytics && window.ShopifyAnalytics.meta && window.ShopifyAnalytics.meta.product) return true;
           } catch(e) {}
 
+          // 3. Lacoste (Magento 2): use ONLY PDP-exclusive element IDs.
+          // form#product_addtocart_form and button#product-addtocart-button are generated
+          // by Magento ONLY on product detail pages — never on listing/category/sale pages.
+          if (url.includes('lacoste.in')) {
+            return !!(document.querySelector('form#product_addtocart_form') ||
+                      document.querySelector('button#product-addtocart-button') ||
+                      document.querySelector('button[data-action="add-to-cart"]'));
+          }
+
+          // 4. og:type=product metadata check (for non-Lacoste brands)
           var ogType = document.querySelector('meta[property="og:type"]');
           if (ogType && (ogType.content === 'product' || ogType.content === 'og:product')) return true;
 
-          // 3. DOM check: "ADD TO BAG" or "ADD TO CART" buttons on page
+          // 4. DOM check: "ADD TO BAG" or "ADD TO CART" buttons on page
           var btns = document.querySelectorAll('button, a, input[type="submit"], div[role="button"]');
           for (var i = 0; i < Math.min(btns.length, 120); i++) {
             var txt = (btns[i].innerText || btns[i].value || '').trim().toUpperCase();
@@ -189,6 +202,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     bool isSephoraProduct = lowerUrl.contains('sephora.in') && lowerUrl.contains('/product');
     bool isUniqloProduct = lowerUrl.contains('uniqlo.com') && lowerUrl.contains('/products');
     bool isZaraProduct = lowerUrl.contains('zara.com') && (lowerUrl.contains('-p0') || lowerUrl.contains('.html'));
+    // Lacoste: no URL-based check — detection is handled entirely by the SPA monitor DOM checks
+    // (category pages also end in .html on Magento, so DOM detection is the only reliable signal)
     
     // Snitch, Rare Rabbit, The Bear House product URL checks
     bool isSnitchProduct = (lowerUrl.contains('snitch.com') || lowerUrl.contains('snitch.co.in')) && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
@@ -2159,6 +2174,143 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           return JSON.stringify(product);
         })();
       ''';
+    } else if (currentUrl.contains('lacoste.in')) {
+      return r'''
+        (function() {
+          var product = {};
+
+          // 1. TITLE — try JSON-LD first (most reliable on Magento)
+          try {
+            var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+            for (var i = 0; i < scripts.length; i++) {
+              var data = JSON.parse(scripts[i].innerText);
+              var items = Array.isArray(data) ? data : [data];
+              for (var j = 0; j < items.length; j++) {
+                var item = items[j];
+                if (item["@type"] === "Product" || (item.offers && item.name)) {
+                  if (!product.title && item.name) product.title = item.name;
+                  if (!product.price && item.offers) {
+                    var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+                    var p = offer.price || offer.lowPrice;
+                    if (p) product.price = String(p).replace(/[^0-9]/g, "");
+                  }
+                  if (!product.image && item.image) {
+                    product.image = Array.isArray(item.image) ? item.image[0] : item.image;
+                  }
+                  break;
+                }
+              }
+            }
+          } catch(_) {}
+
+          // 2. DOM TITLE fallback
+          if (!product.title) {
+            var titleEl = document.querySelector("h1.page-title") ||
+                          document.querySelector("h1.product-name") ||
+                          document.querySelector(".product-info-main h1") ||
+                          document.querySelector("h1");
+            var title = titleEl ? titleEl.innerText.trim() : document.title;
+            title = title.replace(/[|\-]\s*LACOSTE.*/i, "").trim();
+            product.title = title;
+          }
+
+          // 3. PRICE fallback
+          if (!product.price) {
+            // Magento uses og:price:amount meta tag reliably
+            var ogPrice = document.querySelector('meta[property="product:price:amount"]') ||
+                          document.querySelector('meta[property="og:price:amount"]');
+            if (ogPrice && ogPrice.content) {
+              product.price = ogPrice.content.replace(/[^0-9]/g, "");
+            }
+          }
+          if (!product.price) {
+            var priceEl = document.querySelector(".price-box .special-price .price") ||
+                          document.querySelector(".price-box .price") ||
+                          document.querySelector(".product-info-price .price") ||
+                          document.querySelector("[data-price-type=\"finalPrice\"] .price") ||
+                          document.querySelector(".final-price .price");
+            if (priceEl) {
+              var m = priceEl.innerText.match(/(?:₹|Rs\.?|INR)\s*([0-9,]+)/i) || priceEl.innerText.match(/([0-9,]{3,})/);
+              if (m) product.price = m[1].replace(/[^0-9]/g, "");
+            }
+          }
+          if (!product.price) {
+            var els = document.querySelectorAll("span, div, p, strong, h1, h2, h3");
+            var maxFontSize = 0;
+            for (var i = 0; i < Math.min(els.length, 300); i++) {
+              var text = els[i].innerText ? els[i].innerText.trim() : "";
+              var m = text.match(/(?:₹|Rs\.?|INR)\s*([0-9,]+)/i);
+              if (m) {
+                var style = window.getComputedStyle(els[i]);
+                if (style.textDecoration && style.textDecoration.includes("line-through")) continue;
+                var cls = (els[i].className || "") + " " + (els[i].parentElement ? els[i].parentElement.className || "" : "");
+                if (cls.toLowerCase().includes("old-price") || cls.toLowerCase().includes("mrp") || cls.toLowerCase().includes("strike")) continue;
+                var fSize = parseInt(style.fontSize, 10) || 0;
+                if (fSize > maxFontSize && fSize > 0) {
+                  maxFontSize = fSize;
+                  product.price = m[1].replace(/[^0-9]/g, "");
+                }
+              }
+            }
+          }
+
+          // 4. VARIANTS (Size & Colour) — Magento swatch pattern
+          var variants = [];
+          var colorVal = "";
+          var sizeVal = "";
+
+          // Selected colour swatch
+          var activeColorSwatch = document.querySelector(".swatch-option.color.selected, .swatch-option.color.active, .swatch-opt [option-selected]");
+          if (activeColorSwatch) {
+            colorVal = activeColorSwatch.getAttribute("aria-label") ||
+                       activeColorSwatch.getAttribute("option-label") ||
+                       activeColorSwatch.getAttribute("title") ||
+                       activeColorSwatch.innerText.trim();
+          }
+          if (!colorVal) {
+            var colorLabel = document.querySelector(".swatch-attribute[attribute-code=\"color\"] .swatch-attribute-selected-option, .swatch-attribute[attribute-code=\"colour\"] .swatch-attribute-selected-option");
+            if (colorLabel) colorVal = colorLabel.innerText.trim();
+          }
+
+          // Selected size swatch
+          var activeSizeSwatch = document.querySelector(".swatch-option.text.selected, .swatch-option.text.active");
+          if (activeSizeSwatch) sizeVal = activeSizeSwatch.innerText.trim();
+          if (!sizeVal) {
+            var sizeLabel = document.querySelector(".swatch-attribute[attribute-code=\"size\"] .swatch-attribute-selected-option");
+            if (sizeLabel) sizeVal = sizeLabel.innerText.trim();
+          }
+          if (!sizeVal) {
+            var sizeSelect = document.querySelector("select[name=\"super_attribute[93]\"], select[name*=\"size\"]");
+            if (sizeSelect && sizeSelect.selectedIndex >= 0) {
+              var selText = sizeSelect.options[sizeSelect.selectedIndex].text.trim();
+              if (selText && !selText.toLowerCase().includes("select") && !selText.toLowerCase().includes("choose")) {
+                sizeVal = selText;
+              }
+            }
+          }
+
+          if (colorVal) variants.push("Colour: " + colorVal.split("\n")[0].trim());
+          if (sizeVal) variants.push("Size: " + sizeVal.split("\n")[0].trim());
+          product.variants = variants.join(", ");
+
+          // 5. IMAGE
+          if (!product.image) {
+            var ogImage = document.querySelector('meta[property="og:image"]');
+            product.image = (ogImage && ogImage.content) ? ogImage.content : "";
+          }
+          if (!product.image) {
+            var imgEl = document.querySelector(".product.media .fotorama__active img") ||
+                        document.querySelector(".gallery-placeholder img") ||
+                        document.querySelector(".product.media img") ||
+                        document.querySelector("img[src*=\"lacoste\"]");
+            if (imgEl) product.image = imgEl.src;
+          }
+
+          product.url = window.location.href;
+          product.brand = "Lacoste";
+          return JSON.stringify(product);
+        })();
+      ''';
     } else if (currentUrl.contains('thebearhouse.com')) {
       return r'''
         (function() {
@@ -2342,6 +2494,16 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             alignment: Alignment.centerLeft,
           ),
           actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.contactUs);
+              },
+              icon: Icon(
+                Icons.support_agent,
+                color: context.color.textDefaultColor,
+                size: 28,
+              ),
+            ),
             BlocBuilder<CartCubit, CartState>(
               builder: (context, state) {
                 int count = 0;
@@ -2423,7 +2585,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                 onPressed: () async {
                   final String? currentUrl = await _controller.currentUrl();
                   if (mounted) {
-                    if (currentUrl != null && (currentUrl.contains('myntra.com') || currentUrl.contains('firstcry.com') || currentUrl.contains('decathlon.in') || currentUrl.contains('sephora.in') || currentUrl.contains('uniqlo.com') || currentUrl.contains('zara.com') || currentUrl.contains('snitch.com') || currentUrl.contains('thehouseofrare.com') || currentUrl.contains('thebearhouse.com'))) {
+                    if (currentUrl != null && (currentUrl.contains('myntra.com') || currentUrl.contains('firstcry.com') || currentUrl.contains('decathlon.in') || currentUrl.contains('sephora.in') || currentUrl.contains('uniqlo.com') || currentUrl.contains('zara.com') || currentUrl.contains('snitch.com') || currentUrl.contains('thehouseofrare.com') || currentUrl.contains('thebearhouse.com') || currentUrl.contains('lacoste.in'))) {
                       _scrapeAndShowSizeColourDialog(context);
                     } else if (currentUrl != null && currentUrl.contains('ikea.com')) {
                       _scrapeProductDetails(context);

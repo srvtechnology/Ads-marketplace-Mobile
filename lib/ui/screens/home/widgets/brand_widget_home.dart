@@ -72,10 +72,14 @@ class BrandWidgetHome extends StatelessWidget {
         'url': 'https://thebearhouse.com/',
       },
       {
+        'name': 'Lacoste',
+        'image': 'assets/brands_logo/lacoste-seeklogo.png',
+        'url': 'https://www.lacoste.in/',
+      },
+      {
         'name': 'H&M',
         'image': 'assets/brands_logo/hm.png',
-        'url': 'coming_soon',
-        'isComingSoon': 'true',
+        'url': 'https://www.myntra.com/hm',
       },
     ];
 

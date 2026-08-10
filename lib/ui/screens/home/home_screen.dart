@@ -12,6 +12,7 @@ import 'package:eClassify/data/cubits/home/fetch_home_screen_cubit.dart';
 import 'package:eClassify/data/cubits/slider_cubit.dart';
 import 'package:eClassify/data/cubits/system/fetch_system_settings_cubit.dart';
 import 'package:eClassify/data/cubits/brands/fetch_brands_cubit.dart';
+import 'package:eClassify/data/cubits/ecommerce/cart_cubit.dart';
 import 'package:eClassify/data/helper/designs.dart';
 import 'package:eClassify/data/model/home/home_screen_section.dart';
 import 'package:eClassify/data/model/item/item_model.dart';
@@ -78,6 +79,11 @@ class HomeScreenState extends State<HomeScreen>
     initializeSettings();
     addPageScrollListener();
     _initNotifications();
+    Future.microtask(() {
+      if (mounted) {
+        context.read<CartCubit>().fetchCart(isSilent: true);
+      }
+    });
     context.read<SliderCubit>().fetchSlider(
           context,
         );
@@ -166,19 +172,67 @@ class HomeScreenState extends State<HomeScreen>
             // child: const LocationWidget()
           ),
           actions: [
-            Padding(
-              padding: EdgeInsetsDirectional.only(end: sidePadding),
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, Routes.contactUs);
-                },
-                icon: Icon(
-                  Icons.support_agent,
-                  color: context.color.textColorDark,
-                  size: 28,
-                ),
+            IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, Routes.contactUs);
+              },
+              icon: Icon(
+                Icons.support_agent,
+                color: context.color.textColorDark,
+                size: 28,
               ),
             ),
+            BlocBuilder<CartCubit, CartState>(
+              builder: (context, state) {
+                int count = 0;
+                if (state is CartSuccess) {
+                  count = state.cart.totalItemsCount > 0
+                      ? state.cart.totalItemsCount
+                      : state.cart.items.fold(0, (sum, i) => sum + i.qty);
+                }
+                return Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.shopping_cart_outlined,
+                        color: context.color.textColorDark,
+                        size: 28,
+                      ),
+                      onPressed: () {
+                        Navigator.pushNamed(context, Routes.ecommerceCart);
+                      },
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 16,
+                            minHeight: 16,
+                          ),
+                          child: Text(
+                            '$count',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(width: sidePadding),
           ],
           backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         ),
@@ -188,6 +242,7 @@ class HomeScreenState extends State<HomeScreen>
           key: _refreshIndicatorKey,
           color: context.color.territoryColor,
           onRefresh: () async {
+            context.read<CartCubit>().fetchCart(isSilent: true);
             context.read<SliderCubit>().fetchSlider(
                   context,
                 );
