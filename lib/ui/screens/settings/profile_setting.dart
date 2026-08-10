@@ -67,11 +67,17 @@ class ProfileSettingsState extends State<ProfileSettings> {
   }
 
   Widget contentWidget(ProfileSettingFetchSuccess state, BuildContext context) {
+    String htmlData = state.data
+        .toString()
+        .replaceAll("Kora - Secondhand Marketplace", "Kora - Online Marketplace")
+        .replaceAll("Kora Secondhand Marketplace", "Kora Online Marketplace")
+        .replaceAll("Secondhand Marketplace", "Online Marketplace")
+        .replaceAll("Second-hand Marketplace", "Online Marketplace");
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: HtmlWidget(
-        state.data.toString(),
+        htmlData,
         onTapUrl: (url) =>
             launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
         customStylesBuilder: (element) {

@@ -162,7 +162,13 @@ class ContactUsState extends State<ContactUs> {
   }
 
   Widget contentWidget(ProfileSettingFetchSuccess state, BuildContext context) {
-    String htmlData = state.data.toString().replaceAll("7001769472", "+975 17110547");
+    String htmlData = state.data
+        .toString()
+        .replaceAll("7001769472", "+975 17110547")
+        .replaceAll("Kora - Secondhand Marketplace", "Kora - Online Marketplace")
+        .replaceAll("Kora Secondhand Marketplace", "Kora Online Marketplace")
+        .replaceAll("Secondhand Marketplace", "Online Marketplace")
+        .replaceAll("Second-hand Marketplace", "Online Marketplace");
     return HtmlWidget(
       htmlData,
       onTapUrl: (url) =>

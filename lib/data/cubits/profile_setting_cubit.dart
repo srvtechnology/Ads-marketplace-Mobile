@@ -111,7 +111,14 @@ class ProfileSettingCubit extends Cubit<ProfileSettingState> {
 
           if (title == Api.contactUs) {
             profileSettingData = data['contact_us'];
+          }
 
+          if (profileSettingData != null) {
+            profileSettingData = profileSettingData
+                .replaceAll('Kora - Secondhand Marketplace', 'Kora - Online Marketplace')
+                .replaceAll('Kora Secondhand Marketplace', 'Kora Online Marketplace')
+                .replaceAll('Secondhand Marketplace', 'Online Marketplace')
+                .replaceAll('Second-hand Marketplace', 'Online Marketplace');
           }
         }
       } else {

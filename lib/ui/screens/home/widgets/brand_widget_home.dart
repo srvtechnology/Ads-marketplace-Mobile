@@ -76,11 +76,6 @@ class BrandWidgetHome extends StatelessWidget {
         'image': 'assets/brands_logo/lacoste-seeklogo.png',
         'url': 'https://www.lacoste.in/',
       },
-      {
-        'name': 'H&M',
-        'image': 'assets/brands_logo/hm.png',
-        'url': 'https://www.myntra.com/hm',
-      },
     ];
 
     return Column(
