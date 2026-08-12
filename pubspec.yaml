@@ -76,6 +76,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   crypto: ^3.0.5
   pusher_channels_flutter: ^2.4.0
+  upgrader: ^13.6.0
 
 dependency_overrides:
   intl: ^0.20.0

@@ -37,6 +37,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:upgrader/upgrader.dart';
 
 List<ItemModel> myItemList = [];
 Map<String, dynamic> searchBody = {};
@@ -327,20 +328,22 @@ class MainActivityState extends State<MainActivity>
             return;
           }
         },
-        child: Scaffold(
-          backgroundColor: context.color.primaryColor,
-          bottomNavigationBar:
-              Constant.maintenanceMode == "1" ? null : bottomBar(),
-          body: Stack(
-            children: <Widget>[
-              PageView(
-                physics: const NeverScrollableScrollPhysics(),
-                controller: pageController,
-                //onPageChanged: onItemSwipe,
-                children: pages,
-              ),
-              if (Constant.maintenanceMode == "1") MaintenanceMode()
-            ],
+        child: UpgradeAlert(
+          child: Scaffold(
+            backgroundColor: context.color.primaryColor,
+            bottomNavigationBar:
+                Constant.maintenanceMode == "1" ? null : bottomBar(),
+            body: Stack(
+              children: <Widget>[
+                PageView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  controller: pageController,
+                  //onPageChanged: onItemSwipe,
+                  children: pages,
+                ),
+                if (Constant.maintenanceMode == "1") MaintenanceMode()
+              ],
+            ),
           ),
         ),
       ),
