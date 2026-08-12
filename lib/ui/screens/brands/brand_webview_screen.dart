@@ -333,6 +333,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
   }
 
   Future<void> _addToCart(BuildContext context, Map<String, dynamic> product) async {
+    double priceNum = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    if (priceNum <= 0) {
+      HelperUtils.showSnackBarMessage(context, "Could not detect product price", type: MessageType.error);
+      return;
+    }
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -352,57 +358,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         );
       },
     );
-
-    double priceNum = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
-    if (priceNum <= 0) {
-      Navigator.of(context).pop(); // hide progress modal
-      final TextEditingController priceCtrl = TextEditingController();
-      final bool? confirmed = await showDialog<bool>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text('Enter Product Price', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Price could not be automatically detected. Please enter the product price (in ₹):', style: TextStyle(fontSize: 13, color: context.color.textLightColor)),
-              const SizedBox(height: 12),
-              TextField(
-                controller: priceCtrl,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: InputDecoration(
-                  hintText: 'e.g. 1749',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: context.color.territoryColor),
-              onPressed: () => Navigator.of(ctx).pop(true),
-              child: Text('Confirm', style: TextStyle(color: context.color.buttonColor)),
-            ),
-          ],
-        ),
-      );
-      if (confirmed != true || priceCtrl.text.trim().isEmpty) {
-        return;
-      }
-      product['price'] = priceCtrl.text.trim();
-      
-      // Re-show progress dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) => Center(child: UiUtils.progress()),
-      );
-    }
 
     final success = await context.read<CartCubit>().addScrapedProductToCart(product);
     if (context.mounted) {
@@ -430,8 +385,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             ],
           ),
         );
-      }
-      else {
+      } else {
         String msg = "Failed to add product to cart";
         final state = context.read<CartCubit>().state;
         if (state is CartFailure) {
@@ -483,6 +437,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             dataStr = dataStr.substring(1, dataStr.length - 1).replaceAll('\\"', '"');
           }
           final product = jsonDecode(dataStr);
+          debugPrint('🛒 SCRAPED PRODUCT: price=${product['price']} title=${product['title']} debug=${product['debug']}');
           _addToCart(context, product);
         }
       } catch (e) {
@@ -985,29 +940,88 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           var imgEl = document.querySelector('#landingImage') || document.querySelector('#imgBlkFront') || document.querySelector('#main-image') || document.querySelector('.a-dynamic-image');
           product.image = imgEl ? imgEl.src : '';
           
-          var variants = [];
-          var labels = document.querySelectorAll('span, div, p');
-          labels.forEach(function(el) {
-              if(el.children.length <= 2 && el.innerText.length < 50) {
-                  var text = el.innerText.trim().replace(/\n/g, ' ');
-                  var match = text.match(/^(Model|Color|Size|Style|Pattern|Capacity)\s*:\s*(.+)$/i);
-                  if (match) {
-                      var val = match[2].trim();
-                      if(val && variants.indexOf(val) === -1) variants.push(val);
+          var selectedVariants = [];
+          var seenLabels = {};
+          
+          // Strategy 1: Amazon's variation containers (most reliable - desktop & mobile)
+          // Each container has a label span and a .selection span showing the chosen value
+          var variationContainers = document.querySelectorAll('[id^="variation_"], [id^="native_"]');
+          variationContainers.forEach(function(container) {
+              // Get label (e.g. "Colour:", "Size:")
+              var labelEl = container.querySelector('.a-form-label, label, .a-size-base.a-text-bold');
+              var label = labelEl ? labelEl.innerText.trim().replace(/:$/, '').trim() : '';
+              // Get selected value from .selection span (Amazon's standard)
+              var selEl = container.querySelector('.selection, .twister-mobile-selection-text');
+              if (!selEl) {
+                  selEl = container.querySelector('.a-button-selected .a-button-text, li[aria-selected="true"], .a-button-text[data-action*="select"]');
+              }
+              var val = selEl ? selEl.innerText.trim().split('\n')[0].trim() : '';
+              // Clean up common Amazon suffixes like "  2XL Chest 48..." - keep only first word group
+              if (val) {
+                  val = val.split(/\s{2,}/)[0].trim(); // split on 2+ spaces
+                  val = val.replace(/\s+(Chest|Length|Waist|Size Guide|Get help|Find your).*/i, '').trim();
+              }
+              if (val && val.length > 0 && val.length < 60 && !val.includes('₹')) {
+                  var key = label.toLowerCase() || val.toLowerCase().substring(0, 5);
+                  if (!seenLabels[key]) {
+                      seenLabels[key] = true;
+                      selectedVariants.push(val);
                   }
               }
           });
           
-          if(variants.length === 0) {
-              document.querySelectorAll('.selection, .twister-mobile-selection-text').forEach(function(node) {
-                var t = node.innerText.trim();
-                if(t && !t.includes('₹') && variants.indexOf(t) === -1 && t.length < 30) {
-                    variants.push(t);
-                }
+          // Strategy 2: Twister tiles (mobile Amazon) - look for the selected tile text
+          if (selectedVariants.length === 0) {
+              var tilesSel = document.querySelectorAll('.twister-mobile-tiles-selected, .twister-tile-selected, .twister-mobile-tile-selected');
+              tilesSel.forEach(function(tile) {
+                  var t = tile.innerText.trim().split('\n')[0].trim();
+                  if (t && !t.includes('₹') && t.length < 50) {
+                      selectedVariants.push(t);
+                  }
               });
           }
           
-          product.variants = variants.join(', ');
+          // Strategy 3: Generic "selected" buttons/li with size/colour values
+          if (selectedVariants.length === 0) {
+              var activeSels = document.querySelectorAll(
+                  '.a-button-selected .a-button-text, ' +
+                  'li.a-selected span.a-size-base, ' +
+                  'li[aria-selected="true"], ' +
+                  '.swatchSelect.selected, ' +
+                  '.swatchAvailable.selected, ' +
+                  '.selection'
+              );
+              activeSels.forEach(function(el) {
+                  var t = el.innerText.trim().split('\n')[0].trim();
+                  t = t.split(/\s{2,}/)[0].replace(/\s+(Chest|Length|Waist|Size Guide|Find your).*/i, '').trim();
+                  if (t && !t.includes('₹') && t.length < 50 && selectedVariants.indexOf(t) === -1) {
+                      selectedVariants.push(t);
+                  }
+              });
+          }
+
+          // Strategy 4: Visible inline "Color: X" or "Size: X" labels on page (last resort)
+          // Only take FIRST match per attribute type to avoid picking up all available options
+          if (selectedVariants.length === 0) {
+              var seen = {};
+              var all = document.querySelectorAll('span, div');
+              for (var i = 0; i < all.length; i++) {
+                  var el = all[i];
+                  if (el.children.length > 0) continue;
+                  var text = el.innerText.trim().replace(/\n/g, ' ');
+                  var m = text.match(/^(Colour|Color|Size|Style)\s*:\s*(.{1,40})$/i);
+                  if (m) {
+                      var attrKey = m[1].toLowerCase();
+                      var val = m[2].trim().split(/\s{2,}/)[0].replace(/\s+(Chest|Length|Size Guide).*/i, '').trim();
+                      if (!seen[attrKey] && val && !val.includes('₹')) {
+                          seen[attrKey] = true;
+                          selectedVariants.push(val);
+                      }
+                  }
+              }
+          }
+          
+          product.variants = selectedVariants.join(', ');
           product.url = window.location.href;
           product.brand = 'Amazon';
           
@@ -1076,243 +1090,175 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       return r'''
         (function() {
           var product = {};
-          var brandEl = document.querySelector('.pdp-title');
-          var titleEl = document.querySelector('.pdp-name') || document.querySelector('.name');
-          var titleStr = '';
-          if(brandEl) titleStr += brandEl.innerText.trim() + ' ';
-          if(titleEl) {
-              titleStr += titleEl.innerText.trim();
-          } else {
-              var h1s = document.querySelectorAll('h1, h2, h3, h4');
-              for(var i=0; i<h1s.length; i++) {
-                  if(h1s[i].innerText.length > 15 && h1s[i].innerText.length < 100) {
-                      titleStr += h1s[i].innerText.trim();
-                      break;
+
+          // ── STRATEGY 1: Static SSR HTML parsing (__NEXT_DATA__) ──
+          try {
+            var rawJson = '';
+            var elNext = document.getElementById('__NEXT_DATA__');
+            if (elNext && elNext.textContent) {
+              rawJson = elNext.textContent;
+            }
+            if (rawJson) {
+              var pObj = JSON.parse(rawJson);
+              var pp = pObj.props && pObj.props.pageProps ? pObj.props.pageProps : null;
+              if (pp) {
+                var sData = (pp.pdpData && pp.pdpData.styleData) || pp.pdpData || pp.styleData || pp.productData;
+                if (!sData && pp.initialState && pp.initialState.pdpData) {
+                  sData = pp.initialState.pdpData.styleData || pp.initialState.pdpData;
+                }
+                
+                if (sData) {
+                  if (sData.name) {
+                    product.title = ((sData.brandName || (sData.brand && sData.brand.name) || '') + ' ' + sData.name).trim();
                   }
-              }
-          }
-          if (!titleStr.trim()) titleStr = document.title.replace(/Buy.*Myntra/i, '').replace(/Online Shopping.*Myntra/i, '');
-          product.title = titleStr.trim();
-          
-          var variants = [];
-          var els = document.querySelectorAll('span, div, p, h4, h3, h2, h1');
-          for(var i=0; i<els.length; i++) {
-              var t = els[i].innerText.trim();
-              
-              var cMatch = t.replace(/\n/g, ' ').match(/^(Colour|Color)\s+([a-zA-Z\s]{2,15})$/i);
-              if(cMatch) {
-                  var val = cMatch[2].trim();
-                  if(val.length > 1 && variants.indexOf(val) === -1 && !val.toLowerCase().includes('chart') && !val.toLowerCase().includes('fit')) {
-                      variants.push("Colour: " + val);
-                  }
-              }
-              
-              var sMatch = t.replace(/\n/g, ' ').match(/^Size\s*:\s*([0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS|One Size|Free Size)/i);
-              if(sMatch && !t.toLowerCase().includes('chart') && !t.toLowerCase().includes('fit')) {
-                  var val = sMatch[1].trim();
-                  if(variants.indexOf("Size: " + val) === -1) {
-                      variants.push("Size: " + val);
-                  }
-              }
-          }
-          
-          var btns = document.querySelectorAll('button, li');
-          if(variants.length === 0 || !variants.join(' ').match(/[0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS/i)) {
-              for(var i=0; i<btns.length; i++) {
-                  if (btns[i].className && typeof btns[i].className === 'string') {
-                      var cls = btns[i].className.toLowerCase();
-                      if (cls.includes('select') || cls.includes('active') || btns[i].getAttribute('aria-selected') === 'true') {
-                          var txt = btns[i].innerText.trim();
-                          var sizeMatch = txt.match(/^([0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS|One Size)/i);
-                          if(sizeMatch && sizeMatch[1].length < 10) {
-                              var sizeVal = "Size: " + sizeMatch[1];
-                              if(variants.indexOf(sizeVal) === -1) variants.push(sizeVal);
-                          }
-                      }
-                  }
-              }
-          }
-          product.variants = variants.join(', ');
-          
-          var sizePrices = {};
-          var activeSizePrice = '';
-          var sizeBtns = document.querySelectorAll('button[class*="size-buttons"], div[class*="size-buttons-size-button"], .size-buttons-size-button, button');
-          for (var i = 0; i < sizeBtns.length; i++) {
-              var btnText = sizeBtns[i].innerText.trim();
-              var sNameMatch = btnText.match(/^([0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS|One Size|Free Size)/i);
-              var sPriceMatch = btnText.match(/₹\s*([0-9,]+)/);
-              
-              if (sNameMatch) {
-                  var sName = sNameMatch[1].toUpperCase();
-                  var lowerBtn = btnText.toLowerCase();
-                  var isDiscountText = lowerBtn.includes('off') || lowerBtn.includes('save') || lowerBtn.includes('discount') || lowerBtn.includes('less');
-                  if (sPriceMatch && !isDiscountText) {
-                      sizePrices[sName] = sPriceMatch[1].replace(/[^0-9]/g, '');
+                  var p = sData.discountedPrice || (sData.price ? sData.price.discounted : null) || sData.mrp;
+                  if (p && parseInt(p,10) > 0) product.price = String(parseInt(p,10));
+                  
+                  // Enhancing Image extraction
+                  if (sData.media && sData.media.albums && sData.media.albums.length > 0) {
+                    var alb = sData.media.albums[0];
+                    if (alb.images && alb.images.length > 0) {
+                      product.image = alb.images[0].secureSrc || alb.images[0].src || alb.images[0].imageURL;
+                    }
+                  } else if (sData.styleImages && sData.styleImages.length > 0) {
+                    product.image = sData.styleImages[0].secureSrc || sData.styleImages[0].imageURL;
                   }
                   
-                  var cls = (sizeBtns[i].className || '').toLowerCase();
-                  var parentCls = (sizeBtns[i].parentElement ? sizeBtns[i].parentElement.className || '' : '').toLowerCase();
-                  if (cls.includes('active') || cls.includes('selected') || parentCls.includes('active') || parentCls.includes('selected')) {
-                      if (sPriceMatch && !isDiscountText) activeSizePrice = sPriceMatch[1].replace(/[^0-9]/g, '');
+                  if (sData.landingPageUrl) {
+                    product.url = 'https://www.myntra.com/' + sData.landingPageUrl.replace(/^\//, '');
+                  } else if (sData.id || sData.styleId) {
+                    product.url = 'https://www.myntra.com/' + (sData.id || sData.styleId);
                   }
+                }
               }
-          }
-          product.sizePrices = sizePrices;
-          
-          var mainPdpPrice = '';
+            }
+          } catch(e) {}
 
-          // 1. Native Myntra State Object (100% accurate discounted price from styleData & sizes)
+          // ── STRATEGY 2: Schema.org JSON-LD ──
+          if (!product.price || !product.title || !product.image) {
+            try {
+              var ldScripts = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var s = 0; s < ldScripts.length; s++) {
+                var txt = ldScripts[s].textContent || '';
+                if (!txt.includes('Product')) continue;
+                var ldObj = JSON.parse(txt);
+                var items = Array.isArray(ldObj) ? ldObj : (ldObj['@graph'] || [ldObj]);
+                for (var i = 0; i < items.length; i++) {
+                  var it = items[i];
+                  if (it['@type'] === 'Product') {
+                    if (it.name && !product.title) {
+                      var b = (it.brand && it.brand.name) ? it.brand.name + ' ' : '';
+                      product.title = (b + it.name).trim();
+                    }
+                    if (it.offers && !product.price) {
+                      var off = Array.isArray(it.offers) ? it.offers[0] : it.offers;
+                      var pr = off.price || off.lowPrice;
+                      if (pr && parseFloat(pr) > 50) product.price = String(Math.round(parseFloat(pr)));
+                    }
+                    if (it.image && !product.image) {
+                      product.image = Array.isArray(it.image) ? it.image[0] : it.image;
+                    }
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+
+          // ── STRATEGY 3: Ultimate RAW DOM Text Regex Extractor (For Price) ──
+          if (!product.price) {
+            try {
+              var rawText = document.body.innerText.replace(/\n/g, ' ');
+              var reg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*[0-9,]+[\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9,]+)/i;
+              var match1 = rawText.match(reg);
+              if (match1) {
+                var v = parseInt(match1[1].replace(/,/g, ''), 10);
+                if (v > 50) product.price = String(v);
+              } 
+              
+              if (!product.price) {
+                var match2 = rawText.match(/(?:rs\.?|inr|[\u20b9₹])\s*([0-9,]{3,7})/i);
+                if (match2) {
+                  var v2 = parseInt(match2[1].replace(/,/g, ''), 10);
+                  if (v2 > 50) product.price = String(v2);
+                }
+              }
+            } catch(e) {}
+          }
+
+          // ── STRATEGY 4: Targeted DOM Fallback (Title & Image) ──
           try {
-              var myntraObj = window.__myntraData__ || window.pdpData;
-              if (myntraObj && myntraObj.pdpData && myntraObj.pdpData.styleData) {
-                  var styleData = myntraObj.pdpData.styleData;
-                  if (styleData.name && !product.title) {
-                      product.title = (styleData.brandName ? styleData.brandName + ' ' : '') + styleData.name;
-                  }
-                  var dPrice = styleData.discountedPrice || (styleData.price ? styleData.price.discounted : null);
-                  if (!dPrice && styleData.sizes && Array.isArray(styleData.sizes)) {
-                      var dPrices = [];
-                      for (var s = 0; s < styleData.sizes.length; s++) {
-                          var sz = styleData.sizes[s];
-                          if (sz.discountedPrice && parseInt(sz.discountedPrice, 10) > 0) {
-                              dPrices.push(parseInt(sz.discountedPrice, 10));
-                          }
-                          if (sz.size && sz.discountedPrice && parseInt(sz.discountedPrice, 10) > 0) {
-                              sizePrices[sz.size.toUpperCase()] = sz.discountedPrice.toString().replace(/[^0-9]/g, '');
-                          }
-                      }
-                      if (dPrices.length > 0) {
-                          dPrice = Math.min.apply(null, dPrices);
-                      }
-                  }
-                  if (dPrice && parseInt(dPrice, 10) > 0) {
-                      mainPdpPrice = dPrice.toString().replace(/[^0-9]/g, '');
-                  }
+            if (!product.title || product.title.includes('Online Shopping') || product.title.length < 5) {
+              var brandEl = document.querySelector('.pdp-title');
+              var nameEl = document.querySelector('.pdp-name, h1.pdp-title, h1.pdp-name, h1');
+              if (brandEl || nameEl) {
+                product.title = ((brandEl ? brandEl.innerText.trim() : '') + ' ' + (nameEl ? nameEl.innerText.trim() : '')).trim();
+              } else {
+                 var ogTitle = document.querySelector('meta[property="og:title"]');
+                 if (ogTitle) product.title = ogTitle.getAttribute('content');
               }
-          } catch (_) {}
+              if (product.title) {
+                product.title = product.title.replace(/\s*[\|\-\u2013\u2014]\s*(Myntra|myntra\.com).*/i, '').replace(/Online at Best Price.*/i, '').trim();
+              }
+            }
 
-          // 2. DOM Selling Price Extraction (Directly target PDP selling price elements)
-          if (!mainPdpPrice) {
-              var pdpPriceEl = document.querySelector('.pdp-price strong') || 
-                               document.querySelector('.pdp-price') || 
-                               document.querySelector('.pdp-discount-container .pdp-price strong') ||
-                               document.querySelector('.pdp-discount-container .pdp-price') ||
-                               document.querySelector('.pdp-selling-price') || 
-                               document.querySelector('span.pdp-price');
-              if (pdpPriceEl) {
-                  var pText = pdpPriceEl.innerText || pdpPriceEl.textContent || '';
-                  var pMatch = pText.match(/₹\s*([0-9,]+)/) || pText.match(/([0-9,]{3,})/);
-                  if (pMatch) {
-                      var pNum = parseInt(pMatch[1].replace(/[^0-9]/g, ''), 10);
-                      if (pNum > 0) mainPdpPrice = pNum.toString();
-                  }
+            // Image Fallback (More robust for M-Web)
+            if (!product.image || product.image.includes('myntra-logo') || product.image.includes('placeholder')) {
+              var mainImg = document.querySelector('.image-grid-image, .pdp-image-grid-image, [class*="image-grid"] img');
+              if (mainImg) {
+                product.image = mainImg.style && mainImg.style.backgroundImage ? mainImg.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '') : mainImg.src;
               }
-          }
+              
+              // Try og:image but ensure it's not the logo
+              if (!product.image || product.image.includes('myntra-logo')) {
+                var ogImg = document.querySelector('meta[property="og:image"]');
+                if (ogImg && !ogImg.getAttribute('content').includes('myntra-logo')) {
+                  product.image = ogImg.getAttribute('content');
+                }
+              }
 
-          // 3. DOM Container Clone & Element Scan (Filter out MRP / strikethrough nodes)
-          if (!mainPdpPrice) {
-              var priceContainer = document.querySelector('.pdp-price-info') || 
-                                   document.querySelector('.pdp-discount-container') || 
-                                   document.querySelector('.pdp-price');
-              if (priceContainer) {
-                  var clone = priceContainer.cloneNode(true);
-                  var mrpEls = clone.querySelectorAll('.pdp-mrp, s, strike, del, [class*="mrp"], [class*="strike"], [class*="cross"]');
-                  for (var mIdx = 0; mIdx < mrpEls.length; mIdx++) {
-                      mrpEls[mIdx].remove();
-                  }
-                  var cMatches = clone.innerText.match(/₹\s*([0-9,]+)/g);
-                  if (cMatches) {
-                      var cList = [];
-                      for (var idx = 0; idx < cMatches.length; idx++) {
-                          var cVal = parseInt(cMatches[idx].replace(/[^0-9]/g, ''), 10);
-                          if (cVal > 0) cList.push(cVal);
-                      }
-                      if (cList.length > 0) {
-                          mainPdpPrice = Math.min.apply(null, cList).toString();
-                      }
-                  }
-              }
-          }
-
-          // 4. Global DOM Element Scanner (Find lowest non-strikethrough price figure)
-          if (!mainPdpPrice) {
-              var allElements = document.querySelectorAll('h1, h2, h3, h4, span, div, p, strong, b');
-              var validP = [];
-              for (var eIdx = 0; eIdx < Math.min(allElements.length, 500); eIdx++) {
-                  var el = allElements[eIdx];
-                  var text = el.innerText ? el.innerText.trim() : '';
-                  if (text && text.length < 30) {
-                      var m = text.match(/^₹\s*([0-9,]+)$/) || text.match(/^([0-9,]{3,})$/);
-                      if (m) {
-                          var style = window.getComputedStyle(el);
-                          if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
-                          var cls = (el.className || '') + ' ' + (el.parentElement ? el.parentElement.className || '' : '');
-                          if (cls.toLowerCase().includes('mrp') || cls.toLowerCase().includes('strike') || cls.toLowerCase().includes('cross')) continue;
-                          
-                          var pVal = parseInt(m[1].replace(/[^0-9]/g, ''), 10);
-                          if (pVal > 0) validP.push(pVal);
-                      }
-                  }
-              }
-              if (validP.length > 0) {
-                  mainPdpPrice = Math.min.apply(null, validP).toString();
-              }
-          }
-          
-          var finalPrice = mainPdpPrice;
-          if (activeSizePrice && mainPdpPrice) {
-              var aNum = parseInt(activeSizePrice, 10);
-              var mNum = parseInt(mainPdpPrice, 10);
-              if (aNum > 0 && mNum > 0 && aNum <= mNum * 1.3) {
-                  finalPrice = activeSizePrice;
-              }
-          } else if (!finalPrice && activeSizePrice) {
-              finalPrice = activeSizePrice;
-          }
-          
-          // 4. Substring Font-size Scanner Fallback
-          if (!finalPrice) {
-              var maxFontSize = 0;
-              var bestPrice = '';
-              for (var i = 0; i < Math.min(els.length, 300); i++) {
-                  var text = els[i].innerText ? els[i].innerText.trim() : '';
-                  var m = text.match(/₹\s*([0-9,]+)/) || text.match(/INR\s*([0-9,]+)/i);
-                  if (m) {
-                      var style = window.getComputedStyle(els[i]);
-                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
-                      var cls = (els[i].className || '') + ' ' + (els[i].parentElement ? els[i].parentElement.className || '' : '');
-                      if (cls.toLowerCase().includes('mrp') || cls.toLowerCase().includes('strike') || cls.toLowerCase().includes('cross')) continue;
-                      
-                      var fSize = parseInt(style.fontSize, 10) || 0;
-                      if (fSize > maxFontSize && fSize > 0) {
-                          maxFontSize = fSize;
-                          bestPrice = m[1].replace(/[^0-9]/g, '');
-                      }
-                  }
-              }
-              finalPrice = bestPrice;
-          }
-          
-          product.price = finalPrice;
-          
-          var imgEl = document.querySelector('.image-grid-image') || document.querySelector('.pdp-image-grid-image');
-          if (!imgEl) {
-              var imgs = document.querySelectorAll('img');
-              for(var i=0; i<imgs.length; i++) {
-                  if(imgs[i].src && imgs[i].src.includes('myntassets') && imgs[i].width > 100) {
-                      imgEl = imgs[i];
+              // Ultimate Fallback: Scan all DOM images and find the first real product image
+              if (!product.image || product.image.includes('myntra-logo')) {
+                var imgs = document.querySelectorAll('img');
+                for (var k = 0; k < imgs.length; k++) {
+                  var src = imgs[k].src || '';
+                  // Product images are usually on myntassets and have /images/ in path, not thumbnails
+                  if (src.includes('myntassets') && !src.includes('placeholder') && !src.includes('myntra-logo') && !src.includes('apple-touch')) {
+                    if (src.includes('/images/') || imgs[k].width > 120 || imgs[k].height > 120) {
+                      product.image = src;
                       break;
+                    }
                   }
+                }
               }
-          }
-          product.image = (imgEl && imgEl.style && imgEl.style.backgroundImage) ? imgEl.style.backgroundImage.slice(4, -1).replace(/"/g, "") : (imgEl ? imgEl.src : '');
-          
-          product.url = window.location.href;
+            }
+          } catch(e) {}
+
+          // ── STRATEGY 5: Variants ──
+          try {
+            var variants = [];
+            var sEls = document.querySelectorAll('button, li');
+            for (var v = 0; v < sEls.length; v++) {
+              var sb = sEls[v];
+              var cls = (sb.className || '').toLowerCase();
+              if (cls.includes('active') || cls.includes('selected') || sb.getAttribute('aria-selected') === 'true') {
+                var stxt = (sb.innerText || '').trim();
+                if (stxt.match(/^([0-9]{1,3}|XS|S|M|L|XL|XXL|XXXL|One Size|Free Size)$/i)) {
+                  variants.push('Size: ' + stxt);
+                  break;
+                }
+              }
+            }
+            product.variants = variants.join(', ');
+          } catch(e) {}
+
+          if (!product.title) product.title = document.title.replace(/\s*[\|\-\u2013\u2014]\s*(Myntra|myntra\.com).*/i, '').replace(/Online Shopping.*/i, 'Myntra Product').trim();
+          if (!product.url) product.url = window.location.href;
           product.brand = 'Myntra';
           return JSON.stringify(product);
         })();
       ''';
-    } else if (currentUrl.contains('firstcry.com')) {
+
+    } else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {
       return r'''
         (function() {
           var product = {};
@@ -2479,6 +2425,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         })();
       ''';
     }
+    return '';
   }
 
   @override
