@@ -1089,151 +1089,117 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     } else if (currentUrl.contains('myntra.com')) {
       return r'''
         (function() {
-          var product = {};
+          var product = { brand: 'Myntra', url: window.location.href };
 
-          // ── STRATEGY 1: Static SSR HTML parsing (__NEXT_DATA__) ──
+          // ── STRATEGY 1: Myntra Gateway API for Title & Image ──
+          // (Called within WebView so session cookies are sent - no CORS issue)
           try {
-            var rawJson = '';
-            var elNext = document.getElementById('__NEXT_DATA__');
-            if (elNext && elNext.textContent) {
-              rawJson = elNext.textContent;
+            var url = window.location.href;
+            // Extract style ID from URL (e.g. /watches/brand/.../30389309/buy or /30389309)
+            var styleId = null;
+            var pathM = url.match(/\/(\d{6,10})(?:\/buy)?(?:[?#].*)?$/);
+            if (pathM) styleId = pathM[1];
+            if (!styleId) {
+              var segM = url.match(/\/(\d{7,9})(?:\/|$|\?)/);
+              if (segM) styleId = segM[1];
             }
-            if (rawJson) {
-              var pObj = JSON.parse(rawJson);
-              var pp = pObj.props && pObj.props.pageProps ? pObj.props.pageProps : null;
-              if (pp) {
-                var sData = (pp.pdpData && pp.pdpData.styleData) || pp.pdpData || pp.styleData || pp.productData;
-                if (!sData && pp.initialState && pp.initialState.pdpData) {
-                  sData = pp.initialState.pdpData.styleData || pp.initialState.pdpData;
+
+            if (styleId) {
+              var xhr = new XMLHttpRequest();
+              xhr.open('GET', 'https://www.myntra.com/gateway/v2/product/' + styleId, false);
+              xhr.setRequestHeader('Accept', 'application/json');
+              xhr.setRequestHeader('x-meta-app', 'appFamily=msite');
+              xhr.send(null);
+
+              if (xhr.status === 200) {
+                var data = JSON.parse(xhr.responseText);
+                var style = data.style || data.product || data.data || data;
+
+                // Title from API
+                var bName = style.brandName || (style.brand && style.brand.name) || '';
+                var pName = style.name || '';
+                if (pName) product.title = (bName + ' ' + pName).trim();
+
+                // Image from API (recursive search for first myntassets /images/ URL)
+                function findImg(obj, depth) {
+                  if (!obj || depth > 12) return null;
+                  if (typeof obj === 'string') {
+                    if (obj.startsWith('http') && obj.includes('myntassets') && obj.includes('/images/') && !obj.includes('logo')) return obj;
+                    return null;
+                  }
+                  if (Array.isArray(obj)) {
+                    for (var i = 0; i < obj.length; i++) { var r = findImg(obj[i], depth+1); if (r) return r; }
+                    return null;
+                  }
+                  if (typeof obj !== 'object') return null;
+                  for (var k in obj) {
+                    if (k === 'reviews' || k === 'relatedProducts' || k === 'similar') continue;
+                    var res = findImg(obj[k], depth+1);
+                    if (res) return res;
+                  }
+                  return null;
                 }
-                
-                if (sData) {
-                  if (sData.name) {
-                    product.title = ((sData.brandName || (sData.brand && sData.brand.name) || '') + ' ' + sData.name).trim();
-                  }
-                  var p = sData.discountedPrice || (sData.price ? sData.price.discounted : null) || sData.mrp;
-                  if (p && parseInt(p,10) > 0) product.price = String(parseInt(p,10));
-                  
-                  // Enhancing Image extraction
-                  if (sData.media && sData.media.albums && sData.media.albums.length > 0) {
-                    var alb = sData.media.albums[0];
-                    if (alb.images && alb.images.length > 0) {
-                      product.image = alb.images[0].secureSrc || alb.images[0].src || alb.images[0].imageURL;
-                    }
-                  } else if (sData.styleImages && sData.styleImages.length > 0) {
-                    product.image = sData.styleImages[0].secureSrc || sData.styleImages[0].imageURL;
-                  }
-                  
-                  if (sData.landingPageUrl) {
-                    product.url = 'https://www.myntra.com/' + sData.landingPageUrl.replace(/^\//, '');
-                  } else if (sData.id || sData.styleId) {
-                    product.url = 'https://www.myntra.com/' + (sData.id || sData.styleId);
-                  }
+                var img = findImg(style.media, 0) || findImg(style.styleImages, 0) || findImg(style.images, 0);
+                if (img) product.image = img;
+
+                // URL from API
+                if (style.landingPageUrl) {
+                  product.url = 'https://www.myntra.com/' + style.landingPageUrl.replace(/^\//, '');
+                } else {
+                  product.url = 'https://www.myntra.com/' + styleId;
                 }
               }
             }
           } catch(e) {}
 
-          // ── STRATEGY 2: Schema.org JSON-LD ──
-          if (!product.price || !product.title || !product.image) {
-            try {
-              var ldScripts = document.querySelectorAll('script[type="application/ld+json"]');
-              for (var s = 0; s < ldScripts.length; s++) {
-                var txt = ldScripts[s].textContent || '';
-                if (!txt.includes('Product')) continue;
-                var ldObj = JSON.parse(txt);
-                var items = Array.isArray(ldObj) ? ldObj : (ldObj['@graph'] || [ldObj]);
-                for (var i = 0; i < items.length; i++) {
-                  var it = items[i];
-                  if (it['@type'] === 'Product') {
-                    if (it.name && !product.title) {
-                      var b = (it.brand && it.brand.name) ? it.brand.name + ' ' : '';
-                      product.title = (b + it.name).trim();
-                    }
-                    if (it.offers && !product.price) {
-                      var off = Array.isArray(it.offers) ? it.offers[0] : it.offers;
-                      var pr = off.price || off.lowPrice;
-                      if (pr && parseFloat(pr) > 50) product.price = String(Math.round(parseFloat(pr)));
-                    }
-                    if (it.image && !product.image) {
-                      product.image = Array.isArray(it.image) ? it.image[0] : it.image;
-                    }
-                  }
-                }
-              }
-            } catch(e) {}
-          }
+          // ── STRATEGY 2: Price from raw DOM text (Primary - most reliable) ──
+          // Handles TWO cases:
+          //   Case A (Discounted): "MRP ₹5,400 ₹2,538 53% OFF!" → selling price = ₹2,538
+          //   Case B (Full Price):  "MRP ₹1,799"  (no discount badge) → selling price = ₹1,799
+          try {
+            var rawText = document.body.innerText.replace(/\n/g, ' ');
 
-          // ── STRATEGY 3: Ultimate RAW DOM Text Regex Extractor (For Price) ──
+            // Case A: Discounted product - look for "MRP price1 price2 X% OFF" pattern
+            // The "X% OFF" badge MUST be present within 30 chars of price2 to confirm it's a real discount
+            var discReg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*[0-9]+%\s*off/i;
+            var md = rawText.match(discReg);
+            if (md) {
+              var mrpV = parseInt(md[1].replace(/,/g, ''), 10);
+              var sellV = parseInt(md[2].replace(/,/g, ''), 10);
+              if (sellV > 50 && sellV < mrpV) {
+                product.price = String(sellV);
+              }
+            }
+
+            // Case B: Non-discounted - just MRP shown, use it as the selling price
+            if (!product.price) {
+              var mrpReg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
+              var mm = rawText.match(mrpReg);
+              if (mm) {
+                var mrpPrice = parseInt(mm[1].replace(/,/g, ''), 10);
+                if (mrpPrice > 50) product.price = String(mrpPrice);
+              }
+            }
+          } catch(e) {}
+
+          // Price last-resort: first ₹ price on page
           if (!product.price) {
             try {
-              var rawText = document.body.innerText.replace(/\n/g, ' ');
-              var reg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*[0-9,]+[\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9,]+)/i;
-              var match1 = rawText.match(reg);
-              if (match1) {
-                var v = parseInt(match1[1].replace(/,/g, ''), 10);
-                if (v > 50) product.price = String(v);
-              } 
-              
-              if (!product.price) {
-                var match2 = rawText.match(/(?:rs\.?|inr|[\u20b9₹])\s*([0-9,]{3,7})/i);
-                if (match2) {
-                  var v2 = parseInt(match2[1].replace(/,/g, ''), 10);
-                  if (v2 > 50) product.price = String(v2);
-                }
-              }
+              var rawText2 = document.body.innerText.replace(/\n/g, ' ');
+              var m2 = rawText2.match(/[\u20b9₹]\s*([1-9][0-9,]{2,8})/i);
+              if (m2) product.price = String(parseInt(m2[1].replace(/,/g, ''), 10));
             } catch(e) {}
           }
 
-          // ── STRATEGY 4: Targeted DOM Fallback (Title & Image) ──
-          try {
-            if (!product.title || product.title.includes('Online Shopping') || product.title.length < 5) {
-              var brandEl = document.querySelector('.pdp-title');
-              var nameEl = document.querySelector('.pdp-name, h1.pdp-title, h1.pdp-name, h1');
-              if (brandEl || nameEl) {
-                product.title = ((brandEl ? brandEl.innerText.trim() : '') + ' ' + (nameEl ? nameEl.innerText.trim() : '')).trim();
-              } else {
-                 var ogTitle = document.querySelector('meta[property="og:title"]');
-                 if (ogTitle) product.title = ogTitle.getAttribute('content');
-              }
-              if (product.title) {
-                product.title = product.title.replace(/\s*[\|\-\u2013\u2014]\s*(Myntra|myntra\.com).*/i, '').replace(/Online at Best Price.*/i, '').trim();
-              }
-            }
+          // Title fallback (if API didn't work)
+          if (!product.title || product.title.length < 3) {
+            try {
+              var dTitle = document.title || '';
+              product.title = dTitle.replace(/^Buy\s+/i, '').replace(/\|\s*Myntra.*$/i, '').trim();
+            } catch(e) {}
+          }
 
-            // Image Fallback (More robust for M-Web)
-            if (!product.image || product.image.includes('myntra-logo') || product.image.includes('placeholder')) {
-              var mainImg = document.querySelector('.image-grid-image, .pdp-image-grid-image, [class*="image-grid"] img');
-              if (mainImg) {
-                product.image = mainImg.style && mainImg.style.backgroundImage ? mainImg.style.backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '') : mainImg.src;
-              }
-              
-              // Try og:image but ensure it's not the logo
-              if (!product.image || product.image.includes('myntra-logo')) {
-                var ogImg = document.querySelector('meta[property="og:image"]');
-                if (ogImg && !ogImg.getAttribute('content').includes('myntra-logo')) {
-                  product.image = ogImg.getAttribute('content');
-                }
-              }
-
-              // Ultimate Fallback: Scan all DOM images and find the first real product image
-              if (!product.image || product.image.includes('myntra-logo')) {
-                var imgs = document.querySelectorAll('img');
-                for (var k = 0; k < imgs.length; k++) {
-                  var src = imgs[k].src || '';
-                  // Product images are usually on myntassets and have /images/ in path, not thumbnails
-                  if (src.includes('myntassets') && !src.includes('placeholder') && !src.includes('myntra-logo') && !src.includes('apple-touch')) {
-                    if (src.includes('/images/') || imgs[k].width > 120 || imgs[k].height > 120) {
-                      product.image = src;
-                      break;
-                    }
-                  }
-                }
-              }
-            }
-          } catch(e) {}
-
-          // ── STRATEGY 5: Variants ──
+          // ── STRATEGY 3: Variants ──
           try {
             var variants = [];
             var sEls = document.querySelectorAll('button, li');
@@ -1248,17 +1214,20 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                 }
               }
             }
+            // Also try colour
+            var colBtn = document.querySelector('[class*="colour"][class*="select"], [class*="color"][class*="select"], [aria-selected="true"][class*="colour"]');
+            if (colBtn) {
+              var colTxt = (colBtn.innerText || colBtn.getAttribute('title') || '').trim();
+              if (colTxt && colTxt.length < 20) variants.push('Colour: ' + colTxt);
+            }
             product.variants = variants.join(', ');
           } catch(e) {}
 
-          if (!product.title) product.title = document.title.replace(/\s*[\|\-\u2013\u2014]\s*(Myntra|myntra\.com).*/i, '').replace(/Online Shopping.*/i, 'Myntra Product').trim();
-          if (!product.url) product.url = window.location.href;
-          product.brand = 'Myntra';
           return JSON.stringify(product);
         })();
       ''';
 
-    } else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {} else if (currentUrl.contains('firstcry.com')) {
+    } else if (currentUrl.contains('firstcry.com')) {
       return r'''
         (function() {
           var product = {};
