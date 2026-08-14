@@ -32,6 +32,11 @@ class BrandWidgetHome extends StatelessWidget {
         'url': 'https://www.ikea.com/in/en/',
       },
       {
+        'name': 'Lacoste',
+        'image': 'assets/brands_logo/lacoste-seeklogo.png',
+        'url': 'https://www.lacoste.in/',
+      },
+      {
         'name': 'Amazon',
         'image': 'assets/brands_logo/amazon.png',
         'url': 'https://www.amazon.in',
@@ -70,11 +75,6 @@ class BrandWidgetHome extends StatelessWidget {
         'name': 'The Bear House',
         'image': 'assets/brands_logo/the_bear houses.jpeg',
         'url': 'https://thebearhouse.com/',
-      },
-      {
-        'name': 'Lacoste',
-        'image': 'assets/brands_logo/lacoste-seeklogo.png',
-        'url': 'https://www.lacoste.in/',
       },
     ];
 

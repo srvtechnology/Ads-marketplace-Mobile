@@ -44,6 +44,37 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
   late final WebViewController _controller;
   bool isLoading = true;
   bool isProductPage = false;
+  int _activeDialogCount = 0;
+
+  bool get _isDialogShowing => _activeDialogCount > 0;
+
+  Future<T?> _showAppDialog<T>({
+    required BuildContext context,
+    required WidgetBuilder builder,
+    bool barrierDismissible = true,
+  }) async {
+    setState(() {
+      _activeDialogCount++;
+    });
+    _controller.runJavaScript("if (document && document.body) document.body.style.pointerEvents = 'none';").catchError((_) {});
+
+    try {
+      return await showDialog<T>(
+        context: context,
+        barrierDismissible: barrierDismissible,
+        builder: builder,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _activeDialogCount = (_activeDialogCount - 1).clamp(0, 999);
+        });
+        if (_activeDialogCount == 0) {
+          _controller.runJavaScript("if (document && document.body) document.body.style.pointerEvents = 'auto';").catchError((_) {});
+        }
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -226,112 +257,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return Dialog(
-          backgroundColor: context.color.secondaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        "Ready to confirm order?",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: context.color.textDefaultColor,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => Navigator.of(dialogContext).pop(),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: context.color.textLightColor.withValues(alpha: 0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.close,
-                          size: 20,
-                          color: context.color.textDefaultColor,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Please confirm the details of the product, size, color and specification! You will not be able to change after this step.",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: context.color.textDefaultColor.withValues(alpha: 0.8),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 1,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.color.territoryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                          _scrapeProductDetails(context);
-                        },
-                        child: const Text(
-                          "Ok",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      flex: 2,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.color.forthColor, // Red/Orange
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(dialogContext).pop();
-                        },
-                        child: const Text(
-                          "Go Back & Select",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   Future<void> _addToCart(BuildContext context, Map<String, dynamic> product) async {
     double priceNum = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
     if (priceNum <= 0) {
@@ -339,7 +264,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       return;
     }
 
-    showDialog(
+    _showAppDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -365,7 +290,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       if (success) {
         HelperUtils.showSnackBarMessage(context, "Added to Cart successfully", type: MessageType.success);
         // Prompt to go to cart
-        showDialog(
+        _showAppDialog(
           context: context,
           builder: (ctx) => AlertDialog(
             title: const Text('Added to Cart'),
@@ -396,61 +321,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
-  Future<void> _scrapeProductDetails(BuildContext context) async {
-    // Show a loading indicator while scraping
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const Center(
-          child: Material(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 16),
-                Text('Extracting details...', style: TextStyle(color: Colors.white, fontSize: 16)),
-              ],
-            ),
-          ),
-        );
-      },
-    );
 
-    final String? currentUrl = await _controller.currentUrl();
-    if (currentUrl == null) {
-      if (mounted) Navigator.of(context).pop();
-      return;
-    }
-
-    String jsScript = _getJsScript(currentUrl);
-
-    if (jsScript.isNotEmpty) {
-      try {
-        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
-        if (mounted) Navigator.of(context).pop();
-
-        if (mounted) {
-          String dataStr = result.toString();
-          if (dataStr.startsWith('"') && dataStr.endsWith('"')) {
-            dataStr = dataStr.substring(1, dataStr.length - 1).replaceAll('\\"', '"');
-          }
-          final product = jsonDecode(dataStr);
-          debugPrint('🛒 SCRAPED PRODUCT: price=${product['price']} title=${product['title']} debug=${product['debug']}');
-          _addToCart(context, product);
-        }
-      } catch (e) {
-        if (mounted) Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to scrape product details.')));
-      }
-    } else {
-      if (mounted) Navigator.of(context).pop();
-    }
-  }
 
   Future<void> _scrapeAndShowSizeColourDialog(BuildContext context) async {
-    showDialog(
+    _showAppDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -524,7 +398,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
     final TextEditingController shadeController = TextEditingController(text: detectedShade);
 
-    showDialog(
+    _showAppDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return Dialog(
@@ -532,8 +406,11 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
+          child: GestureDetector(
+            onTap: () {},
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -664,9 +541,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   void _showSizeColourSelectionDialog(BuildContext context, Map<String, dynamic> product) {
@@ -713,7 +591,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     final TextEditingController sizeController = TextEditingController(text: detectedSize);
     final TextEditingController colourController = TextEditingController(text: detectedColour);
 
-    showDialog(
+    _showAppDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return Dialog(
@@ -721,8 +599,11 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
+          child: GestureDetector(
+            onTap: () {},
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
             child: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -902,9 +783,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               ),
             ),
           ),
-        );
-      },
-    );
+        ),
+      );
+    },
+  );
   }
 
   String _getJsScript(String currentUrl) {
@@ -2394,7 +2276,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         })();
       ''';
     }
-    return '';
   }
 
   @override
@@ -2469,7 +2350,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           ]),
       body: Stack(
         children: [
-          WebViewWidget(controller: _controller),
+          IgnorePointer(
+            ignoring: _isDialogShowing,
+            child: WebViewWidget(controller: _controller),
+          ),
           if (isLoading)
             Center(
               child: UiUtils.progress(
@@ -2498,17 +2382,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () async {
-                  final String? currentUrl = await _controller.currentUrl();
-                  if (mounted) {
-                    if (currentUrl != null && (currentUrl.contains('myntra.com') || currentUrl.contains('firstcry.com') || currentUrl.contains('decathlon.in') || currentUrl.contains('sephora.in') || currentUrl.contains('uniqlo.com') || currentUrl.contains('zara.com') || currentUrl.contains('snitch.com') || currentUrl.contains('thehouseofrare.com') || currentUrl.contains('thebearhouse.com') || currentUrl.contains('lacoste.in'))) {
-                      _scrapeAndShowSizeColourDialog(context);
-                    } else if (currentUrl != null && currentUrl.contains('ikea.com')) {
-                      _scrapeProductDetails(context);
-                    } else {
-                      _showConfirmationDialog(context);
-                    }
-                  }
+                onPressed: () {
+                  _scrapeAndShowSizeColourDialog(context);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
