@@ -395,12 +395,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 81;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FLUTTER_BUILD_NAME = 2.9.10;
-				FLUTTER_BUILD_NUMBER = 81;
+				FLUTTER_BUILD_NAME = 2.9.11;
+				FLUTTER_BUILD_NUMBER = 82;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -494,7 +494,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9.10;
+				MARKETING_VERSION = 2.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -635,12 +635,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 81;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FLUTTER_BUILD_NAME = 2.9.10;
-				FLUTTER_BUILD_NUMBER = 81;
+				FLUTTER_BUILD_NAME = 2.9.11;
+				FLUTTER_BUILD_NUMBER = 82;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -734,7 +734,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9.10;
+				MARKETING_VERSION = 2.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -763,12 +763,12 @@
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 81;
+				CURRENT_PROJECT_VERSION = 82;
 				DEVELOPMENT_TEAM = 5D2JQYC6NS;
 				ENABLE_BITCODE = "$(inherited)";
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FLUTTER_BUILD_NAME = 2.9.10;
-				FLUTTER_BUILD_NUMBER = 81;
+				FLUTTER_BUILD_NAME = 2.9.11;
+				FLUTTER_BUILD_NUMBER = 82;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"${PODS_CONFIGURATION_BUILD_DIR}/AppAuth/AppAuth.framework/Headers\"",
@@ -862,7 +862,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.9.10;
+				MARKETING_VERSION = 2.9.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bhutanmarket.srvtech;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

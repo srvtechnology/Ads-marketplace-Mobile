@@ -44,11 +44,6 @@ class _BrandListScreenState extends State<BrandListScreen> {
         'url': 'https://www.zara.com/in/',
       },
       {
-        'name': 'IKEA',
-        'image': 'assets/brands_logo/ikea.png',
-        'url': 'https://www.ikea.com/in/en/',
-      },
-      {
         'name': 'Lacoste',
         'image': 'assets/brands_logo/lacoste-seeklogo.png',
         'url': 'https://www.lacoste.in/',

@@ -207,7 +207,7 @@ Converts all items currently present in the user's cart into a new order and cle
 | `billing_address` | String | Optional (Nullable) | Billing address (falls back to shipping address if empty) |
 | `billing_zipcode` | String | Optional (Nullable) | Postal zip code for billing address |
 | `billing_landmark` | String | Optional (Nullable) | Landmark for billing address |
-| `status` | String | Optional (Nullable) | Initial order status (defaults to `AA` (Awaiting). Valid values: `AA`, `AP`, `RE`, `SHIPPED`, `OUT`, `DELIVERED`, `CAN`, `OTHER`) |
+| `status` | String | Optional (Nullable) | Initial order status (defaults to `AA` (Awaiting). Valid values: `AA`, `AP`, `RE`, `SHIPPED`, `REACHED_JAIGAON`, `REACHED_THIMPHU`, `REACHED_THIMPU`, `OUT`, `DELIVERED`, `CAN`, `OTHER`) |
 | `remarks` | String | Optional (Nullable) | Special instructions or remarks |
 
 ### Request Payload Example:
@@ -272,6 +272,7 @@ Retrieves a paginated list of the user's placed orders.
         "payment_mode": "ONLINE",
         "total_amount": 552.30,
         "status": "AA",
+        "delivery_status": "AWAITING",
         "placed_on": "2026-07-23 13:09:10"
       }
     ],
@@ -323,6 +324,7 @@ Retrieves complete details of a specific order, including all calculations and i
     "billing_landmark": "Near Clock Tower",
     "payment_mode": "ONLINE",
     "status": "AA",
+    "delivery_status": "AWAITING",
     "remarks": "Paid via BFS Online Payment",
     "placed_on": "2026-07-23 13:09:10",
     "bfs_transaction": {

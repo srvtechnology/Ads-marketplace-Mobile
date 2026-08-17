@@ -75,6 +75,8 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
               _buildInfoRow(context, 'Payment Mode', order.paymentMode ?? 'Unknown'),
               if (order.deliveryOtp != null && order.deliveryOtp!.isNotEmpty)
                 _buildInfoRow(context, 'Delivery OTP', order.deliveryOtp!),
+              if (order.deliveryDate != null && order.deliveryDate!.isNotEmpty)
+                _buildInfoRow(context, 'Expected Delivery Date', order.deliveryDate!),
               if (order.remarks != null && order.remarks!.isNotEmpty)
                 _buildInfoRow(context, 'Remarks', order.remarks!),
             ],
