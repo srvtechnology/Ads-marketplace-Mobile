@@ -2,6 +2,7 @@ import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_order_details_cu
 import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/ecommerce_order_status_helper.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
@@ -71,7 +72,6 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
             children: [
               _buildInfoRow(context, 'Order ID', '#${order.orderId ?? order.id ?? ''}'),
               _buildInfoRow(context, 'Placed On', order.placedOn ?? order.createdAt ?? 'N/A'),
-              _buildInfoRow(context, 'Status', _getStatusText(order.status)),
               _buildInfoRow(context, 'Payment Mode', order.paymentMode ?? 'Unknown'),
               if (order.deliveryOtp != null && order.deliveryOtp!.isNotEmpty)
                 _buildInfoRow(context, 'Delivery OTP', order.deliveryOtp!),
@@ -227,6 +227,9 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
   }
 
   Widget _buildItemCard(BuildContext context, EcommerceOrderItemModel item) {
+    final itemStatus = item.effectiveStatus;
+    final itemDeliveryDate = item.deliveryDate;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -258,15 +261,42 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      item.title ?? item.product?.name ?? 'Product',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        color: context.color.textDefaultColor,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.title ?? item.product?.name ?? 'Product',
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: context.color.textDefaultColor,
+                            ),
+                          ),
+                        ),
+                        if (itemStatus != null && itemStatus.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(left: 6.0),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: EcommerceOrderStatusHelper.getStatusColor(context, itemStatus).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                EcommerceOrderStatusHelper.getStatusText(itemStatus),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: EcommerceOrderStatusHelper.getStatusColor(context, itemStatus),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                     if (item.displayVariantDetails != null)
                       Padding(
@@ -274,6 +304,20 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
                         child: Text(
                           item.displayVariantDetails!,
                           style: TextStyle(fontSize: 12, color: context.color.textLightColor),
+                        ),
+                      ),
+                    if (itemDeliveryDate != null && itemDeliveryDate.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4.0),
+                        child: Row(
+                          children: [
+                            Icon(Icons.local_shipping_outlined, size: 13, color: context.color.textLightColor),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Delivery: $itemDeliveryDate',
+                              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: context.color.textLightColor),
+                            ),
+                          ],
                         ),
                       ),
                     const SizedBox(height: 6),
@@ -328,27 +372,5 @@ class _EcommerceOrderDetailsScreenState extends State<EcommerceOrderDetailsScree
       ),
     );
   }
-
-  String _getStatusText(String? status) {
-    if (status == null) return 'Awaiting';
-    switch (status.toUpperCase()) {
-      case 'AA':
-        return 'Awaiting';
-      case 'AP':
-        return 'Approved';
-      case 'RE':
-        return 'Reserved';
-      case 'SHIPPED':
-        return 'Shipped';
-      case 'OUT':
-        return 'Out for Delivery';
-      case 'DELIVERED':
-        return 'Delivered';
-      case 'CAN':
-      case 'CC':
-        return 'Cancelled';
-      default:
-        return status;
-    }
-  }
 }
+

@@ -207,7 +207,7 @@ Converts all items currently present in the user's cart into a new order and cle
 | `billing_address` | String | Optional (Nullable) | Billing address (falls back to shipping address if empty) |
 | `billing_zipcode` | String | Optional (Nullable) | Postal zip code for billing address |
 | `billing_landmark` | String | Optional (Nullable) | Landmark for billing address |
-| `status` | String | Optional (Nullable) | Initial order status (defaults to `AA` (Awaiting). Valid values: `AA`, `AP`, `RE`, `SHIPPED`, `REACHED_JAIGAON`, `REACHED_THIMPHU`, `REACHED_THIMPU`, `OUT`, `DELIVERED`, `CAN`, `OTHER`) |
+| `status` | String | Optional (Nullable) | Initial order status (defaults to `AA` (Awaiting). Valid values: `AA`, `AP`, `RE`, `SHIPPED`, `REACHED_JAIGAON`, `REACHED_THIMPHU`, `REACHED_THIMPU`, `OUT`, `DELIVERED`, `CAN`, `PAA`, `PAP`, `PRE`, `PSHIPPED`, `PREACHED_JAIGAON`, `PREACHED_THIMPHU`, `PREACHED_THIMPU`, `POUT`, `PDELIVERED`, `PCAN`) |
 | `remarks` | String | Optional (Nullable) | Special instructions or remarks |
 
 ### Request Payload Example:
@@ -355,6 +355,9 @@ Retrieves complete details of a specific order, including all calculations and i
         "quantity": 2,
         "unit_price": 150.00,
         "variant_details": "Colour: Black",
+        "status": "SHIPPED",
+        "delivery_status": "SHIPPED",
+        "delivery_date": "2026-08-25",
         "service_charge": 100.00,
         "delivery_charge": 100.00,
         "shipment_charge": 37.00,
@@ -576,4 +579,34 @@ When debit authorization is successful (`bfs_debitAuthCode` = `"00"`):
   }
 }
 ```
+
+---
+
+## 11. Order Status Codes & Mappings
+
+The table below lists all valid order status codes used across the order management system, along with their mapped human-readable status descriptions:
+
+| Status Code | Mapped Status Description | Description / Details |
+| :--- | :--- | :--- |
+| `AA` | `AWAITING` | Order placed, awaiting seller or admin processing |
+| `AP` | `APPROVED` | Order approved by seller or admin |
+| `RE` | `REJECTED` | Order rejected |
+| `SHIPPED` | `SHIPPED` | Order dispatched and shipped |
+| `REACHED_JAIGAON` | `REACHED JAIGAON` | Package arrived at Jaigaon transit hub |
+| `REACHED_THIMPHU` | `REACHED THIMPHU` | Package arrived at Thimphu distribution centre |
+| `REACHED_THIMPU` | `REACHED THIMPU` | Package arrived at Thimphu distribution centre (legacy spelling) |
+| `OUT` | `OUT FOR DELIVERY` | Package out with local courier for final delivery |
+| `DELIVERED` | `DELIVERED` | Order successfully delivered to customer |
+| `CAN` | `CANCELLED` | Order cancelled |
+| `PAA` | `PARTIALLY AWAITING` | Multi-item order: partially awaiting processing |
+| `PAP` | `PARTIALLY APPROVED` | Multi-item order: partially approved |
+| `PRE` | `PARTIALLY REJECTED` | Multi-item order: partially rejected |
+| `PSHIPPED` | `PARTIALLY SHIPPED` | Multi-item order: partially shipped |
+| `PREACHED_JAIGAON` | `PARTIALLY REACHED JAIGAON` | Multi-item order: partially reached Jaigaon hub |
+| `PREACHED_THIMPHU` | `PARTIALLY REACHED THIMPHU` | Multi-item order: partially reached Thimphu distribution centre |
+| `PREACHED_THIMPU` | `PARTIALLY REACHED THIMPU` | Multi-item order: partially reached Thimphu centre (legacy spelling) |
+| `POUT` | `PARTIALLY OUT FOR DELIVERY` | Multi-item order: partially out for delivery |
+| `PDELIVERED` | `PARTIALLY DELIVERED` | Multi-item order: partially delivered |
+| `PCAN` | `PARTIALLY CANCELLED` | Multi-item order: partially cancelled |
+
 

@@ -203,6 +203,9 @@ class EcommerceOrderItemModel {
   final int? qty;
   final String? subtotal;
   final String? variantDetails;
+  final String? status;
+  final String? deliveryStatus;
+  final String? deliveryDate;
   final double serviceCharge;
   final double deliveryCharge;
   final double shipmentCharge;
@@ -226,6 +229,9 @@ class EcommerceOrderItemModel {
     this.qty,
     this.subtotal,
     this.variantDetails,
+    this.status,
+    this.deliveryStatus,
+    this.deliveryDate,
     this.serviceCharge = 0.0,
     this.deliveryCharge = 0.0,
     this.shipmentCharge = 0.0,
@@ -243,6 +249,9 @@ class EcommerceOrderItemModel {
     }
     return null;
   }
+
+  /// Returns effective item-wise status code or status string
+  String? get effectiveStatus => status ?? deliveryStatus;
 
   factory EcommerceOrderItemModel.fromJson(Map<String, dynamic> json) {
     String? itemTitle = json['title']?.toString() ?? json['name']?.toString();
@@ -274,6 +283,9 @@ class EcommerceOrderItemModel {
       qty: quantity,
       subtotal: (json['final_amount'] ?? json['subtotal'])?.toString(),
       variantDetails: vDetails,
+      status: json['status']?.toString(),
+      deliveryStatus: json['delivery_status']?.toString(),
+      deliveryDate: json['delivery_date']?.toString() ?? json['expected_delivery_date']?.toString(),
       serviceCharge: double.tryParse(json['service_charge']?.toString() ?? '0') ?? 0.0,
       deliveryCharge: double.tryParse(json['delivery_charge']?.toString() ?? '0') ?? 0.0,
       shipmentCharge: double.tryParse(json['shipment_charge']?.toString() ?? '0') ?? 0.0,
