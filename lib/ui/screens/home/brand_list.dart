@@ -74,6 +74,11 @@ class _BrandListScreenState extends State<BrandListScreen> {
         'url': 'https://www.firstcry.com/',
       },
       {
+        'name': 'IKEA',
+        'image': 'assets/brands_logo/ikea.png',
+        'url': 'https://www.ikea.com/in/en/',
+      },
+      {
         'name': 'Snitch',
         'image': 'assets/brands_logo/Snitch.png',
         'url': 'https://www.snitch.com/',

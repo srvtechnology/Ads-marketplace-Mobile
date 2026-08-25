@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
@@ -86,10 +87,17 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
     });
 
+    // Use a Desktop Chrome User-Agent for two reasons:
+    // 1. Varnish-based CDNs (e.g. Lacoste.in) blocklist mobile/WebView UA strings (Error 54113).
+    // 2. IKEA and many e-commerce sites serve a different React layout to mobile UAs
+    //    with different CSS class names, breaking our price/title scraping selectors.
+    //    Desktop UA ensures both Android and iOS get the same page structure.
+    const String _browserUA =
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(
-          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1')
+      ..setUserAgent(_browserUA)
       ..setBackgroundColor(const Color(0x00000000))
       ..addJavaScriptChannel(
         'FlutterProductDetector',
@@ -124,7 +132,20 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           },
         ),
       )
-      ..loadRequest(Uri.parse(widget.url));
+      // Include browser-standard headers so Varnish CDN (Lacoste.in Error 54113)
+      // accepts the request. Missing Accept/Accept-Language headers are a common
+      // cause of 403 blocks on Varnish-guarded e-commerce sites.
+      ..loadRequest(
+        Uri.parse(widget.url),
+        headers: {
+          'Accept':
+              'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+        },
+      );
   }
 
   /// Injects a JavaScript monitor into the page that intercepts SPA navigation
@@ -258,7 +279,9 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
   }
 
   Future<void> _addToCart(BuildContext context, Map<String, dynamic> product) async {
-    double priceNum = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    // Allow manual price override from the dialog price field
+    final String rawPrice = (product['price'] ?? '').toString().trim();
+    double priceNum = double.tryParse(rawPrice.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
     if (priceNum <= 0) {
       HelperUtils.showSnackBarMessage(context, "Could not detect product price", type: MessageType.error);
       return;
@@ -323,6 +346,58 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
 
 
+  /// Safely parses the Object returned by runJavaScriptReturningResult into a Map.
+  /// Handles single-encoded JSON (iOS) and double-encoded JSON (Chromium Android)
+  /// without corrupting newlines, quotes, or unicode characters.
+  Map<String, dynamic> _parseJsResult(Object? result) {
+    if (result == null) return {};
+    try {
+      dynamic decoded = result;
+      if (decoded is String) {
+        decoded = jsonDecode(decoded);
+      }
+      if (decoded is String) {
+        decoded = jsonDecode(decoded);
+      }
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
+      }
+    } catch (e) {
+      debugPrint('[SCRAPER] parse error: $e');
+    }
+    return {};
+  }
+
+  /// Runs a synchronous JS scraper with retry support.
+  /// Retries up to [maxRetries] times (with [delayMs] between attempts)
+  /// to handle React/SPA hydration lag — especially on Android WebView.
+  Future<Map<String, dynamic>> _runJsScraperWithRetry(
+    String jsScript, {
+    int maxRetries = 4,
+    int delayMs = 800,
+  }) async {
+    Map<String, dynamic> lastResult = {};
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      if (attempt > 0) {
+        await Future.delayed(Duration(milliseconds: delayMs));
+      }
+      try {
+        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
+        final Map<String, dynamic> product = _parseJsResult(result);
+        if (product.isNotEmpty) {
+          lastResult = product;
+          final String price = (product['price'] ?? '').toString();
+          if (price.isNotEmpty && price != '0') {
+            return product; // success
+          }
+        }
+      } catch (e) {
+        debugPrint('[SCRAPER] attempt=$attempt error=$e');
+      }
+    }
+    return lastResult;
+  }
+
   Future<void> _scrapeAndShowSizeColourDialog(BuildContext context) async {
     _showAppDialog(
       context: context,
@@ -350,35 +425,39 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       return;
     }
 
-    String jsScript = _getJsScript(currentUrl);
-
-    if (jsScript.isNotEmpty) {
-      try {
-        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
-        if (mounted) Navigator.of(context).pop();
-
-        String data = result.toString();
-        if (data.startsWith('"') && data.endsWith('"')) {
-          data = data.substring(1, data.length - 1).replaceAll('\\"', '"');
-        }
-        Map<String, dynamic> product = {};
-        try {
-          product = jsonDecode(data);
-        } catch (_) {}
-
-        if (mounted) {
-          if (currentUrl.contains('sephora.in')) {
-            _showShadeSelectionDialog(context, product);
-          } else {
-            _showSizeColourSelectionDialog(context, product);
-          }
-        }
-      } catch (e) {
-        if (mounted) Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to scrape product details.')));
-      }
-    } else {
+    final String jsScript = _getJsScript(currentUrl);
+    if (jsScript.isEmpty) {
       if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    try {
+      Map<String, dynamic> product;
+
+      if (Platform.isAndroid) {
+        // Android WebView: wait for React SPA hydration before scraping
+        await Future.delayed(const Duration(milliseconds: 2500));
+        product = await _runJsScraperWithRetry(jsScript, maxRetries: 4, delayMs: 800);
+      } else {
+        // iOS: existing single-shot synchronous JS — untouched
+        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
+        product = _parseJsResult(result);
+      }
+
+      if (mounted) Navigator.of(context).pop();
+
+      if (mounted) {
+        if (currentUrl.contains('sephora.in')) {
+          _showShadeSelectionDialog(context, product);
+        } else {
+          _showSizeColourSelectionDialog(context, product);
+        }
+      }
+    } catch (e) {
+      if (mounted) Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Failed to scrape product details.')),
+      );
     }
   }
 
@@ -1221,55 +1300,130 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       return r'''
         (function() {
           var product = {};
-          
-          // 1. TITLE
-          var titleEl = document.querySelector('.pip-header-section__title--big') || 
-                        document.querySelector('h1.pip-header-section__title--big') || 
+
+          // ─── 1. TITLE ───────────────────────────────────────────────────
+          var titleEl = document.querySelector('.pip-header-section__title--big') ||
+                        document.querySelector('h1.pip-header-section__title--big') ||
+                        document.querySelector('[class*="pip-header"] h1') ||
                         document.querySelector('h1');
-          var descEl = document.querySelector('.pip-header-section__description');
-          var title = (titleEl ? titleEl.innerText.trim() : '');
-          if (descEl && descEl.innerText.trim()) {
-              title += ' ' + descEl.innerText.trim();
-          }
+          var descEl = document.querySelector('.pip-header-section__description') ||
+                       document.querySelector('[class*="pip-header"] [class*="description"]');
+          var title = titleEl ? titleEl.innerText.trim() : '';
+          if (descEl && descEl.innerText.trim()) title += ' ' + descEl.innerText.trim();
           if (!title) {
-              var ogTitle = document.querySelector('meta[property="og:title"]');
-              title = ogTitle ? ogTitle.content : document.title;
+            var ogT = document.querySelector('meta[property="og:title"]');
+            title = ogT ? ogT.content : document.title;
           }
-          title = title.replace(/\s*-\s*IKEA.*/i, '').trim();
-          product.title = title;
-          
-          // 2. PRICE
+          product.title = title.replace(/\s*-\s*IKEA.*/i, '').trim();
+
+          // ─── 2. PRICE ───────────────────────────────────────────────────
           var price = '';
-          var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
-          if (ogPrice && ogPrice.content) {
-              price = ogPrice.content.replace(/[^0-9]/g, '');
-          }
-          if (!price) {
-              var priceEl = document.querySelector('span.pip-temp-lugg-price__integer') || 
-                            document.querySelector('span.pip-price__integer') || 
-                            document.querySelector('.pip-temp-lugg-price') || 
-                            document.querySelector('.pip-price');
-              if (priceEl) {
-                  price = priceEl.innerText.replace(/[^0-9]/g, '');
+
+          // 1. Classic IKEA CSS classes & test IDs
+          var selectors = [
+            'span.pip-temp-lugg-price__integer',
+            'span.pip-price__integer',
+            '.pip-temp-lugg-price__integer',
+            '.pip-price__integer',
+            '.pip-price__sr-text',
+            '.pip-temp-lugg-price',
+            '.pip-price',
+            '.pip-price-module__price',
+            '.pip-price-module__integer',
+            '[class*="pip-price-module__price"]',
+            '[class*="pip-price-module__integer"]',
+            '.pip-price-package__main-price',
+            '[class*="price-package__main"]',
+            '[data-testid="pip-price-module__price"]',
+            '[data-testid="regular-price-value"]',
+            '[data-testid*="regular-price"]',
+            '[data-testid="pip-price"]'
+          ];
+          for (var si = 0; si < selectors.length; si++) {
+            var el = document.querySelector(selectors[si]);
+            if (el) {
+              var txt = (el.innerText || el.textContent || '').trim();
+              var numMatch = txt.match(/(?:Rs\.?|\u20b9)?\s*([0-9][0-9,\s]{1,})/i);
+              if (numMatch) {
+                var pClean = numMatch[1].replace(/[^0-9]/g, '');
+                if (pClean && parseInt(pClean, 10) > 0) {
+                  price = pClean;
+                  break;
+                }
               }
+            }
           }
+
+          // 2. Open Graph & Product Meta Tags
           if (!price) {
-              var els = document.querySelectorAll('span, div, p, strong, h1, h2, h3');
-              var maxFontSize = 0;
-              for (var i = 0; i < Math.min(els.length, 300); i++) {
-                  var text = els[i].innerText ? els[i].innerText.trim() : '';
-                  var m = text.match(/(?:Rs\.?|₹|INR)\s*([0-9,]+)/i);
-                  if (m) {
-                      var style = window.getComputedStyle(els[i]);
-                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
-                      var fSize = parseInt(style.fontSize, 10) || 0;
-                      if (fSize > maxFontSize && fSize > 0) {
-                          maxFontSize = fSize;
-                          price = m[1].replace(/[^0-9]/g, '');
-                      }
-                  }
-              }
+            var ogP = document.querySelector('meta[property="product:price:amount"]') ||
+                      document.querySelector('meta[property="og:price:amount"]');
+            if (ogP && ogP.content) {
+              price = ogP.content.replace(/[^0-9]/g, '');
+            }
           }
+
+          // 3. JSON-LD structured data
+          if (!price) {
+            try {
+              var ldEls = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var j = 0; j < ldEls.length; j++) {
+                var ld = JSON.parse(ldEls[j].textContent || '{}');
+                var ldP = (ld.offers && ld.offers.price) ||
+                          (ld.offers && ld.offers[0] && ld.offers[0].price) || ld.price;
+                if (ldP) {
+                  price = String(ldP).replace(/[^0-9]/g, '');
+                  if (price) break;
+                }
+              }
+            } catch(e) {}
+          }
+
+          // 4. Tealium / dataLayer / ecommerce analytics objects
+          if (!price) {
+            try {
+              if (window.utag_data) {
+                var ud = window.utag_data;
+                var udPrice = ud.product_price_sale || ud.product_special_price ||
+                              ud.product_price || ud.sale_price || ud.price;
+                if (udPrice) price = String(udPrice).replace(/[^0-9]/g, '');
+              }
+            } catch(e) {}
+          }
+
+          // 5. Global scan for largest font-size element with Rs. / ₹ / INR
+          if (!price) {
+            var allEls = document.querySelectorAll('*');
+            var maxFs = 0;
+            for (var ae = 0; ae < Math.min(allEls.length, 600); ae++) {
+              var curr = allEls[ae];
+              if (curr.children && curr.children.length > 2) continue;
+              var cTxt = (curr.innerText || curr.textContent || '').trim();
+              if (!cTxt || cTxt.length > 40) continue;
+              var cMatch = cTxt.match(/(?:Rs\.?|\u20b9|INR)\s*([0-9,]+)/i);
+              if (cMatch) {
+                var cStyle = window.getComputedStyle(curr);
+                if (cStyle.textDecoration && cStyle.textDecoration.includes('line-through')) continue;
+                var cCls = (curr.className || '') + ' ' + (curr.parentElement ? curr.parentElement.className || '' : '');
+                if (cCls.toLowerCase().includes('off') || cCls.toLowerCase().includes('save') || cCls.toLowerCase().includes('discount')) continue;
+                var fs = parseInt(cStyle.fontSize, 10) || 0;
+                if (fs > maxFs) {
+                  maxFs = fs;
+                  price = cMatch[1].replace(/[^0-9]/g, '');
+                }
+              }
+            }
+          }
+
+          // 6. Body text regex fallback
+          if (!price) {
+            try {
+              var bodyTxt = document.body ? (document.body.innerText || document.body.textContent || '') : '';
+              var bM = bodyTxt.match(/(?:Rs\.?|\u20b9)\s*([0-9][0-9,]{2,})/i);
+              if (bM) price = bM[1].replace(/[^0-9]/g, '');
+            } catch(e) {}
+          }
+
           product.price = price;
           
           // 3. VARIANTS

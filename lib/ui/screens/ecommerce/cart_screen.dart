@@ -293,13 +293,16 @@ class _CartScreenState extends State<CartScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              color: context.color.textLightColor,
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 14,
+                color: context.color.textLightColor,
+              ),
             ),
           ),
+          const SizedBox(width: 8),
           Text(
             amount,
             style: TextStyle(
@@ -503,18 +506,22 @@ class _CartScreenState extends State<CartScreen> {
                                         ),
                                       ),
                                     ],
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${cart.currency}${itemPrice.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                        color: context.color.territoryColor,
+                                    FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      alignment: Alignment.centerLeft,
+                                      child: Text(
+                                        '${cart.currency}${itemPrice.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: context.color.territoryColor,
+                                        ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
+                              const SizedBox(width: 8),
 
                               // Quantity Controls (- 1 +)
                               Container(
@@ -594,32 +601,39 @@ class _CartScreenState extends State<CartScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              'Grand Total',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: context.color.textLightColor,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Grand Total',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: context.color.textLightColor,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              '${cart.currency}${cart.grandTotal.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: context.color.territoryColor,
+                              const SizedBox(height: 2),
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  '${cart.currency}${cart.grandTotal.toStringAsFixed(2)}',
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: context.color.territoryColor,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        const SizedBox(width: 12),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.color.territoryColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             elevation: 0,
                           ),
