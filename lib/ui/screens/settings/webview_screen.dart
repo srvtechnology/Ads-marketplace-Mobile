@@ -106,12 +106,32 @@ class _WebViewScreenState extends State<WebViewScreen> {
       ..loadRequest(Uri.parse(widget.url));
   }
 
+  Future<void> _handleBackNavigation() async {
+    if (await _controller.canGoBack()) {
+      await _controller.goBack();
+    } else {
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.color.primaryColor,
-      appBar: UiUtils.buildAppBar(context,
-          showBackButton: true, title: widget.title),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _handleBackNavigation();
+      },
+      child: Scaffold(
+        backgroundColor: context.color.primaryColor,
+        appBar: UiUtils.buildAppBar(context,
+            showBackButton: true,
+            onBackPress: () {
+              _handleBackNavigation();
+            },
+            title: widget.title),
       body: _errorMessage != null
           ? Center(
               child: Padding(
@@ -147,6 +167,7 @@ class _WebViewScreenState extends State<WebViewScreen> {
                   ),
               ],
             ),
+      ),
     );
   }
 }

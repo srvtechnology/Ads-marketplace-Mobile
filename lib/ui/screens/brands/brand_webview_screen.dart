@@ -2432,18 +2432,37 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
+  Future<void> _handleBackNavigation() async {
+    if (await _controller.canGoBack()) {
+      await _controller.goBack();
+    } else {
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: context.color.primaryColor,
-      appBar: UiUtils.buildAppBar(context,
-          showBackButton: true, 
-          titleWidget: Image.asset(
-            'assets/kora.png',
-            height: 28,
-            fit: BoxFit.contain,
-            alignment: Alignment.centerLeft,
-          ),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        await _handleBackNavigation();
+      },
+      child: Scaffold(
+        backgroundColor: context.color.primaryColor,
+        appBar: UiUtils.buildAppBar(context,
+            showBackButton: true,
+            onBackPress: () {
+              _handleBackNavigation();
+            },
+            titleWidget: Image.asset(
+              'assets/kora.png',
+              height: 28,
+              fit: BoxFit.contain,
+              alignment: Alignment.centerLeft,
+            ),
           actions: [
             IconButton(
               onPressed: () {
@@ -2570,6 +2589,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               ),
             )
           : null,
+      ),
     );
   }
 }
