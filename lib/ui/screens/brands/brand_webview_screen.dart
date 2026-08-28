@@ -87,18 +87,25 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
     });
 
-    // Use a Desktop Chrome User-Agent for two reasons:
-    // 1. Varnish-based CDNs (e.g. Lacoste.in) blocklist mobile/WebView UA strings (Error 54113).
-    // 2. IKEA and many e-commerce sites serve a different React layout to mobile UAs
-    //    with different CSS class names, breaking our price/title scraping selectors.
-    //    Desktop UA ensures both Android and iOS get the same page structure.
-    const String _browserUA =
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+    final String lowerUrl = widget.url.toLowerCase();
+    final bool isMeesho = lowerUrl.contains('meesho.com');
+    final bool isLacoste = lowerUrl.contains('lacoste.in');
 
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setUserAgent(_browserUA)
-      ..setBackgroundColor(const Color(0x00000000))
+      ..setBackgroundColor(const Color(0x00000000));
+
+    // Only set custom Desktop UA for Lacoste (to satisfy Magento/Varnish 54113 rule).
+    // For all other brands (especially Meesho on Akamai Bot Manager),
+    // we MUST leave the native platform User-Agent untouched so that
+    // TLS fingerprint, WebKit build version, and Client Hints match 100%.
+    if (isLacoste) {
+      const String desktopUA =
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+      _controller.setUserAgent(desktopUA);
+    }
+
+    _controller
       ..addJavaScriptChannel(
         'FlutterProductDetector',
         onMessageReceived: (JavaScriptMessage message) {
@@ -131,21 +138,25 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             }
           },
         ),
-      )
-      // Include browser-standard headers so Varnish CDN (Lacoste.in Error 54113)
-      // accepts the request. Missing Accept/Accept-Language headers are a common
-      // cause of 403 blocks on Varnish-guarded e-commerce sites.
-      ..loadRequest(
+      );
+
+    if (isMeesho) {
+      _controller.clearCache();
+      _controller.clearLocalStorage();
+    }
+
+    if (isLacoste) {
+      _controller.loadRequest(
         Uri.parse(widget.url),
         headers: {
           'Accept':
               'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.9',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
         },
       );
+    } else {
+      _controller.loadRequest(Uri.parse(widget.url));
+    }
   }
 
   /// Injects a JavaScript monitor into the page that intercepts SPA navigation
@@ -166,6 +177,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           if (url.includes('myntra.com') && (url.includes('/buy') || /\/[0-9]{5,}/.test(url))) return true;
           if (url.includes('firstcry.com') && url.includes('product-detail')) return true;
           if (url.includes('zara.com') && (url.includes('-p0') || url.includes('.html'))) return true;
+          if (url.includes('meesho.com') && (url.includes('/p/') || url.includes('/s/p/'))) return true;
           // Lacoste (Magento): use DOM check below — URL alone is not reliable (category pages also end in .html)
 
           // 2. Shopify check (non-Lacoste pages only)
@@ -257,10 +269,11 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     // Lacoste: no URL-based check — detection is handled entirely by the SPA monitor DOM checks
     // (category pages also end in .html on Magento, so DOM detection is the only reliable signal)
     
-    // Snitch, Rare Rabbit, The Bear House product URL checks
+    // Snitch, Rare Rabbit, The Bear House, Meesho product URL checks
     bool isSnitchProduct = (lowerUrl.contains('snitch.com') || lowerUrl.contains('snitch.co.in')) && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
     bool isRareRabbitProduct = lowerUrl.contains('thehouseofrare.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
     bool isBearHouseProduct = lowerUrl.contains('thebearhouse.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isMeeshoProduct = lowerUrl.contains('meesho.com') && (lowerUrl.contains('/p/') || lowerUrl.contains('/s/p/'));
     
     // Generic fallback for product URLs
     bool isGenericProduct = lowerUrl.contains('/products/') || lowerUrl.contains('/product/');
@@ -269,6 +282,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                      isDecathlonProduct || isFirstcryProduct || isIkeaProduct || 
                      isSephoraProduct || isUniqloProduct || isZaraProduct ||
                      isSnitchProduct || isRareRabbitProduct || isBearHouseProduct ||
+                     isMeeshoProduct ||
                      isGenericProduct;
     
     if (isProduct != isProductPage) {
@@ -564,7 +578,9 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  _buildOversizedItemNotice(dialogContext),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
@@ -788,7 +804,9 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
+                  _buildOversizedItemNotice(dialogContext),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
@@ -1762,7 +1780,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           var product = {};
           var price = '';
           
-          // 1. JSON-LD PARSING
+          // 1. JSON-LD PARSING (Title, Image, and fallback price)
+          var jsonLdPrice = '';
           var jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
           for (var i = 0; i < jsonLdScripts.length; i++) {
               try {
@@ -1773,8 +1792,9 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                       if (item['@type'] === 'Product' || item.offers) {
                           if (item.offers) {
                               var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
-                              if (offer.price || offer.lowPrice) {
-                                  price = String(offer.price || offer.lowPrice).replace(/[^0-9]/g, '');
+                              var p = offer.price || offer.lowPrice;
+                              if (p) {
+                                  jsonLdPrice = String(p).split('.')[0].replace(/[^0-9]/g, '');
                               }
                           }
                           if (item.name && !product.title) product.title = item.name;
@@ -1795,33 +1815,108 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               product.title = title;
           }
           
-          // 3. PRICE
-          if (!price) {
-              var priceEls = document.querySelectorAll('.price-current__amount, .price__amount, .money-amount__main, [class*="price-current"], [class*="price"]');
-              for (var i = 0; i < priceEls.length; i++) {
-                  var text = priceEls[i].innerText ? priceEls[i].innerText.trim() : '';
+          // 3. PRICE (Prioritize discounted / current price over old / strikethrough price)
+          function isStrikethroughOrOld(el) {
+              if (!el) return false;
+              var curr = el;
+              while (curr && curr !== document.body) {
+                  var cls = (curr.className && typeof curr.className === 'string') ? curr.className.toLowerCase() : '';
+                  if (cls.includes('price-old') || cls.includes('price_old') || cls.includes('old-price') || 
+                      cls.includes('price-original') || cls.includes('original-price') || 
+                      cls.includes('money-amount--old') || cls.includes('price__amount--old') ||
+                      cls.includes('strike')) {
+                      return true;
+                  }
+                  if (curr.tagName === 'DEL' || curr.tagName === 'S' || curr.tagName === 'STRIKE') {
+                      return true;
+                  }
+                  var style = window.getComputedStyle(curr);
+                  if (style.textDecoration && style.textDecoration.includes('line-through')) {
+                      return true;
+                  }
+                  curr = curr.parentElement;
+              }
+              return false;
+          }
+
+          // Method A: Targeted current/discounted price selectors
+          var currentPriceSelectors = [
+              '.price-current .money-amount__main',
+              '.price-current__amount .money-amount__main',
+              '.price-current__amount',
+              '[class*="price-current"] .money-amount__main',
+              '[class*="price-current"] [class*="money-amount"]',
+              '.price__amount-current',
+              '.price__amount--on-sale',
+              '[data-qa-action="product-detail-price"] [class*="price-current"]',
+              '[class*="price-current"]',
+              '.product-detail-info__price .price-current'
+          ];
+          for (var k = 0; k < currentPriceSelectors.length; k++) {
+              var el = document.querySelector(currentPriceSelectors[k]);
+              if (el && !isStrikethroughOrOld(el)) {
+                  var text = el.innerText ? el.innerText.trim() : '';
                   var m = text.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]+)?)/i) || text.match(/([0-9,]{3,}(?:\.[0-9]+)?)/);
                   if (m) {
-                      price = m[1].split('.')[0].replace(/[^0-9]/g, '');
-                      if (price) break;
+                      var p = m[1].split('.')[0].replace(/[^0-9]/g, '');
+                      if (p && parseInt(p, 10) > 0) {
+                          price = p;
+                          break;
+                      }
                   }
               }
           }
+
+          // Method B: General price elements excluding old/strikethrough
+          if (!price) {
+              var priceEls = document.querySelectorAll('.product-detail-info__price * , [data-qa-action="product-detail-price"] * , .money-amount__main, .price__amount, [class*="money-amount"], [class*="price"]');
+              for (var i = 0; i < priceEls.length; i++) {
+                  var el = priceEls[i];
+                  if (isStrikethroughOrOld(el)) continue;
+                  var text = el.innerText ? el.innerText.trim() : '';
+                  var m = text.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]+)?)/i) || text.match(/([0-9,]{3,}(?:\.[0-9]+)?)/);
+                  if (m) {
+                      var p = m[1].split('.')[0].replace(/[^0-9]/g, '');
+                      if (p && parseInt(p, 10) > 0) {
+                          price = p;
+                          break;
+                      }
+                  }
+              }
+          }
+
+          // Method C: Computed style / font size search excluding old/strikethrough
           if (!price) {
               var els = document.querySelectorAll('span, div, p, strong, h1, h2, h3');
               var maxFontSize = 0;
               for (var i = 0; i < Math.min(els.length, 300); i++) {
-                  var text = els[i].innerText ? els[i].innerText.trim() : '';
-                  var m = text.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+)/i);
+                  var el = els[i];
+                  if (isStrikethroughOrOld(el)) continue;
+                  var text = el.innerText ? el.innerText.trim() : '';
+                  var m = text.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]+)?)/i);
                   if (m) {
-                      var style = window.getComputedStyle(els[i]);
-                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
+                      var style = window.getComputedStyle(el);
                       var fSize = parseInt(style.fontSize, 10) || 0;
                       if (fSize > maxFontSize && fSize > 0) {
-                          maxFontSize = fSize;
-                          price = m[1].replace(/[^0-9]/g, '');
+                          var p = m[1].split('.')[0].replace(/[^0-9]/g, '');
+                          if (p && parseInt(p, 10) > 0) {
+                              maxFontSize = fSize;
+                              price = p;
+                          }
                       }
                   }
+              }
+          }
+
+          // Method D: Fallback to JSON-LD price or meta tags
+          if (!price && jsonLdPrice) {
+              price = jsonLdPrice;
+          }
+          if (!price) {
+              var ogPrice = document.querySelector('meta[property="product:price:amount"]') ||
+                            document.querySelector('meta[property="og:price:amount"]');
+              if (ogPrice && ogPrice.content) {
+                  price = ogPrice.content.split('.')[0].replace(/[^0-9]/g, '');
               }
           }
           product.price = price;
@@ -2383,6 +2478,151 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           return JSON.stringify(product);
         })();
       ''';
+    } else if (currentUrl.contains('meesho.com')) {
+      return r'''
+        (function() {
+          var product = {};
+
+          // 1. NEXT.js INITIAL STATE (Highly reliable for Meesho SSR & hydration data)
+          try {
+            if (window.__NEXT_DATA__ && window.__NEXT_DATA__.props && window.__NEXT_DATA__.props.pageProps) {
+              var init = window.__NEXT_DATA__.props.pageProps.initialState;
+              if (init && init.product && init.product.details && init.product.details.data) {
+                var pData = init.product.details.data;
+                if (pData.name) product.title = pData.name;
+                if (pData.price) product.price = String(pData.price).replace(/[^0-9]/g, '');
+                if (pData.images && Array.isArray(pData.images) && pData.images.length > 0) {
+                  product.image = pData.images[0];
+                }
+                var vars = [];
+                if (pData.variations && Array.isArray(pData.variations) && pData.variations.length > 0) {
+                  vars.push('Size: ' + pData.variations[0]);
+                }
+                if (pData.product_details && pData.product_details.additional_details && pData.product_details.additional_details.attributes) {
+                  var attrs = pData.product_details.additional_details.attributes;
+                  for (var a = 0; a < attrs.length; a++) {
+                    if (attrs[a].field_name === 'color' && attrs[a].value) {
+                      vars.push('Colour: ' + attrs[a].value);
+                      break;
+                    }
+                  }
+                }
+                if (vars.length > 0) product.variants = vars.join(', ');
+                product.brand = 'Meesho';
+              }
+            }
+          } catch(_) {}
+
+          // 2. JSON-LD STRUCTURED DATA
+          if (!product.title || !product.price) {
+            try {
+              var scripts = document.querySelectorAll('script[type="application/ld+json"]');
+              for (var i = 0; i < scripts.length; i++) {
+                var data = JSON.parse(scripts[i].innerText);
+                var items = Array.isArray(data) ? data : [data];
+                for (var j = 0; j < items.length; j++) {
+                  var item = items[j];
+                  if (item['@type'] === 'Product' || (item.offers && item.name)) {
+                    if (!product.title && item.name) product.title = item.name;
+                    if (!product.price && item.offers) {
+                      var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
+                      var p = offer.price || offer.lowPrice;
+                      if (p) product.price = String(p).replace(/[^0-9]/g, '');
+                    }
+                    if (!product.image && item.image) {
+                      product.image = Array.isArray(item.image) ? item.image[0] : item.image;
+                    }
+                    break;
+                  }
+                }
+              }
+            } catch(_) {}
+          }
+
+          // 3. META TAGS / OPEN GRAPH
+          if (!product.title) {
+            var ogTitle = document.querySelector('meta[property="og:title"]');
+            if (ogTitle && ogTitle.content) product.title = ogTitle.content.trim();
+          }
+          if (!product.image) {
+            var ogImg = document.querySelector('meta[property="og:image"]');
+            if (ogImg && ogImg.content) product.image = ogImg.content;
+          }
+
+          // 4. DOM SELECTORS FOR TITLE
+          if (!product.title) {
+            var titleEl = document.querySelector('h1') ||
+                          document.querySelector('[class*="ShippingInfo__DetailCard"] h1') ||
+                          document.querySelector('[class*="ProductCard"] h1');
+            product.title = titleEl ? titleEl.innerText.trim() : document.title.replace(/\| Meesho.*$/i, '').trim();
+          }
+
+          // 5. DOM SELECTORS FOR PRICE
+          if (!product.price) {
+            var priceEl = document.querySelector('[class*="PriceContainer"] h4') ||
+                          document.querySelector('[class*="ShippingInfo__PriceRow"] h4') ||
+                          document.querySelector('h4');
+            if (priceEl && priceEl.innerText && priceEl.innerText.includes('₹')) {
+              var pm = priceEl.innerText.match(/₹\s*([0-9,]+)/);
+              if (pm) product.price = pm[1].replace(/[^0-9]/g, '');
+            }
+          }
+          if (!product.price) {
+            var allEls = document.querySelectorAll('h4, h3, h2, span, p');
+            for (var i = 0; i < Math.min(allEls.length, 300); i++) {
+              var t = allEls[i].innerText ? allEls[i].innerText.trim() : '';
+              if (t.match(/^₹\s*[0-9,]+$/)) {
+                product.price = t.replace(/[^0-9]/g, '');
+                break;
+              }
+            }
+          }
+
+          // 6. DOM SELECTORS FOR IMAGE
+          if (!product.image) {
+            var imgEl = document.querySelector('img[data-testid="product-images"]') ||
+                        document.querySelector('[class*="ProductDesktopImage"] img') ||
+                        document.querySelector('[class*="ProductCard__ProductImage"] img') ||
+                        document.querySelector('img[src*="images.meesho.com/images/products"]');
+            if (imgEl && imgEl.src) product.image = imgEl.src;
+          }
+
+          // 7. DOM SELECTORS FOR VARIANTS (SIZE & COLOR)
+          if (!product.variants) {
+            var variants = [];
+            var selectedSizeEl = document.querySelector('[class*="SizeSelectorChips"] [class*="SingleChip"]') ||
+                                 document.querySelector('[class*="SizeSelection"] [class*="SingleChip"]') ||
+                                 document.querySelector('[class*="SingleChip"]');
+            if (selectedSizeEl) {
+              var sText = selectedSizeEl.innerText.trim();
+              if (sText) variants.push('Size: ' + sText.split('\n')[0].trim());
+            }
+            if (variants.length === 0) {
+              var chips = document.querySelectorAll('[class*="SingleChip"] span, [class*="SizeSelectorChips"] span');
+              if (chips.length > 0) {
+                var sText = chips[0].innerText.trim();
+                if (sText) variants.push('Size: ' + sText.split('\n')[0].trim());
+              }
+            }
+            var attrRows = document.querySelectorAll('[class*="AdditionalDetailsContainer"], [class*="AttributeCard"]');
+            for (var r = 0; r < attrRows.length; r++) {
+              var rowText = attrRows[r].innerText || '';
+              if (rowText.toLowerCase().includes('color')) {
+                var cVal = rowText.replace(/color/i, '').replace(/[:\n\r]/g, ' ').trim();
+                if (cVal && cVal.length < 30) {
+                  variants.push('Colour: ' + cVal);
+                  break;
+                }
+              }
+            }
+            product.variants = variants.join(', ');
+          }
+
+          product.url = window.location.href;
+          product.brand = 'Meesho';
+          return JSON.stringify(product);
+        })();
+      ''';
     } else {
       return r'''
         (function() {
@@ -2440,6 +2680,60 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         Navigator.pop(context);
       }
     }
+  }
+
+  Widget _buildOversizedItemNotice(BuildContext context, {EdgeInsetsGeometry? margin}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      margin: margin,
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.amber.withValues(alpha: 0.15)
+            : const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark
+              ? Colors.amber.withValues(alpha: 0.4)
+              : const Color(0xFFFFD54F),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            Icons.info_outline_rounded,
+            size: 16,
+            color: isDark ? Colors.amber.shade400 : Colors.amber.shade800,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 11,
+                  color: context.color.textDefaultColor.withValues(alpha: 0.9),
+                  height: 1.35,
+                ),
+                children: const [
+                  TextSpan(
+                    text: "Oversized Item Notice: ",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text:
+                        "Final shipping costs for heavy or bulky items (furniture, gym gear, etc.) will be communicated separately before dispatch and may differ from the standard cart estimate.",
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -2503,19 +2797,19 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                           ),
                           constraints: const BoxConstraints(
                             minWidth: 16,
-                            minHeight: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          '$count',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
                           ),
-                          child: Text(
-                            '$count',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
+                    ),
                   ],
                 );
               },
@@ -2536,7 +2830,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       ),
       bottomNavigationBar: isProductPage
           ? Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: context.color.primaryColor,
                 boxShadow: [
@@ -2547,42 +2841,57 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                   )
                 ],
               ),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: context.color.forthColor, // Global theme color
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () {
-                  _scrapeAndShowSizeColourDialog(context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.shopping_cart_outlined, color: context.color.buttonColor), // Theme icon color
-                    const SizedBox(width: 8),
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Order via Kora",
-                          style: TextStyle(
-                            color: context.color.buttonColor,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    _buildOversizedItemNotice(
+                      context,
+                      margin: const EdgeInsets.only(bottom: 10),
+                    ),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: context.color.forthColor, // Global theme color
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        Text(
-                          "login not required",
-                          style: TextStyle(
-                            color: context.color.buttonColor.withValues(alpha: 0.85),
-                            fontSize: 11,
-                            fontWeight: FontWeight.normal,
-                          ),
+                        onPressed: () {
+                          _scrapeAndShowSizeColourDialog(context);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.shopping_cart_outlined, color: context.color.buttonColor), // Theme icon color
+                            const SizedBox(width: 8),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "Order via Kora",
+                                  style: TextStyle(
+                                    color: context.color.buttonColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  "login not required",
+                                  style: TextStyle(
+                                    color: context.color.buttonColor.withValues(alpha: 0.85),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.normal,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),

@@ -76,6 +76,11 @@ class BrandWidgetHome extends StatelessWidget {
         'image': 'assets/brands_logo/the_bear houses.jpeg',
         'url': 'https://thebearhouse.com/',
       },
+      // {
+      //   'name': 'Meesho',
+      //   'image': 'assets/brands_logo/meesho.png',
+      //   'url': 'https://www.meesho.com/',
+      // },
     ];
 
     return Column(
