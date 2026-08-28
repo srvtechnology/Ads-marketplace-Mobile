@@ -3,6 +3,7 @@ import 'package:eClassify/data/cubits/ecommerce/fetch_ecommerce_orders_cubit.dar
 import 'package:eClassify/data/model/ecommerce/ecommerce_order_model.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/custom_text.dart';
+import 'package:eClassify/utils/ecommerce_order_status_helper.dart';
 import 'package:eClassify/utils/extensions/extensions.dart';
 import 'package:eClassify/utils/ui_utils.dart';
 import 'package:flutter/material.dart';
@@ -88,6 +89,8 @@ class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
   }
 
   Widget _buildOrderCard(BuildContext context, EcommerceOrderModel order) {
+    final status = order.status ?? order.deliveryStatus;
+
     return Container(
       decoration: BoxDecoration(
         color: context.color.secondaryColor,
@@ -107,14 +110,33 @@ class _EcommerceOrderListScreenState extends State<EcommerceOrderListScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Order #${order.orderId ?? order.id ?? ''}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
-                  color: context.color.textDefaultColor,
+              Expanded(
+                child: Text(
+                  'Order #${order.orderId ?? order.id ?? ''}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                    color: context.color.textDefaultColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (status != null && status.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: EcommerceOrderStatusHelper.getStatusColor(context, status).withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    EcommerceOrderStatusHelper.getStatusText(status),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: EcommerceOrderStatusHelper.getStatusColor(context, status),
+                    ),
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),

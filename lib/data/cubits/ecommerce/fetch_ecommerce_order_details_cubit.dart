@@ -40,16 +40,51 @@ class FetchEcommerceOrderDetailsCubit extends Cubit<FetchEcommerceOrderDetailsSt
 
       if (result['error'] == false || result['success'] == true) {
         if (result['data'] != null) {
-          EcommerceOrderModel order = EcommerceOrderModel.fromJson(result['data']);
+          EcommerceOrderModel order = EcommerceOrderModel.fromJson(Map<String, dynamic>.from(result['data']));
           emit(FetchEcommerceOrderDetailsSuccess(order));
         } else {
           emit(FetchEcommerceOrderDetailsFailure("Order details not found"));
         }
       } else {
-        emit(FetchEcommerceOrderDetailsFailure(result['message'].toString()));
+        emit(FetchEcommerceOrderDetailsFailure(result['message']?.toString() ?? "Failed to fetch order details"));
       }
     } catch (e) {
       emit(FetchEcommerceOrderDetailsFailure(e.toString()));
+    }
+  }
+
+  Future<Map<String, dynamic>> cancelOrder(int orderId, String remarks) async {
+    try {
+      final String baseUrl = Constant.isDemoModeOn
+          ? 'http://127.0.0.1:8000/api'
+          : '${AppSettings.ecommerceHostUrl}/api';
+
+      final result = await Api.post(
+        url: '$baseUrl/orders/$orderId/cancel',
+        useBaseUrl: false,
+        useJson: true,
+        parameter: {
+          'remarks': remarks,
+        },
+      );
+
+      if (result['success'] == true || result['error'] == false) {
+        fetchOrderDetails(orderId);
+        return {
+          'success': true,
+          'message': result['message']?.toString() ?? 'Order cancelled successfully',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': result['message']?.toString() ?? 'Failed to cancel order',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': e.toString(),
+      };
     }
   }
 }

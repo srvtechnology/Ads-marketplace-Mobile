@@ -70,6 +70,7 @@ class EcommerceOrderModel {
   final String? orderId;
   final String? deliveryOtp;
   final String? deliveryDate;
+  final int? checkoutBfsTransactionId;
   final String? name;
   final String? email;
   final String? countryCode;
@@ -83,6 +84,7 @@ class EcommerceOrderModel {
   final String? paymentMode;
   final String? totalAmount;
   final String? status;
+  final String? deliveryStatus;
   final String? remarks;
   final String? statusRemarks;
   final String? placedOn;
@@ -98,6 +100,7 @@ class EcommerceOrderModel {
     this.orderId,
     this.deliveryOtp,
     this.deliveryDate,
+    this.checkoutBfsTransactionId,
     this.name,
     this.email,
     this.countryCode,
@@ -111,6 +114,7 @@ class EcommerceOrderModel {
     this.paymentMode,
     this.totalAmount,
     this.status,
+    this.deliveryStatus,
     this.remarks,
     this.statusRemarks,
     this.placedOn,
@@ -121,39 +125,66 @@ class EcommerceOrderModel {
     this.items = const [],
   });
 
+  bool get isCancellable {
+    final s = (status ?? deliveryStatus ?? '').toUpperCase().trim();
+    if (s.isEmpty) return true;
+    if (s == 'CAN' ||
+        s == 'CC' ||
+        s == 'CANCELLED' ||
+        s == 'PCAN' ||
+        s == 'PARTIALLY CANCELLED' ||
+        s == 'PARTIALLY_CANCELLED' ||
+        s == 'DELIVERED' ||
+        s == 'PDELIVERED' ||
+        s == 'PARTIALLY DELIVERED' ||
+        s == 'PARTIALLY_DELIVERED' ||
+        s == 'RE' ||
+        s == 'REJECTED' ||
+        s == 'PRE' ||
+        s == 'PARTIALLY REJECTED' ||
+        s == 'PARTIALLY_REJECTED') {
+      return false;
+    }
+    return true;
+  }
+
   factory EcommerceOrderModel.fromJson(Map<String, dynamic> json) {
     return EcommerceOrderModel(
       id: json['id'],
       customerId: json['customer_id'],
       orderId: json['order_id']?.toString() ?? json['order_no']?.toString(),
       deliveryOtp: json['delivery_otp']?.toString() ?? json['otp']?.toString(),
-      deliveryDate: json['delivery_date']?.toString(),
+      deliveryDate: json['delivery_date']?.toString() ?? json['expected_delivery_date']?.toString(),
+      checkoutBfsTransactionId: json['checkout_bfs_transaction_id'] is int
+          ? json['checkout_bfs_transaction_id']
+          : int.tryParse(json['checkout_bfs_transaction_id']?.toString() ?? ''),
       name: json['name'],
       email: json['email'],
       countryCode: json['country_code']?.toString(),
-      mobile: json['mobile'],
-      shippingAddress: json['shipping_address'],
+      mobile: json['mobile']?.toString(),
+      shippingAddress: json['shipping_address']?.toString(),
       shippingZipcode: json['shipping_zipcode']?.toString(),
       shippingLandmark: json['shipping_landmark']?.toString(),
-      billingAddress: json['billing_address'],
+      billingAddress: json['billing_address']?.toString(),
       billingZipcode: json['billing_zipcode']?.toString(),
       billingLandmark: json['billing_landmark']?.toString(),
-      paymentMode: json['payment_mode'],
-      totalAmount: json['total_amount']?.toString(),
-      status: json['status'],
-      remarks: json['remarks'],
-      statusRemarks: json['status_remarks'],
-      placedOn: json['placed_on']?.toString(),
-      createdAt: json['created_at'],
-      updatedAt: json['updated_at'],
+      paymentMode: json['payment_mode']?.toString(),
+      totalAmount: json['total_amount']?.toString() ?? json['payment_detail']?['grand_total']?.toString(),
+      status: json['status']?.toString(),
+      deliveryStatus: json['delivery_status']?.toString() ?? json['status_label']?.toString(),
+      remarks: json['remarks']?.toString(),
+      statusRemarks: json['status_remarks']?.toString(),
+      placedOn: json['placed_on']?.toString() ?? json['created_at']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      updatedAt: json['updated_at']?.toString(),
       paymentDetail: json['payment_detail'] != null && json['payment_detail'] is Map
-          ? EcommerceOrderPaymentDetailModel.fromJson(json['payment_detail'])
+          ? EcommerceOrderPaymentDetailModel.fromJson(Map<String, dynamic>.from(json['payment_detail']))
           : null,
       bfsTransaction: json['bfs_transaction'] != null && json['bfs_transaction'] is Map
-          ? BfsTransactionModel.fromJson(json['bfs_transaction'])
+          ? BfsTransactionModel.fromJson(Map<String, dynamic>.from(json['bfs_transaction']))
           : null,
       items: (json['items'] as List?)
-              ?.map((e) => EcommerceOrderItemModel.fromJson(e))
+              ?.map((e) => EcommerceOrderItemModel.fromJson(Map<String, dynamic>.from(e)))
               .toList() ??
           [],
     );
@@ -166,6 +197,7 @@ class EcommerceOrderModel {
       'order_id': orderId,
       'delivery_otp': deliveryOtp,
       'delivery_date': deliveryDate,
+      'checkout_bfs_transaction_id': checkoutBfsTransactionId,
       'name': name,
       'email': email,
       'country_code': countryCode,
@@ -179,6 +211,7 @@ class EcommerceOrderModel {
       'payment_mode': paymentMode,
       'total_amount': totalAmount,
       'status': status,
+      'delivery_status': deliveryStatus,
       'remarks': remarks,
       'status_remarks': statusRemarks,
       'placed_on': placedOn,
@@ -200,12 +233,16 @@ class EcommerceOrderItemModel {
   final String? sourceUrl;
   final String? image;
   final String? price;
+  final double unitPrice;
   final int? qty;
   final String? subtotal;
   final String? variantDetails;
   final String? status;
+  final String? statusLabel;
   final String? deliveryStatus;
   final String? deliveryDate;
+  final String? orderNo;
+  final String? remarks;
   final double serviceCharge;
   final double deliveryCharge;
   final double shipmentCharge;
@@ -226,12 +263,16 @@ class EcommerceOrderItemModel {
     this.sourceUrl,
     this.image,
     this.price,
+    this.unitPrice = 0.0,
     this.qty,
     this.subtotal,
     this.variantDetails,
     this.status,
+    this.statusLabel,
     this.deliveryStatus,
     this.deliveryDate,
+    this.orderNo,
+    this.remarks,
     this.serviceCharge = 0.0,
     this.deliveryCharge = 0.0,
     this.shipmentCharge = 0.0,
@@ -250,8 +291,10 @@ class EcommerceOrderItemModel {
     return null;
   }
 
-  /// Returns effective item-wise status code or status string
-  String? get effectiveStatus => status ?? deliveryStatus;
+  /// Returns effective item-wise status label or status code
+  String? get effectiveStatus => statusLabel ?? status ?? deliveryStatus;
+
+  double get effectiveUnitPrice => unitPrice > 0 ? unitPrice : (double.tryParse(price ?? '0') ?? 0.0);
 
   factory EcommerceOrderItemModel.fromJson(Map<String, dynamic> json) {
     String? itemTitle = json['title']?.toString() ?? json['name']?.toString();
@@ -269,6 +312,8 @@ class EcommerceOrderItemModel {
       vDetails = null;
     }
 
+    double parsedUnitPrice = double.tryParse((json['unit_price'] ?? json['price'] ?? '0').toString()) ?? 0.0;
+
     return EcommerceOrderItemModel(
       id: json['id'] ?? json['item_id'],
       itemId: json['item_id'] ?? json['id'],
@@ -280,12 +325,16 @@ class EcommerceOrderItemModel {
       sourceUrl: json['source_url']?.toString(),
       image: itemImage,
       price: (json['unit_price'] ?? json['price'])?.toString(),
+      unitPrice: parsedUnitPrice,
       qty: quantity,
       subtotal: (json['final_amount'] ?? json['subtotal'])?.toString(),
       variantDetails: vDetails,
       status: json['status']?.toString(),
+      statusLabel: json['status_label']?.toString(),
       deliveryStatus: json['delivery_status']?.toString(),
       deliveryDate: json['delivery_date']?.toString() ?? json['expected_delivery_date']?.toString(),
+      orderNo: json['order_no']?.toString(),
+      remarks: json['remarks']?.toString(),
       serviceCharge: double.tryParse(json['service_charge']?.toString() ?? '0') ?? 0.0,
       deliveryCharge: double.tryParse(json['delivery_charge']?.toString() ?? '0') ?? 0.0,
       shipmentCharge: double.tryParse(json['shipment_charge']?.toString() ?? '0') ?? 0.0,
@@ -293,7 +342,7 @@ class EcommerceOrderItemModel {
       gstAmount: double.tryParse(json['gst_amount']?.toString() ?? '0') ?? 0.0,
       finalAmount: double.tryParse(json['final_amount']?.toString() ?? '0') ?? 0.0,
       product: json['product'] != null && json['product'] is Map
-          ? EcommerceProductModel.fromJson(json['product'])
+          ? EcommerceProductModel.fromJson(Map<String, dynamic>.from(json['product']))
           : (itemTitle != null ? EcommerceProductModel(
               id: json['product_id'] ?? 0,
               name: itemTitle,
@@ -306,11 +355,11 @@ class EcommerceOrderItemModel {
               variants: [],
             ) : null),
       variant: json['variant'] != null && json['variant'] is Map
-          ? EcommerceVariantModel.fromJson(json['variant'])
+          ? EcommerceVariantModel.fromJson(Map<String, dynamic>.from(json['variant']))
           : (vDetails != null ? EcommerceVariantModel(
               id: json['product_varient_id'] ?? json['product_variant_id'] ?? 0,
               productId: json['product_id'] ?? 0,
-              price: double.tryParse((json['unit_price'] ?? json['price'] ?? 0).toString()) ?? 0.0,
+              price: parsedUnitPrice,
               variantName: vDetails,
             ) : null),
     );
@@ -328,9 +377,22 @@ class EcommerceOrderItemModel {
       'source_url': sourceUrl,
       'image': image,
       'price': price,
+      'unit_price': unitPrice,
       'qty': qty,
       'subtotal': subtotal,
       'variant_details': variantDetails,
+      'status': status,
+      'status_label': statusLabel,
+      'delivery_status': deliveryStatus,
+      'delivery_date': deliveryDate,
+      'order_no': orderNo,
+      'remarks': remarks,
+      'service_charge': serviceCharge,
+      'delivery_charge': deliveryCharge,
+      'shipment_charge': shipmentCharge,
+      'gst_charge': gstCharge,
+      'gst_amount': gstAmount,
+      'final_amount': finalAmount,
       'product': product?.toJson(),
       'variant': variant?.toJson(),
     };
