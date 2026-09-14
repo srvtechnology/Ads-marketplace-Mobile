@@ -1070,7 +1070,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         (function() {
           var product = { brand: 'Myntra', url: window.location.href };
 
-          // ── STRATEGY 1: Myntra Gateway API for Title & Image ──
+          // ── STRATEGY 1: Myntra Gateway API for Title, Image, URL & Price ──
           // (Called within WebView so session cookies are sent - no CORS issue)
           try {
             var url = window.location.href;
@@ -1094,10 +1094,18 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                 var data = JSON.parse(xhr.responseText);
                 var style = data.style || data.product || data.data || data;
 
-                // Title from API
-                var bName = style.brandName || (style.brand && style.brand.name) || '';
-                var pName = style.name || '';
-                if (pName) product.title = (bName + ' ' + pName).trim();
+                // Title from API (avoid duplicating brand name if product name already starts with it)
+                var bName = (style.brandName || (style.brand && style.brand.name) || '').trim();
+                var pName = (style.name || '').trim();
+                if (pName) {
+                  if (bName && pName.toLowerCase().indexOf(bName.toLowerCase()) === 0) {
+                    product.title = pName;
+                  } else if (bName) {
+                    product.title = bName + ' ' + pName;
+                  } else {
+                    product.title = pName;
+                  }
+                }
 
                 // Image from API (recursive search for first myntassets /images/ URL)
                 function findImg(obj, depth) {
@@ -1127,39 +1135,259 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                 } else {
                   product.url = 'https://www.myntra.com/' + styleId;
                 }
+
+
+                // Sizes / sizePrices from API
+                try {
+                  var opts = style.styleOptions || style.sizes;
+                  if (Array.isArray(opts)) {
+                    var sp = {};
+                    for (var o = 0; o < opts.length; o++) {
+                      var opt = opts[o];
+                      var sz = (opt.value || opt.label || opt.size || '').toString().trim().toUpperCase();
+                      var pr = opt.discountedPrice != null ? opt.discountedPrice : (opt.price != null ? opt.price : opt.sellingPrice);
+                      if (sz && pr && Number(pr) > 50) {
+                        sp[sz] = Number(pr);
+                      }
+                    }
+                    if (Object.keys(sp).length > 0) {
+                      product.sizePrices = sp;
+                    }
+                  }
+                } catch(se) {}
               }
             }
           } catch(e) {}
 
-          // ── STRATEGY 2: Price from raw DOM text (Primary - most reliable) ──
-          // Handles TWO cases:
-          //   Case A (Discounted): "MRP ₹5,400 ₹2,538 53% OFF!" → selling price = ₹2,538
-          //   Case B (Full Price):  "MRP ₹1,799"  (no discount badge) → selling price = ₹1,799
-          try {
-            var rawText = document.body.innerText.replace(/\n/g, ' ');
-
-            // Case A: Discounted product - look for "MRP price1 price2 X% OFF" pattern
-            // The "X% OFF" badge MUST be present within 30 chars of price2 to confirm it's a real discount
-            var discReg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*[0-9]+%\s*off/i;
-            var md = rawText.match(discReg);
-            if (md) {
-              var mrpV = parseInt(md[1].replace(/,/g, ''), 10);
-              var sellV = parseInt(md[2].replace(/,/g, ''), 10);
-              if (sellV > 50 && sellV < mrpV) {
-                product.price = String(sellV);
+          // ── STRATEGY 2: Global SSR State (window.__myx.pdpData) ──
+          if (!product.price) {
+            try {
+              if (window.__myx && window.__myx.pdpData) {
+                var pData = window.__myx.pdpData;
+                if (pData.price) {
+                  var disc = pData.price.discounted != null ? pData.price.discounted : pData.price.discountedPrice;
+                  var mrp = pData.price.mrp != null ? pData.price.mrp : pData.price.maximumRetailPrice;
+                  if (disc && Number(disc) > 50) {
+                    product.price = String(disc);
+                  } else if (mrp && Number(mrp) > 50) {
+                    product.price = String(mrp);
+                  }
+                }
+                if (!product.title && pData.name) {
+                  var pb = (pData.brand && pData.brand.name) || '';
+                  if (pb && pData.name.toLowerCase().indexOf(pb.toLowerCase()) === -1) {
+                    product.title = pb + ' ' + pData.name;
+                  } else {
+                    product.title = pData.name;
+                  }
+                }
+                if (!product.sizePrices && Array.isArray(pData.sizes)) {
+                  var spMap = {};
+                  for (var si = 0; si < pData.sizes.length; si++) {
+                    var sObj = pData.sizes[si];
+                    var sLabel = (sObj.label || sObj.size || sObj.name || '').toString().trim().toUpperCase();
+                    var sPrice = sObj.discountedPrice != null ? sObj.discountedPrice : (sObj.price != null ? sObj.price : sObj.sellingPrice);
+                    if (sLabel && sPrice && Number(sPrice) > 50) {
+                      spMap[sLabel] = Number(sPrice);
+                    }
+                  }
+                  if (Object.keys(spMap).length > 0) {
+                    product.sizePrices = spMap;
+                  }
+                }
               }
-            }
+            } catch(e) {}
+          }
 
-            // Case B: Non-discounted - just MRP shown, use it as the selling price
-            if (!product.price) {
-              var mrpReg = /mrp\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
-              var mm = rawText.match(mrpReg);
-              if (mm) {
-                var mrpPrice = parseInt(mm[1].replace(/,/g, ''), 10);
-                if (mrpPrice > 50) product.price = String(mrpPrice);
+          // ── STRATEGY 3: Scan <script> tags for pdpData JSON ──
+          if (!product.price) {
+            try {
+              var scripts = document.querySelectorAll('script');
+              for (var i = 0; i < scripts.length; i++) {
+                var sc = scripts[i].textContent || '';
+                if (sc.includes('pdpData') && sc.includes('price')) {
+                  var dm = sc.match(/"discounted"\s*:\s*([0-9]+)/i) || sc.match(/"discountedPrice"\s*:\s*([0-9]+)/i);
+                  if (dm) {
+                    var pv = parseInt(dm[1], 10);
+                    if (pv > 50) {
+                      product.price = String(pv);
+                      break;
+                    }
+                  }
+                }
               }
-            }
-          } catch(e) {}
+            } catch(e) {}
+          }
+
+          // ── STRATEGY 4: DOM Element Price Detection (skip strikethrough MRP) ──
+          if (!product.price) {
+            try {
+              // Scan all elements for ₹ prices, skip strikethrough (MRP) elements
+              var allEls = document.querySelectorAll('span, div, strong, b, p, h1, h2, h3, h4');
+              var biggestNonStrike = 0;
+              var biggestFontSize = 0;
+              for (var ei = 0; ei < Math.min(allEls.length, 500); ei++) {
+                var el = allEls[ei];
+                var txt = (el.innerText || '').trim();
+                // Must look like a price: ₹X,XXX or just digits
+                var prM = txt.match(/^[₹\u20b9]?\s*([0-9]{1,3}(?:,[0-9]{3})*)$/);
+                if (!prM) continue;
+                var prVal = parseInt(prM[1].replace(/,/g, ''), 10);
+                if (prVal <= 50) continue;
+
+                // Skip if this element is strikethrough (MRP)
+                var cs = window.getComputedStyle(el);
+                if (cs.textDecoration && cs.textDecoration.includes('line-through')) continue;
+                // Skip if inside a <s>, <del>, <strike> or MRP container
+                if (el.closest && el.closest('s, del, strike, [class*="mrp"], [class*="strike"]')) continue;
+                // Skip if parent has line-through
+                var par = el.parentElement;
+                if (par) {
+                  var parCs = window.getComputedStyle(par);
+                  if (parCs.textDecoration && parCs.textDecoration.includes('line-through')) continue;
+                  if (par.tagName === 'S' || par.tagName === 'DEL' || par.tagName === 'STRIKE') continue;
+                }
+
+                var fSize = parseInt(cs.fontSize, 10) || 0;
+                if (fSize > biggestFontSize) {
+                  biggestFontSize = fSize;
+                  biggestNonStrike = prVal;
+                }
+              }
+              if (biggestNonStrike > 50) {
+                product.price = String(biggestNonStrike);
+              }
+            } catch(e) {}
+          }
+
+          // ── STRATEGY 4b: DOM CSS Selectors (pdp-price classes) ──
+          if (!product.price) {
+            try {
+              var priceSelectors = [
+                'strong.pdp-price',
+                '.pdp-price',
+                'span.pdp-price',
+                '[class*="pdp-price"]',
+                '[class*="pdp-selling-price"]',
+                '[class*="selling-price"]'
+              ];
+              for (var ps = 0; ps < priceSelectors.length; ps++) {
+                var pEls = document.querySelectorAll(priceSelectors[ps]);
+                for (var pe = 0; pe < pEls.length; pe++) {
+                  var pEl = pEls[pe];
+                  // Exclude elements that are strikethrough or within an MRP container
+                  var elStyle = window.getComputedStyle(pEl);
+                  if (elStyle.textDecoration && elStyle.textDecoration.includes('line-through')) continue;
+                  if (pEl.closest && pEl.closest('.pdp-mrp, [class*="pdp-mrp"], [class*="mrp"], del, s, strike')) continue;
+
+                  var pTxt = (pEl.innerText || '').replace(/[^0-9]/g, '');
+                  var pVal = parseInt(pTxt, 10);
+                  if (pVal > 50) {
+                    product.price = String(pVal);
+                    break;
+                  }
+                }
+                if (product.price) break;
+              }
+            } catch(e) {}
+          }
+
+
+          // ── STRATEGY 5: DOM Text Regex & Proximity Verification ──
+          if (!product.price) {
+            try {
+              var rawText = document.body.innerText.replace(/[\s\u00a0]+/g, ' ');
+
+              // Case A1: "MRP ₹2,990 ₹2,810 (6% OFF)" or "MRP: ₹2,990 ₹2,810 6% OFF"
+              var reg1 = /mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*\(?\s*([0-9]+)%\s*off\)?/i;
+              var m1 = rawText.match(reg1);
+              if (m1) {
+                var mrpV1 = parseInt(m1[1].replace(/,/g, ''), 10);
+                var sellV1 = parseInt(m1[2].replace(/,/g, ''), 10);
+                if (sellV1 > 50 && sellV1 < mrpV1) {
+                  product.price = String(sellV1);
+                }
+              }
+
+              // Case A2: "₹2,810 MRP ₹2,990 (6% OFF)" or "₹2,810 MRP: ₹2,990 (6% OFF)"
+              if (!product.price) {
+                var reg2 = /(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*\(?\s*([0-9]+)%\s*off\)?/i;
+                var m2 = rawText.match(reg2);
+                if (m2) {
+                  var sellV2 = parseInt(m2[1].replace(/,/g, ''), 10);
+                  var mrpV2 = parseInt(m2[2].replace(/,/g, ''), 10);
+                  if (sellV2 > 50 && sellV2 < mrpV2) {
+                    product.price = String(sellV2);
+                  }
+                }
+              }
+
+              // Case A3: "₹2,810 (6% OFF) MRP ₹2,990"
+              if (!product.price) {
+                var reg3 = /(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:\(?\s*[0-9]+%\s*off\)?)\s*mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
+                var m3 = rawText.match(reg3);
+                if (m3) {
+                  var sellV3 = parseInt(m3[1].replace(/,/g, ''), 10);
+                  var mrpV3 = parseInt(m3[2].replace(/,/g, ''), 10);
+                  if (sellV3 > 50 && sellV3 < mrpV3) {
+                    product.price = String(sellV3);
+                  }
+                }
+              }
+
+              // Case A4: Generic discount proximity search with mathematical discount validation
+              if (!product.price) {
+                var badgeRegex = /\(?\s*([1-9][0-9]?)%\s*off\)?/gi;
+                var badgeMatch;
+                while ((badgeMatch = badgeRegex.exec(rawText)) !== null) {
+                  var discPct = parseInt(badgeMatch[1], 10);
+                  var start = Math.max(0, badgeMatch.index - 120);
+                  var end = Math.min(rawText.length, badgeMatch.index + badgeMatch[0].length + 120);
+                  var snippet = rawText.substring(start, end);
+                  
+                  var priceRegex = /(?:rs\.?|inr|[\u20b9₹])\s*([0-9]{1,3}(?:,[0-9]{3})*)/gi;
+                  var prices = [];
+                  var pm;
+                  while ((pm = priceRegex.exec(snippet)) !== null) {
+                    var val = parseInt(pm[1].replace(/,/g, ''), 10);
+                    if (val > 50 && prices.indexOf(val) === -1) {
+                      prices.push(val);
+                    }
+                  }
+                  
+                  if (prices.length >= 2) {
+                    prices.sort(function(a, b) { return a - b; });
+                    for (var pi = 0; pi < prices.length - 1; pi++) {
+                      for (var pj = pi + 1; pj < prices.length; pj++) {
+                        var lower = prices[pi];
+                        var higher = prices[pj];
+                        var calculatedPct = Math.round((1 - lower / higher) * 100);
+                        if (Math.abs(calculatedPct - discPct) <= 1) {
+                          product.price = String(lower);
+                          break;
+                        }
+                      }
+                      if (product.price) break;
+                    }
+                    if (!product.price && prices[0] > 50) {
+                      product.price = String(prices[0]);
+                    }
+                  }
+                  if (product.price) break;
+                }
+              }
+
+              // Case B: Non-discounted fallback (only when no discount badge matched anywhere)
+              if (!product.price) {
+                var mrpReg = /mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
+                var mm = rawText.match(mrpReg);
+                if (mm) {
+                  var mrpPrice = parseInt(mm[1].replace(/,/g, ''), 10);
+                  if (mrpPrice > 50) product.price = String(mrpPrice);
+                }
+              }
+            } catch(e) {}
+          }
 
           // Price last-resort: first ₹ price on page
           if (!product.price) {
@@ -1178,7 +1406,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             } catch(e) {}
           }
 
-          // ── STRATEGY 3: Variants ──
+          // ── STRATEGY 6: Variants (Size & Colour) ──
           try {
             var variants = [];
             var sEls = document.querySelectorAll('button, li');
