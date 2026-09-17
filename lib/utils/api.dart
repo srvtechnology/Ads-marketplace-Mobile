@@ -147,6 +147,7 @@ class Api {
   // Cart & Checkout Endpoints
   static String cartAddApi = "cart/add";
   static String cartApi = "cart";
+  static String cartUpdateSelectionApi = "cart/update-selection";
   static String checkoutApi = "checkout";
   static String ordersApi = "orders";
 

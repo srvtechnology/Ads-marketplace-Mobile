@@ -311,12 +311,18 @@ class _EcommerceCheckoutScreenState extends State<EcommerceCheckoutScreen> {
           ),
           Divider(height: 1, color: context.color.borderColor),
           */
-          RadioListTile<String>(
-            title: Text('Pay Online', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
-            value: 'ONLINE',
+          RadioGroup<String>(
             groupValue: _paymentMode,
-            activeColor: context.color.territoryColor,
-            onChanged: (value) => setState(() => _paymentMode = value!),
+            onChanged: (value) {
+              if (value != null) {
+                setState(() => _paymentMode = value);
+              }
+            },
+            child: RadioListTile<String>(
+              title: Text('Pay Online', style: TextStyle(color: context.color.textDefaultColor, fontWeight: FontWeight.w600)),
+              value: 'ONLINE',
+              activeColor: context.color.territoryColor,
+            ),
           ),
         ],
       ),

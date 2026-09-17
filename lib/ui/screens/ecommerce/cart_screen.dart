@@ -22,9 +22,6 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  final Set<int> _selectedItemIds = {};
-  bool _selectAll = true;
-
   @override
   void initState() {
     super.initState();
@@ -32,14 +29,78 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _toggleSelectAll(EcommerceCartModel cart) {
-    setState(() {
-      _selectAll = !_selectAll;
-      if (_selectAll) {
-        _selectedItemIds.addAll(cart.items.map((e) => e.id));
-      } else {
-        _selectedItemIds.clear();
-      }
-    });
+    context.read<CartCubit>().toggleSelectAll(!cart.isAllSelected);
+  }
+
+  void _onItemSelectionToggled(EcommerceCartModel cart, EcommerceCartItemModel item) {
+    final List<int> selectedIds = cart.selectedIds.toList();
+    if (item.isSelected) {
+      selectedIds.remove(item.id);
+    } else {
+      selectedIds.add(item.id);
+    }
+    context.read<CartCubit>().updateSelection(selectedIds: selectedIds);
+  }
+
+  void _onDeletePressed(EcommerceCartModel cart) {
+    final selectedIds = cart.selectedIds;
+    if (selectedIds.isEmpty) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete Items'),
+        content: Text(
+          'Are you sure you want to remove ${selectedIds.length} item${selectedIds.length > 1 ? "s" : ""} from your cart?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: context.color.textLightColor),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              context.read<CartCubit>().deleteCartItems(selectedIds);
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(color: context.color.error),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onDecrementQuantity(EcommerceCartItemModel item) {
+    if (item.qty > 1) {
+      context.read<CartCubit>().updateCartItem(item.id, item.qty - 1);
+    } else {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Remove Item'),
+          content: const Text('Do you want to remove this item from your cart?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text('Cancel', style: TextStyle(color: context.color.textLightColor)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx).pop();
+                context.read<CartCubit>().removeCartItem(item.id);
+              },
+              child: Text('Remove', style: TextStyle(color: context.color.error)),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void _showProductDetailsBottomSheet(BuildContext context, EcommerceCartItemModel item, EcommerceCartModel cart) {
@@ -354,11 +415,6 @@ class _CartScreenState extends State<CartScreen> {
               );
             }
 
-            // Sync selection state
-            if (_selectedItemIds.isEmpty && _selectAll) {
-              _selectedItemIds.addAll(cart.items.map((e) => e.id));
-            }
-
             return Column(
               children: [
                 // Top Action Bar (Select All & Delete Items)
@@ -369,14 +425,23 @@ class _CartScreenState extends State<CartScreen> {
                     children: [
                       InkWell(
                         onTap: () => _toggleSelectAll(cart),
+                        borderRadius: BorderRadius.circular(6),
                         child: Row(
                           children: [
                             Checkbox(
-                              value: _selectedItemIds.length == cart.items.length && cart.items.isNotEmpty,
+                              value: cart.isAllSelected,
                               onChanged: (_) => _toggleSelectAll(cart),
                               activeColor: context.color.territoryColor,
+                              checkColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              side: BorderSide(
+                                color: context.color.textLightColor.withValues(alpha: 0.5),
+                                width: 1.5,
+                              ),
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              visualDensity: VisualDensity.compact,
                             ),
+                            const SizedBox(width: 8),
                             Text(
                               'Select All',
                               style: TextStyle(
@@ -391,21 +456,26 @@ class _CartScreenState extends State<CartScreen> {
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          side: BorderSide(color: context.color.borderColor),
+                          side: BorderSide(color: context.color.borderColor.withValues(alpha: 0.8)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          backgroundColor: Colors.transparent,
                         ),
-                        onPressed: _selectedItemIds.isEmpty
-                            ? null
-                            : () {
-                                context.read<CartCubit>().deleteCartItems(_selectedItemIds.toList());
-                                setState(() {
-                                  _selectedItemIds.clear();
-                                });
-                              },
-                        icon: Icon(Icons.delete_outline, size: 18, color: context.color.textLightColor),
+                        onPressed: cart.selectedIds.isEmpty ? null : () => _onDeletePressed(cart),
+                        icon: Icon(
+                          Icons.delete_outline,
+                          size: 18,
+                          color: cart.selectedIds.isEmpty
+                              ? context.color.textLightColor.withValues(alpha: 0.3)
+                              : context.color.textLightColor,
+                        ),
                         label: Text(
                           'Delete Items',
-                          style: TextStyle(fontSize: 13, color: context.color.textLightColor),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: cart.selectedIds.isEmpty
+                                ? context.color.textLightColor.withValues(alpha: 0.3)
+                                : context.color.textLightColor,
+                          ),
                         ),
                       ),
                     ],
@@ -420,7 +490,6 @@ class _CartScreenState extends State<CartScreen> {
                     separatorBuilder: (context, index) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final item = cart.items[index];
-                      final bool isSelected = _selectedItemIds.contains(item.id);
                       final double itemPrice = item.subtotal > 0 ? item.subtotal : (item.price * item.qty);
 
                       return GestureDetector(
@@ -442,20 +511,19 @@ class _CartScreenState extends State<CartScreen> {
                             children: [
                               // Selection Checkbox
                               Checkbox(
-                                value: isSelected,
-                                onChanged: (val) {
-                                  setState(() {
-                                    if (val == true) {
-                                      _selectedItemIds.add(item.id);
-                                    } else {
-                                      _selectedItemIds.remove(item.id);
-                                    }
-                                  });
-                                  context.read<CartCubit>().updateCartItem(item.id, item.qty, isSelected: val);
-                                },
+                                value: item.isSelected,
+                                onChanged: (val) => _onItemSelectionToggled(cart, item),
                                 activeColor: context.color.territoryColor,
+                                checkColor: Colors.white,
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                side: BorderSide(
+                                  color: context.color.textLightColor.withValues(alpha: 0.5),
+                                  width: 1.5,
+                                ),
+                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                visualDensity: VisualDensity.compact,
                               ),
+                              const SizedBox(width: 4),
 
                               // Item Thumbnail
                               ClipRRect(
@@ -506,6 +574,7 @@ class _CartScreenState extends State<CartScreen> {
                                         ),
                                       ),
                                     ],
+                                    const SizedBox(height: 2),
                                     FittedBox(
                                       fit: BoxFit.scaleDown,
                                       alignment: Alignment.centerLeft,
@@ -533,13 +602,7 @@ class _CartScreenState extends State<CartScreen> {
                                 child: Row(
                                   children: [
                                     InkWell(
-                                      onTap: () {
-                                        if (item.qty > 1) {
-                                          context.read<CartCubit>().updateCartItem(item.id, item.qty - 1);
-                                        } else {
-                                          context.read<CartCubit>().removeCartItem(item.id);
-                                        }
-                                      },
+                                      onTap: () => _onDecrementQuantity(item),
                                       child: Container(
                                         padding: const EdgeInsets.all(4),
                                         decoration: const BoxDecoration(
@@ -638,6 +701,14 @@ class _CartScreenState extends State<CartScreen> {
                             elevation: 0,
                           ),
                           onPressed: () {
+                            if (!cart.hasSelectedItems) {
+                              HelperUtils.showSnackBarMessage(
+                                context,
+                                'No items selected for checkout. Please select at least one item.',
+                                type: MessageType.warning,
+                              );
+                              return;
+                            }
                             Navigator.pushNamed(context, Routes.ecommerceCheckout);
                           },
                           child: Text(

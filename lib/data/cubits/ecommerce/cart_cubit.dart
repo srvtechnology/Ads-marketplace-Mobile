@@ -134,36 +134,91 @@ class CartCubit extends Cubit<CartState> {
     return null;
   }
 
+  Future<void> updateSelection({required List<int> selectedIds}) async {
+    EcommerceCartModel? previousCart;
+    if (state is CartSuccess) {
+      previousCart = (state as CartSuccess).cart;
+      final updatedItems = previousCart.items.map((item) {
+        final bool selected = selectedIds.contains(item.id);
+        return item.copyWith(
+          isSelected: selected,
+          checkoutProduct: selected ? 'Y' : 'N',
+        );
+      }).toList();
+
+      final double newGrandTotal = updatedItems
+          .where((item) => item.isSelected)
+          .fold(0.0, (sum, item) => sum + (item.subtotal > 0 ? item.subtotal : (item.price * item.qty)));
+
+      final int selectedCount = updatedItems.where((item) => item.isSelected).length;
+      final bool isAllSelected = updatedItems.isNotEmpty && selectedCount == updatedItems.length;
+
+      emit(CartSuccess(previousCart.copyWith(
+        items: updatedItems,
+        grandTotal: newGrandTotal,
+        selectedItemsCount: selectedCount,
+        isAllSelected: isAllSelected,
+      )));
+    }
+
+    try {
+      final response = await Api.post(
+        url: '${AppSettings.ecommerceHostUrl}/api/${Api.cartUpdateSelectionApi}',
+        useBaseUrl: false,
+        useJson: true,
+        parameter: {
+          'selected_ids': selectedIds,
+        },
+      );
+
+      if (response['success'] == true && response['data'] != null) {
+        EcommerceCartModel cart = EcommerceCartModel.fromJson(response['data']);
+        emit(CartSuccess(cart));
+      } else {
+        await fetchCart(isSilent: true);
+      }
+    } catch (_) {
+      if (previousCart != null) {
+        emit(CartSuccess(previousCart));
+      } else {
+        await fetchCart(isSilent: true);
+      }
+    }
+  }
+
+  Future<void> toggleSelectAll(bool selectAll) async {
+    if (state is CartSuccess) {
+      final currentCart = (state as CartSuccess).cart;
+      final List<int> selectedIds = selectAll
+          ? currentCart.items.map((e) => e.id).toList()
+          : [];
+      await updateSelection(selectedIds: selectedIds);
+    }
+  }
+
   Future<void> updateCartItem(int cartItemId, int qty, {bool? isSelected}) async {
     if (state is CartSuccess) {
       final currentCart = (state as CartSuccess).cart;
       final updatedItems = currentCart.items.map((item) {
         if (item.id == cartItemId) {
           double newSubtotal = item.price * qty;
-          return EcommerceCartItemModel(
-            id: item.id,
-            productId: item.productId,
-            productVariantId: item.productVariantId,
-            price: item.price,
+          return item.copyWith(
             qty: qty,
             subtotal: newSubtotal,
             isSelected: isSelected ?? item.isSelected,
-            product: item.product,
-            variant: item.variant,
-            variants: item.variants,
-            platform: item.platform,
-            url: item.url,
-            importedDate: item.importedDate,
+            checkoutProduct: (isSelected ?? item.isSelected) ? 'Y' : 'N',
           );
         }
         return item;
       }).toList();
 
-      double newGrandTotal = updatedItems.fold(0, (sum, item) => sum + (item.subtotal > 0 ? item.subtotal : (item.price * item.qty)));
-      emit(CartSuccess(EcommerceCartModel(
+      double newGrandTotal = updatedItems
+          .where((item) => item.isSelected)
+          .fold(0.0, (sum, item) => sum + (item.subtotal > 0 ? item.subtotal : (item.price * item.qty)));
+
+      emit(CartSuccess(currentCart.copyWith(
         items: updatedItems,
         grandTotal: newGrandTotal,
-        currency: currentCart.currency,
       )));
     }
 
@@ -177,6 +232,7 @@ class CartCubit extends Cubit<CartState> {
         useJson: true,
         parameter: {
           'quantity': qty,
+          if (isSelected != null) 'checkout_product': isSelected ? 'Y' : 'N',
           if (isSelected != null) 'is_selected': isSelected,
         },
       );
@@ -196,6 +252,7 @@ class CartCubit extends Cubit<CartState> {
             'cart_item_id': cartItemId,
             'quantity': qty,
             'qty': qty,
+            if (isSelected != null) 'checkout_product': isSelected ? 'Y' : 'N',
             if (isSelected != null) 'is_selected': isSelected,
           },
         );
@@ -218,11 +275,13 @@ class CartCubit extends Cubit<CartState> {
     if (state is CartSuccess) {
       final currentCart = (state as CartSuccess).cart;
       final updatedItems = currentCart.items.where((item) => !cartItemIds.contains(item.id)).toList();
-      double newGrandTotal = updatedItems.fold(0, (sum, item) => sum + (item.subtotal > 0 ? item.subtotal : (item.price * item.qty)));
-      emit(CartSuccess(EcommerceCartModel(
+      double newGrandTotal = updatedItems
+          .where((item) => item.isSelected)
+          .fold(0.0, (sum, item) => sum + (item.subtotal > 0 ? item.subtotal : (item.price * item.qty)));
+      emit(CartSuccess(currentCart.copyWith(
         items: updatedItems,
         grandTotal: newGrandTotal,
-        currency: currentCart.currency,
+        totalItemsCount: updatedItems.length,
       )));
     }
 
