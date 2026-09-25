@@ -18,7 +18,7 @@ import 'package:eClassify/ui/screens/user_profile/profile_screen.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
 import 'package:eClassify/data/cubits/chat/get_seller_chat_users_cubit.dart';
 
-import 'package:eClassify/ui/screens/widgets/blurred_dialog_box.dart';
+import 'package:eClassify/utils/app_upgrader.dart';
 import 'package:eClassify/ui/screens/widgets/maintenance_mode.dart';
 import 'package:eClassify/ui/theme/theme.dart';
 import 'package:eClassify/utils/app_icon.dart';
@@ -36,7 +36,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:upgrader/upgrader.dart';
 
 List<ItemModel> myItemList = [];
@@ -103,6 +102,7 @@ class MainActivityState extends State<MainActivity>
   bool isChecked = false;
   SVGEdit svgEdit = SVGEdit();
   bool isBack = false;
+  bool isForceUpdate = false;
 
   StreamSubscription<Uri>? _linkSubscription;
 
@@ -182,85 +182,37 @@ class MainActivityState extends State<MainActivity>
     }
   }
 
-  void versionCheck(settings) async {
-    var remoteVersion = settings.getSetting(Platform.isIOS
+  void versionCheck(FetchSystemSettingsCubit settings) async {
+    var rawRemoteVersion = settings.getSetting(Platform.isIOS
         ? SystemSetting.iosVersion
         : SystemSetting.androidVersion);
-    var remote = remoteVersion;
 
     var forceUpdate = settings.getSetting(SystemSetting.forceUpdate);
 
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-    var current = packageInfo.version;
-
-    int currentVersion = HelperUtils.comparableVersion(packageInfo.version);
-    if (remoteVersion == null) {
+    if (rawRemoteVersion == null) {
       return;
     }
 
-    remoteVersion = HelperUtils.comparableVersion(
-      remoteVersion,
-    );
+    String remoteVersionStr = rawRemoteVersion.toString();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    int currentVersion = HelperUtils.comparableVersion(packageInfo.version);
+    int comparableRemote = HelperUtils.comparableVersion(remoteVersionStr);
 
-    if (remoteVersion > currentVersion) {
+    if (comparableRemote > currentVersion) {
       Constant.isUpdateAvailable = true;
-      Constant.newVersionNumber = settings.getSetting(
-        Platform.isIOS
-            ? SystemSetting.iosVersion
-            : SystemSetting.androidVersion,
-      );
+      Constant.newVersionNumber = remoteVersionStr;
 
-      Future.delayed(
-        Duration.zero,
-        () {
-          if (forceUpdate == "1") {
-            ///This is force update
-            UiUtils.showBlurredDialoge(context,
-                dialoge: BlurredDialogBox(
-                    onAccept: () async {
-                      await launchUrl(
-                          Uri.parse(
-                            Constant.playstoreURLAndroid,
-                          ),
-                          mode: LaunchMode.externalApplication);
-                    },
-                    backAllowedButton: false,
-                    svgImagePath: AppIcons.update,
-                    isAcceptContainerPush: true,
-                    svgImageColor: context.color.territoryColor,
-                    showCancelButton: false,
-                    title: "updateAvailable".translate(context),
-                    acceptTextColor: context.color.buttonColor,
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomText("$current>$remote"),
-                        CustomText(
-                            "newVersionAvailableForce".translate(context),
-                            textAlign: TextAlign.center),
-                      ],
-                    )));
-          } else {
-            UiUtils.showBlurredDialoge(
-              context,
-              dialoge: BlurredDialogBox(
-                onAccept: () async {
-                  await launchUrl(Uri.parse(Constant.playstoreURLAndroid),
-                      mode: LaunchMode.externalApplication);
-                },
-                svgImagePath: AppIcons.update,
-                svgImageColor: context.color.territoryColor,
-                showCancelButton: true,
-                title: "updateAvailable".translate(context),
-                content: CustomText(
-                  "newVersionAvailable".translate(context),
-                ),
-              ),
-            );
-          }
-        },
-      );
+      if (forceUpdate == "1") {
+        AppUpgrader.instance.syncWithSettings(
+          remoteVersion: remoteVersionStr,
+          forceUpdate: forceUpdate,
+        );
+        if (mounted) {
+          setState(() {
+            isForceUpdate = true;
+          });
+        }
+      }
     }
   }
 
@@ -329,6 +281,16 @@ class MainActivityState extends State<MainActivity>
           }
         },
         child: UpgradeAlert(
+          upgrader: AppUpgrader.instance.upgrader,
+          navigatorKey: Constant.navigatorKey,
+          dialogStyle: Platform.isIOS
+              ? UpgradeDialogStyle.cupertino
+              : UpgradeDialogStyle.material,
+          showIgnore: !isForceUpdate,
+          showLater: !isForceUpdate,
+          barrierDismissible: !isForceUpdate,
+          shouldPopScope: () => !isForceUpdate,
+          onUpdate: () => AppUpgrader.instance.handleUpdate(),
           child: Scaffold(
             backgroundColor: context.color.primaryColor,
             bottomNavigationBar:

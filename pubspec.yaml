@@ -4,7 +4,7 @@ description: A classified app
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev [Be careful]
 
-version: 2.9.20+91
+version: 2.9.21+92
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -77,6 +77,7 @@ dependencies:
   crypto: ^3.0.5
   pusher_channels_flutter: ^2.4.0
   upgrader: ^13.6.0
+  version: ^3.0.2
 
 dependency_overrides:
   intl: ^0.20.0
