@@ -60,6 +60,7 @@ local.properties
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
 
 # iOS/XCode related
 **/ios/**/*.mode1v3

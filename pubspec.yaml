@@ -4,7 +4,7 @@ description: A classified app
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev [Be careful]
 
-version: 2.9.22+93
+version: 2.9.23+94
 
 environment:
   sdk: ">=3.0.6 <4.0.0"
@@ -104,7 +104,8 @@ flutter_launcher_icons:
 
 
 flutter:
-
+  config:
+    enable-swift-package-manager: false
 
   uses-material-design: true
 

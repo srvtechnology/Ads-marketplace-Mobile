@@ -7,7 +7,7 @@ import awesome_notifications
 import FirebaseMessaging
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, MessagingDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, MessagingDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
@@ -17,16 +17,18 @@ import FirebaseMessaging
     if FirebaseApp.app() == nil {
         FirebaseApp.configure()
     }
-
-    GeneratedPluginRegistrant.register(with: self)
       
-      SwiftAwesomeNotificationsPlugin.setPluginRegistrantCallback { registry in
-               SwiftAwesomeNotificationsPlugin.register(
-                 with: registry.registrar(forPlugin: "io.flutter.plugins.awesomenotifications.AwesomeNotificationsPlugin")!)
-           }
-      Messaging.messaging().delegate = self
+    SwiftAwesomeNotificationsPlugin.setPluginRegistrantCallback { registry in
+        SwiftAwesomeNotificationsPlugin.register(
+            with: registry.registrar(forPlugin: "io.flutter.plugins.awesomenotifications.AwesomeNotificationsPlugin")!)
+    }
+    Messaging.messaging().delegate = self
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
+    GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
   }
 
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
