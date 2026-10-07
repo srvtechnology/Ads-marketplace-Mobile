@@ -1,5 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'package:eClassify/utils/notification/notification_service.dart';
 import 'package:eClassify/utils/api.dart';
 import 'package:eClassify/utils/constant.dart';
 import 'package:eClassify/utils/login/lib/login_status.dart';
@@ -19,7 +18,7 @@ class PhoneLogin extends LoginSystem {
       String phoneNumber = (payload as PhoneLoginPayload).phoneNumber;
       String otp = (payload as PhoneLoginPayload).getOTP() ?? '';
 
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      String? fcmToken = await NotificationService.getFCMToken();
 
       // Call the API to verify OTP
       Map<String, dynamic> response = await AuthRepository().verifyOTP(

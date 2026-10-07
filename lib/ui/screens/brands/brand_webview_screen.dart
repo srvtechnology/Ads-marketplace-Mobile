@@ -457,6 +457,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         final Object result = await _controller.runJavaScriptReturningResult(jsScript);
         product = _parseJsResult(result);
       }
+      debugPrint('[SCRAPER RESULT] URL: $currentUrl => product: $product');
 
       if (mounted) Navigator.of(context).pop();
 
@@ -734,6 +735,30 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                       ),
                     ],
                   ),
+                  if ((product['title'] ?? '').toString().isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      product['title'].toString(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: context.color.textDefaultColor,
+                      ),
+                    ),
+                  ],
+                  if ((product['price'] ?? '').toString().isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      "₹${product['price']}",
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: context.color.territoryColor,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   Text(
                     "Please specify or confirm your selected size and colour:",
@@ -2008,250 +2033,346 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           var product = {};
           var price = '';
 
-          // ── METHOD 0: __NEXT_DATA__ (most reliable – Zara runs on Next.js) ──────
-          // Zara embeds full product JSON including discountedPrice in the Next.js
-          // hydration script.  We walk it looking for the lowest non-zero price.
-          try {
-            var nd = document.getElementById('__NEXT_DATA__');
-            if (nd && nd.textContent) {
-              var ndJson = JSON.parse(nd.textContent);
-              // Helper: recursively collect every numeric price-like field
-              function extractZaraPrice(obj, depth) {
-                if (!obj || typeof obj !== 'object' || depth > 12) return null;
-                // Prefer discountedPrice / salePrice / currentPrice / lowestPrice
-                var preferredKeys = ['discountedPrice','salePrice','currentPrice','lowestPrice','promotionalPrice'];
-                for (var ki = 0; ki < preferredKeys.length; ki++) {
-                  var v = obj[preferredKeys[ki]];
-                  if (typeof v === 'number' && v > 0) return String(Math.round(v));
-                  if (typeof v === 'string' && /^[0-9]+(\.[0-9]+)?$/.test(v.trim())) return String(Math.round(parseFloat(v)));
-                }
-                // Also check nested 'value' field patterns like { price: { value: 2350 } }
-                if (obj.value && typeof obj.value === 'number' && obj.value > 0) {
-                  // Only use if parent key suggests a sale/current price
-                  // (handled by caller – skip here to avoid MRP collision)
-                }
-                for (var key in obj) {
-                  if (!obj.hasOwnProperty(key)) continue;
-                  var child = obj[key];
-                  var r = null;
-                  if (Array.isArray(child)) {
-                    for (var ai = 0; ai < child.length; ai++) { r = extractZaraPrice(child[ai], depth+1); if (r) return r; }
-                  } else if (typeof child === 'object') {
-                    r = extractZaraPrice(child, depth+1);
-                    if (r) return r;
-                  }
-                }
-                return null;
-              }
-              var ndPrice = extractZaraPrice(ndJson, 0);
-              if (ndPrice && parseInt(ndPrice, 10) > 0) price = ndPrice;
-
-              // Also attempt to get title/image from __NEXT_DATA__
-              function findZaraField(obj, fields, depth) {
-                if (!obj || typeof obj !== 'object' || depth > 12) return null;
-                for (var fi = 0; fi < fields.length; fi++) {
-                  if (obj[fields[fi]] && typeof obj[fields[fi]] === 'string' && obj[fields[fi]].length > 1) return obj[fields[fi]];
-                }
-                for (var key in obj) {
-                  if (!obj.hasOwnProperty(key)) continue;
-                  var child = obj[key];
-                  var r = null;
-                  if (Array.isArray(child)) { for (var ai=0;ai<child.length;ai++){r=findZaraField(child[ai],fields,depth+1);if(r)return r;} }
-                  else if (typeof child === 'object') { r=findZaraField(child,fields,depth+1);if(r)return r; }
-                }
-                return null;
-              }
-              if (!product.title) {
-                var t = findZaraField(ndJson, ['productName','name','title'], 0);
-                if (t) product.title = t.replace(/\s*-\s*ZARA.*$/i,'').replace(/\s*\|ZARA.*$/i,'').trim();
-              }
-              if (!product.image) {
-                var img = findZaraField(ndJson, ['url','src','image','imageUrl'], 0);
-                if (img && (img.startsWith('http') || img.startsWith('//'))) product.image = img;
-              }
+          // ── Helper: Safe number parsing for Indian currency formats ───
+          // Handles "₹ 2,550.00", "2,550.00", "₹ 1,650.00", "₹4,950", "2550", "495000" (paise)
+          function parseIndianPrice(rawStr) {
+            if (!rawStr) return 0;
+            var str = String(rawStr).trim();
+            var m = str.match(/[\u20b9\u0024]?\s*([0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/);
+            if (!m) return 0;
+            var clean = m[1].replace(/,/g, '').replace(/\s+/g, '');
+            var num = parseFloat(clean);
+            if (!isFinite(num) || num <= 0) return 0;
+            var rounded = Math.round(num);
+            if (rounded > 100000) {
+              rounded = Math.round(rounded / 100);
             }
-          } catch(_) {}
-
-          // ── METHOD 1: JSON-LD – prefer lowPrice/discountedPrice (sale price) ───
-          var jsonLdPrice = '';
-          try {
-            var jsonLdScripts = document.querySelectorAll('script[type="application/ld+json"]');
-            for (var i = 0; i < jsonLdScripts.length; i++) {
-              var data = JSON.parse(jsonLdScripts[i].innerText || jsonLdScripts[i].textContent || '');
-              var items = Array.isArray(data) ? data : [data];
-              for (var j = 0; j < items.length; j++) {
-                var item = items[j];
-                if (item['@type'] === 'Product' || item.offers) {
-                  if (item.offers) {
-                    var offer = Array.isArray(item.offers) ? item.offers[0] : item.offers;
-                    // lowPrice is the discounted price; fall back to price only if no sale
-                    var rawP = offer.lowPrice || offer.discountedPrice || offer.salePrice || offer.price;
-                    if (rawP) jsonLdPrice = String(rawP).split('.')[0].replace(/[^0-9]/g, '');
-                  }
-                  if (item.name && !product.title) product.title = item.name;
-                  if (item.image && !product.image) product.image = Array.isArray(item.image) ? item.image[0] : item.image;
-                }
-              }
-            }
-          } catch(_) {}
-
-          // ── METHOD 2: TITLE from DOM ─────────────────────────────────────────────
-          if (!product.title) {
-            var titleEl = document.querySelector('h1') ||
-                          document.querySelector('.product-detail-info__header-name') ||
-                          document.querySelector('[class*="product-detail-info__name"]') ||
-                          document.querySelector('.product-name');
-            var title = titleEl ? titleEl.innerText.trim() : document.title;
-            title = title.replace(/\s*-\s*ZARA.*$/i, '').replace(/\s*\|ZARA.*$/i, '').trim();
-            product.title = title;
+            return rounded;
           }
 
-          // ── METHOD 3: DOM price extraction (skip if already have price) ─────────
+          // ── Helper: Check if element or any ancestor is struck-out or old price ─
           function isStrikethroughOrOld(el) {
             if (!el) return false;
-            var curr = el;
-            while (curr && curr !== document.body) {
-              var cls = (curr.className && typeof curr.className === 'string') ? curr.className.toLowerCase() : '';
-              if (cls.includes('price-old') || cls.includes('price_old') || cls.includes('old-price') ||
-                  cls.includes('price-original') || cls.includes('original-price') ||
-                  cls.includes('money-amount--old') || cls.includes('price__amount--old') ||
-                  cls.includes('strike')) return true;
-              if (curr.tagName === 'DEL' || curr.tagName === 'S' || curr.tagName === 'STRIKE') return true;
-              var style = window.getComputedStyle(curr);
-              if (style.textDecoration && style.textDecoration.includes('line-through')) return true;
-              curr = curr.parentElement;
+            var cur = el;
+            for (var d = 0; d < 5 && cur && cur !== document.body; d++) {
+              if (cur.tagName === 'DEL' || cur.tagName === 'S') return true;
+              var cls = (cur.className && typeof cur.className === 'string') ? cur.className.toLowerCase() : '';
+              if (cls.includes('old') || cls.includes('original') || cls.includes('strike') || cls.includes('was-price') || cls.includes('undiscounted') || cls.includes('crossed') || cls.includes('line-through')) return true;
+              try {
+                var cs = window.getComputedStyle(cur);
+                if (cs && cs.textDecoration && cs.textDecoration.includes('line-through')) return true;
+              } catch(_) {}
+              cur = cur.parentElement;
             }
             return false;
           }
 
-          if (!price) {
-            // Method 3A: Targeted sale/current-price selectors
-            var currentPriceSelectors = [
-              '.price-current__amount-item--sale',
-              '.price-current__amount-item',
-              '.price-current .money-amount__main',
-              '.price-current__amount .money-amount__main',
-              '.price-current__amount',
-              '[class*="price-current"] .money-amount__main',
-              '[class*="price-current"] [class*="money-amount"]',
-              '.price__amount-current',
-              '.price__amount--on-sale',
-              '[data-qa-action="product-detail-price"] [class*="price-current"]',
-              '[class*="price-current"]',
-              '.product-detail-info__price .price-current'
-            ];
-            for (var k = 0; k < currentPriceSelectors.length; k++) {
-              var el = document.querySelector(currentPriceSelectors[k]);
-              if (el && !isStrikethroughOrOld(el)) {
-                var text = el.innerText ? el.innerText.trim() : '';
-                var m = text.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]+)?)/i) || text.match(/([0-9,]{3,}(?:\.[0-9]+)?)/);
-                if (m) {
-                  var p = m[1].split('.')[0].replace(/[^0-9]/g, '');
-                  if (p && parseInt(p, 10) > 0) { price = p; break; }
+          // ── Helper: Check if element or any ancestor is marked as sale/discount ──
+          function isSaleOrDiscounted(el) {
+            if (!el) return false;
+            var cur = el;
+            for (var d = 0; d < 5 && cur && cur !== document.body; d++) {
+              var cls = (cur.className && typeof cur.className === 'string') ? cur.className.toLowerCase() : '';
+              if (cls.includes('sale') || cls.includes('discount') || cls.includes('special') || cls.includes('highlight') || cls.includes('reduced')) return true;
+              cur = cur.parentElement;
+            }
+            return false;
+          }
+
+          // ── Helper: Calculate visibility score in viewport ───────────────
+          function getViewportScore(el) {
+            if (!el) return -10000;
+            try {
+              var rect = el.getBoundingClientRect();
+              if (rect.width === 0 || rect.height === 0) return -10000;
+              var cs = window.getComputedStyle(el);
+              if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity || '1') === 0) return -10000;
+
+              var vh = window.innerHeight || document.documentElement.clientHeight || 800;
+              var vw = window.innerWidth || document.documentElement.clientWidth || 400;
+
+              var visibleTop = Math.max(0, rect.top);
+              var visibleBottom = Math.min(vh, rect.bottom);
+              var visibleHeight = visibleBottom - visibleTop;
+
+              var visibleLeft = Math.max(0, rect.left);
+              var visibleRight = Math.min(vw, rect.right);
+              var visibleWidth = visibleRight - visibleLeft;
+
+              if (visibleHeight <= 5 || visibleWidth <= 5) return -10000;
+
+              var visibleArea = visibleHeight * visibleWidth;
+              var elCenterY = (rect.top + rect.bottom) / 2;
+              var distFromCenter = Math.abs(elCenterY - (vh / 2));
+
+              return visibleArea - (distFromCenter * 50);
+            } catch(_) {
+              return -10000;
+            }
+          }
+
+          // ═══════════════════════════════════════════════════════════════════
+          // 1. PRICE EXTRACTION (DISCOUNT-AWARE & VIEWPORT-AWARE)
+          // When an item is on sale (e.g. ₹ 2,550.00 -35% ₹ 1,650.00):
+          // Zara shows the old struck-through MRP and the highlighted sale price.
+          // The scraper MUST pick the discounted selling price (₹ 1,650.00).
+          // ═══════════════════════════════════════════════════════════════════
+          var bestPriceVal = 0;
+          var bestPriceEl = null;
+
+          // Collect all leaf-like price elements visible in the viewport
+          var visiblePrices = [];
+          var priceCandidates = document.querySelectorAll(
+            '.price-current__amount-item--sale, [class*="price-current__amount-item--sale"], [class*="sale"] .money-amount__main, .money-amount__main, .price-current__amount-item, .price-current__amount, [class*="price-current"], [class*="money-amount"], [data-qa-action="product-detail-price"], .product-detail-info__price, [class*="product"] [class*="price"], span, div, p, strong'
+          );
+
+          for (var i = 0; i < priceCandidates.length; i++) {
+            var el = priceCandidates[i];
+            // Skip wrapper nodes that contain child money-amount elements to avoid double-counting
+            if (el.querySelector('.money-amount__main, [class*="price-current__amount-item"]')) continue;
+
+            var txt = (el.innerText || '').trim();
+            if (!txt || txt.length > 35) continue;
+            if (!(/[\u20b9\u0024]|INR|Rs/i.test(txt) || /^[\d,]+(?:\.[0-9]{1,2})?$/.test(txt))) continue;
+
+            var pVal = parseIndianPrice(txt);
+            if (pVal <= 50 || pVal >= 1000000) continue;
+
+            var score = getViewportScore(el);
+            if (score <= -5000) continue; // Skip off-screen elements
+
+            var isOld = isStrikethroughOrOld(el);
+            var isSale = isSaleOrDiscounted(el);
+
+            visiblePrices.push({
+              el: el,
+              val: pVal,
+              score: score,
+              isOld: isOld,
+              isSale: isSale
+            });
+          }
+
+          // Pick the true selling price from visiblePrices
+          if (visiblePrices.length > 0) {
+            var nonOldPrices = visiblePrices.filter(function(p) { return !p.isOld; });
+            var salePrices = nonOldPrices.filter(function(p) { return p.isSale; });
+
+            if (salePrices.length === 0) {
+              salePrices = visiblePrices.filter(function(p) { return p.isSale; });
+            }
+
+            if (salePrices.length > 0) {
+              // 1. Explicit sale price elements take absolute highest priority (pick minimum among sale prices)
+              salePrices.sort(function(a, b) { return a.val - b.val; });
+              bestPriceVal = salePrices[0].val;
+              bestPriceEl = salePrices[0].el;
+            } else if (nonOldPrices.length > 0) {
+              // 2. Non-struck prices: On discounted items, the selling price is the MINIMUM
+              nonOldPrices.sort(function(a, b) { return a.val - b.val; });
+              bestPriceVal = nonOldPrices[0].val;
+              bestPriceEl = nonOldPrices[0].el;
+            } else {
+              // 3. Fallback: pick the minimum non-zero price
+              visiblePrices.sort(function(a, b) { return a.val - b.val; });
+              bestPriceVal = visiblePrices[0].val;
+              bestPriceEl = visiblePrices[0].el;
+            }
+          }
+
+          // Fallback: If no price found yet, scan body innerText for prices near "MRP INCL"
+          if (bestPriceVal === 0) {
+            var bodyText = (document.body.innerText || '').replace(/\u00a0/g, ' ');
+            // Match all prices immediately preceding "MRP INCL"
+            var lineMatch = bodyText.match(/([\u20b9\u0024][^\r\n]+?)[\r\n\s]{1,40}MRP\s+INCL/i);
+            if (lineMatch) {
+              var allMatches = lineMatch[1].match(/[\u20b9\u0024]\s*([0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g) || [];
+              var extractedVals = [];
+              for (var mi = 0; mi < allMatches.length; mi++) {
+                var v = parseIndianPrice(allMatches[mi]);
+                if (v > 50) extractedVals.push(v);
+              }
+              if (extractedVals.length > 0) {
+                // Discounted price is the MINIMUM of the displayed prices on that line
+                extractedVals.sort(function(a, b) { return a - b; });
+                bestPriceVal = extractedVals[0];
+              }
+            }
+          }
+
+          if (bestPriceVal > 50) {
+            price = String(bestPriceVal);
+          }
+          product.price = price;
+
+          // ═══════════════════════════════════════════════════════════════════
+          // 2. TITLE EXTRACTION (VIEWPORT-AWARE)
+          // ═══════════════════════════════════════════════════════════════════
+          var bestTitle = '';
+          var bestTitleScore = -10000;
+
+          if (bestPriceEl) {
+            var cur = bestPriceEl;
+            for (var depth = 0; depth < 8 && cur && cur !== document.body; depth++) {
+              var containerTitles = cur.querySelectorAll('h1, h2, h3, h4, [class*="header-name"], [class*="product-name"], [class*="title"], [class*="name"]');
+              for (var ti = 0; ti < containerTitles.length; ti++) {
+                var tEl = containerTitles[ti];
+                var tTxt = (tEl.innerText || '').trim().replace(/\s*[-–|]\s*ZARA.*$/i, '').trim();
+                if (tTxt.length >= 3 && !/MRP|INCL|TAX|SIZE|COLOR|COLOUR|ADD|BUY|NEW/i.test(tTxt)) {
+                  bestTitle = tTxt;
+                  break;
                 }
               }
+              if (bestTitle) break;
+              cur = cur.parentElement;
             }
           }
 
-          if (!price) {
-            // Method 3B: Collect ALL visible ₹ prices on the page, pick the MINIMUM
-            // (on a sale page, the discounted price is always lower than the MRP)
-            var allPriceEls = document.querySelectorAll('span, div, p, strong, del, s');
-            var collectedPrices = [];
-            for (var i = 0; i < Math.min(allPriceEls.length, 500); i++) {
-              var el = allPriceEls[i];
-              // Only look at leaf-like nodes (to avoid double-counting parent text)
-              var directText = '';
-              for (var cn = 0; cn < el.childNodes.length; cn++) {
-                if (el.childNodes[cn].nodeType === 3) directText += el.childNodes[cn].nodeValue;
-              }
-              if (!directText) directText = el.innerText || '';
-              directText = directText.trim();
-              var m = directText.match(/(?:₹|INR|Rs\.?)\s*([0-9,]+(?:\.[0-9]+)?)/i);
-              if (m) {
-                var pNum = parseInt(m[1].replace(/,/g,''), 10);
-                var isStrike = isStrikethroughOrOld(el);
-                collectedPrices.push({val: pNum, isStrike: isStrike});
+          if (!bestTitle) {
+            var titleCandidates = document.querySelectorAll(
+              'h1, h2, h3, h4, .product-detail-info__header-name, [class*="product-detail-info__name"], [class*="product-name"], [class*="product-detail"] h1, [class*="product-detail"] h2'
+            );
+            for (var j = 0; j < titleCandidates.length; j++) {
+              var tel = titleCandidates[j];
+              var tStr = (tel.innerText || '').trim().replace(/\s*[-–|]\s*ZARA.*$/i, '').trim();
+              if (tStr.length < 3 || /MRP|INCL|TAX|SIZE|COLOR|COLOUR|ADD|BUY|NEW/i.test(tStr)) continue;
+
+              var tScore = getViewportScore(tel);
+              if (tScore > bestTitleScore) {
+                bestTitleScore = tScore;
+                bestTitle = tStr;
               }
             }
-            // Prefer the minimum non-struck price (= sale price)
-            var nonStrikePrices = collectedPrices.filter(function(x){return !x.isStrike && x.val > 50;});
-            if (nonStrikePrices.length > 0) {
-              nonStrikePrices.sort(function(a,b){return a.val - b.val;});
-              price = String(nonStrikePrices[0].val);
-            } else if (collectedPrices.length > 0) {
-              // All struck through – still pick minimum
-              collectedPrices.sort(function(a,b){return a.val - b.val;});
-              price = String(collectedPrices[0].val);
+          }
+
+          if (!bestTitle) {
+            bestTitle = (document.title || '').replace(/\s*[-–|]\s*ZARA.*$/i, '').trim();
+          }
+
+          product.title = bestTitle;
+
+          // ═══════════════════════════════════════════════════════════════════
+          // 3. IMAGE EXTRACTION (VIEWPORT-AWARE)
+          // ═══════════════════════════════════════════════════════════════════
+          var bestImg = '';
+          var bestImgScore = -10000;
+
+          if (bestPriceEl) {
+            var curImg = bestPriceEl;
+            for (var idepth = 0; idepth < 8 && curImg && curImg !== document.body; idepth++) {
+              var cImgs = curImg.querySelectorAll('img[src*="zara"], picture img, img');
+              for (var ii = 0; ii < cImgs.length; ii++) {
+                var iEl = cImgs[ii];
+                if (iEl.src && !iEl.src.startsWith('data:') && (iEl.naturalWidth > 100 || iEl.width > 100 || iEl.src.includes('zara.net'))) {
+                  bestImg = iEl.src;
+                  break;
+                }
+              }
+              if (bestImg) break;
+              curImg = curImg.parentElement;
             }
           }
 
-          // ── METHOD 4: JSON-LD fallback ────────────────────────────────────────────
-          if (!price && jsonLdPrice) price = jsonLdPrice;
-
-          // ── METHOD 5: Meta tag fallback ───────────────────────────────────────────
-          if (!price) {
-            var ogPrice = document.querySelector('meta[property="product:price:amount"]') ||
-                          document.querySelector('meta[property="og:price:amount"]');
-            if (ogPrice && ogPrice.content) price = ogPrice.content.split('.')[0].replace(/[^0-9]/g, '');
+          if (!bestImg) {
+            var allImgs = document.querySelectorAll('picture img, img[src*="static.zara.net"], img[src*="zara"], .media-image__image, main img');
+            for (var k = 0; k < allImgs.length; k++) {
+              var aImg = allImgs[k];
+              if (!aImg.src || aImg.src.startsWith('data:')) continue;
+              var iScore = getViewportScore(aImg);
+              if (iScore > bestImgScore) {
+                bestImgScore = iScore;
+                bestImg = aImg.src;
+              }
+            }
           }
 
-          product.price = price;
-          
-          // 4. VARIANTS (Color & Size)
+          if (!bestImg) {
+            var ogImg = document.querySelector('meta[property="og:image"]');
+            if (ogImg && ogImg.content) bestImg = ogImg.content;
+          }
+
+          product.image = bestImg;
+
+          // ═══════════════════════════════════════════════════════════════════
+          // 4. URL & BRAND
+          // ═══════════════════════════════════════════════════════════════════
+          var directUrl = '';
+          if (bestPriceEl) {
+            var curLink = bestPriceEl;
+            for (var ldepth = 0; ldepth < 8 && curLink && curLink !== document.body; ldepth++) {
+              var links = curLink.querySelectorAll('a[href*="-p0"], a[href*=".html"], a[href*="/product/"]');
+              for (var li = 0; li < links.length; li++) {
+                if (links[li].href) {
+                  directUrl = links[li].href;
+                  break;
+                }
+              }
+              if (directUrl) break;
+              curLink = curLink.parentElement;
+            }
+          }
+
+          product.url = directUrl || window.location.href;
+          product.brand = 'Zara';
+
+          // ═══════════════════════════════════════════════════════════════════
+          // 5. VARIANTS (Colour & Size)
+          // ═══════════════════════════════════════════════════════════════════
           var variants = [];
           var colorVal = '';
           var sizeVal = '';
-          
-          var colorEl = document.querySelector('.product-detail-selected-color') || 
-                        document.querySelector('[class*="product-detail-color"]') || 
-                        document.querySelector('[class*="color-selector"]');
-          if (colorEl) {
-              colorVal = colorEl.innerText.trim().split('\n')[0].replace(/\|.*/, '').trim();
-          }
-          
-          var sizeEl = document.querySelector('[class*="size-selector"] [class*="selected"]') || 
-                       document.querySelector('[class*="size-selector"] [aria-checked="true"]') ||
-                       document.querySelector('[data-qa-action="size-selector"] [aria-checked="true"]');
-          if (sizeEl) {
-              sizeVal = sizeEl.innerText.trim().split('\n')[0];
-          }
-          
-          if (!colorVal || !sizeVal) {
-              var els = document.querySelectorAll('span, div, p, h4, h3, h2, h1');
-              for (var i = 0; i < Math.min(els.length, 300); i++) {
-                  var t = els[i].innerText ? els[i].innerText.trim() : '';
-                  if (!colorVal) {
-                      var cMatch = t.match(/^(?:Color|Colour)\s*:\s*([^\n\r]+)/i);
-                      if (cMatch) colorVal = cMatch[1].replace(/\|.*/, '').trim();
-                  }
-                  if (!sizeVal) {
-                      var sMatch = t.match(/^Size\s*:\s*([^\n\r]+)/i);
-                      if (sMatch) sizeVal = sMatch[1].trim();
-                  }
+
+          if (bestPriceEl) {
+            var curVar = bestPriceEl;
+            for (var vdepth = 0; vdepth < 8 && curVar && curVar !== document.body; vdepth++) {
+              var colEl = curVar.querySelector('.product-detail-selected-color, [class*="product-detail-color"], [class*="color-selector"], [class*="selected-color"]');
+              if (colEl && !colorVal) {
+                colorVal = colEl.innerText.trim().split('\n')[0].replace(/\|.*/, '').trim();
               }
+              var szEl = curVar.querySelector('[class*="size-selector"] [class*="selected"], [class*="size-selector"] [aria-checked="true"], [data-qa-action="size-selector"] [aria-checked="true"]');
+              if (szEl && !sizeVal) {
+                sizeVal = szEl.innerText.trim().split('\n')[0];
+              }
+              if (colorVal && sizeVal) break;
+              curVar = curVar.parentElement;
+            }
           }
-          
-          if (colorVal) variants.push("Colour: " + colorVal);
-          if (sizeVal) variants.push("Size: " + sizeVal);
+
+          if (!colorVal) {
+            var pageColorEl = document.querySelector('.product-detail-selected-color, [class*="color-selector"] [class*="selected"]');
+            if (pageColorEl) colorVal = pageColorEl.innerText.trim().split('\n')[0].replace(/\|.*/, '').trim();
+          }
+          if (!sizeVal) {
+            var pageSizeEl = document.querySelector('[class*="size-selector"] [class*="selected"], [class*="size-selector"] [aria-checked="true"]');
+            if (pageSizeEl) sizeVal = pageSizeEl.innerText.trim().split('\n')[0];
+          }
+
+          if (!colorVal || !sizeVal) {
+            var vSearchArea = (bestPriceEl && bestPriceEl.parentElement && bestPriceEl.parentElement.parentElement) || document.body;
+            var vEls = vSearchArea.querySelectorAll('span, div, p, h4, h3, h2, h1');
+            for (var vi = 0; vi < Math.min(vEls.length, 200); vi++) {
+              var vt = (vEls[vi].innerText || '').trim();
+              if (!colorVal) {
+                var cm = vt.match(/^(?:Color|Colour)\s*:\s*([^\n\r]+)/i);
+                if (cm) colorVal = cm[1].replace(/\|.*/, '').trim();
+              }
+              if (!sizeVal) {
+                var sm = vt.match(/^Size\s*:\s*([^\n\r]+)/i);
+                if (sm) sizeVal = sm[1].trim();
+              }
+            }
+          }
+
+          if (colorVal) variants.push('Colour: ' + colorVal);
+          if (sizeVal) variants.push('Size: ' + sizeVal);
           product.variants = variants.join(', ');
-          
-          // 5. IMAGE
-          if (!product.image) {
-              var ogImage = document.querySelector('meta[property="og:image"]');
-              product.image = (ogImage && ogImage.content) ? ogImage.content : '';
-          }
-          if (!product.image) {
-              var imgEl = document.querySelector('.media-image__image') || document.querySelector('picture img') || document.querySelector('img[src*="zara"]');
-              if (imgEl) product.image = imgEl.src;
-          }
-          
-          product.url = window.location.href;
-          product.brand = 'Zara';
-          
+
           return JSON.stringify(product);
         })();
       ''';
+
+
+
     } else if (currentUrl.contains('snitch.com')) {
       return r'''
         (function() {

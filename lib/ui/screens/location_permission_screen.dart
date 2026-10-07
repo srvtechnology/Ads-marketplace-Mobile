@@ -30,10 +30,10 @@ class LocationPermissionScreen extends StatefulWidget {
 class LocationPermissionScreenState extends State<LocationPermissionScreen>
     with WidgetsBindingObserver {
   bool _openedAppSettings = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
-    // _checkLocationPermission();
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
@@ -50,71 +50,104 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
 
     if (state == AppLifecycleState.resumed && _openedAppSettings) {
       _openedAppSettings = false;
-
-      // Reset the flag
       _getCurrentLocation();
-      setState(() {}); // Call the method to fetch the current location
     }
   }
 
   Future<void> _getCurrentLocation() async {
-    LocationPermission permission;
+    if (_isLoading) return;
+    setState(() {
+      _isLoading = true;
+    });
 
-    // Check location permission status
-    permission = await Geolocator.checkPermission();
+    try {
+      LocationPermission permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.deniedForever) {
-      if (Platform.isAndroid) {
-        await Geolocator.openLocationSettings();
-        _getCurrentLocation();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
       }
-      _showLocationServiceInstructions();
-    } else if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
 
-      if (permission != LocationPermission.whileInUse &&
-          permission != LocationPermission.always) {
-        // Handle permission not granted for while in use or always
-        setDefaultLocationAndNavigate();
+      if (permission == LocationPermission.deniedForever) {
+        if (Platform.isAndroid) {
+          await Geolocator.openLocationSettings();
+        }
+        _showLocationServiceInstructions();
+        return;
+      }
+
+      if (permission == LocationPermission.whileInUse ||
+          permission == LocationPermission.always) {
+        await _getCurrentLocationAndNavigate();
       } else {
-        _getCurrentLocation();
+        await setDefaultLocationAndNavigate();
       }
-    } else {
-      _getCurrentLocationAndNavigate();
+    } catch (e) {
+      print("Error in _getCurrentLocation: $e");
+      await setDefaultLocationAndNavigate();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> setDefaultLocationAndNavigate() async {
     try {
-      double latitude = double.parse(Constant.defaultLatitude);
-      double longitude = double.parse(Constant.defaultLongitude);
+      double latitude = double.tryParse(Constant.defaultLatitude) ?? 27.5142;
+      double longitude = double.tryParse(Constant.defaultLongitude) ?? 90.4336;
 
-      await setLocaleIdentifier("en_US");
+      String city = "Thimphu";
+      String state = "Thimphu";
+      String country = "Bhutan";
+      String? area;
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        latitude,
-        longitude,
-      );
+      try {
+        await setLocaleIdentifier("en_US");
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          latitude,
+          longitude,
+        ).timeout(const Duration(seconds: 4));
 
-      if (placemarks.isNotEmpty) {
-        Placemark placemark = placemarks[0];
-        if (Constant.isDemoModeOn) {
-          UiUtils.setDefaultLocationValue(
-              isCurrent: false, isHomeUpdate: false, context: context);
-        } else {
-          HiveUtils.setLocation(
-            area: placemark.subLocality,
-            city: placemark.locality!,
-            state: placemark.administrativeArea!,
-            country: placemark.country!,
-            latitude: latitude,
-            longitude: longitude,
-          );
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks[0];
+          city = placemark.locality ??
+              placemark.subAdministrativeArea ??
+              placemark.administrativeArea ??
+              city;
+          state = placemark.administrativeArea ??
+              placemark.locality ??
+              state;
+          country = placemark.country ?? country;
+          area = placemark.subLocality ?? placemark.name;
         }
-
-        HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
+      } catch (e) {
+        print("Reverse geocoding default coordinates failed: $e");
       }
-    } catch (e) {}
+
+      if (Constant.isDemoModeOn) {
+        UiUtils.setDefaultLocationValue(
+            isCurrent: false, isHomeUpdate: false, context: context);
+      } else {
+        HiveUtils.setLocation(
+          area: area,
+          city: city,
+          state: state,
+          country: country,
+          latitude: latitude,
+          longitude: longitude,
+        );
+      }
+    } catch (e) {
+      print("Error in setDefaultLocationAndNavigate: $e");
+      UiUtils.setDefaultLocationValue(
+          isCurrent: false, isHomeUpdate: false, context: context);
+    }
+
+    if (mounted) {
+      HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
+    }
   }
 
   void _showLocationServiceInstructions() {
@@ -130,45 +163,84 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
             setState(() {
               _openedAppSettings = true;
             });
-
-            // Optionally handle action button press
           },
         ),
       ),
     );
+    // Also navigate with default location so user isn't stuck forever
+    setDefaultLocationAndNavigate();
   }
 
   Future<void> _getCurrentLocationAndNavigate() async {
     try {
-      Position position = await Geolocator.getCurrentPosition(
-          locationSettings: LocationSettings(accuracy: LocationAccuracy.high));
+      Position? position;
+      try {
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.medium,
+            timeLimit: Duration(seconds: 5),
+          ),
+        );
+      } catch (e) {
+        print("getCurrentPosition failed or timed out: $e");
+        position = await Geolocator.getLastKnownPosition();
+      }
 
-      await setLocaleIdentifier("en_US");
+      if (position == null) {
+        print("Location position is null, using default location");
+        await setDefaultLocationAndNavigate();
+        return;
+      }
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+      String city = "Thimphu";
+      String state = "Thimphu";
+      String country = "Bhutan";
+      String? area;
 
-      if (placemarks.isNotEmpty) {
-        Placemark placemark = placemarks[0];
-        if (Constant.isDemoModeOn) {
-          UiUtils.setDefaultLocationValue(
-              isCurrent: false, isHomeUpdate: false, context: context);
-        } else {
-          HiveUtils.setLocation(
-            area: placemark.subLocality,
-            city: placemark.locality!,
-            state: placemark.administrativeArea!,
-            country: placemark.country!,
-            latitude: position.latitude,
-            longitude: position.longitude,
-          );
+      try {
+        await setLocaleIdentifier("en_US");
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        ).timeout(const Duration(seconds: 4));
+
+        if (placemarks.isNotEmpty) {
+          Placemark placemark = placemarks[0];
+          city = placemark.locality ??
+              placemark.subAdministrativeArea ??
+              placemark.administrativeArea ??
+              city;
+          state = placemark.administrativeArea ??
+              placemark.locality ??
+              state;
+          country = placemark.country ?? country;
+          area = placemark.subLocality ?? placemark.name;
         }
+      } catch (e) {
+        print("Reverse geocoding current position failed: $e");
+      }
 
+      if (Constant.isDemoModeOn) {
+        UiUtils.setDefaultLocationValue(
+            isCurrent: false, isHomeUpdate: false, context: context);
+      } else {
+        HiveUtils.setLocation(
+          area: area,
+          city: city,
+          state: state,
+          country: country,
+          latitude: position.latitude,
+          longitude: position.longitude,
+        );
+      }
+
+      if (mounted) {
         HelperUtils.killPreviousPages(context, Routes.main, {"from": "login"});
       }
-    } catch (e) {}
+    } catch (e) {
+      print("Error in _getCurrentLocationAndNavigate: $e");
+      await setDefaultLocationAndNavigate();
+    }
   }
 
   @override
@@ -193,7 +265,7 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
               ),
               const SizedBox(height: 14),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 10),
                 child: CustomText(
                   'enjoyPersonalizedSellingAndBuyingLocationLbl'
                       .translate(context),
@@ -206,16 +278,21 @@ class LocationPermissionScreenState extends State<LocationPermissionScreen>
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12),
-                child: UiUtils.buildButton(context,
-                    showElevation: false,
-                    buttonColor: context.color.territoryColor,
-                    textColor: context.color.secondaryColor, onPressed: () {
-                  // Check location permission when the button is pressed
-                  _getCurrentLocation();
-                },
-                    radius: 8,
-                    height: 46,
-                    buttonTitle: "next".translate(context)),
+                child: UiUtils.buildButton(
+                  context,
+                  showElevation: false,
+                  buttonColor: context.color.territoryColor,
+                  textColor: context.color.secondaryColor,
+                  disabled: _isLoading,
+                  onPressed: () {
+                    _getCurrentLocation();
+                  },
+                  radius: 8,
+                  height: 46,
+                  buttonTitle: _isLoading
+                      ? "loading".translate(context)
+                      : "next".translate(context),
+                ),
               ),
             ],
           ),

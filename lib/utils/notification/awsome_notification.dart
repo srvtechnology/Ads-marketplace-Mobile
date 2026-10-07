@@ -324,6 +324,14 @@ class NotificationController {
               getItemsWithStatus: selectItemStatus,
             );
       });
+    } else if (payload?['type'] == "notification" ||
+        payload?['type'] == "general" ||
+        payload?['type'] == "default" ||
+        payload?['type'] == "0") {
+      Future.delayed(Duration.zero, () {
+        HelperUtils.goToNextPage(Routes.notificationPage,
+            Constant.navigatorKey.currentContext!, false);
+      });
     } else if (receivedAction.payload?["item_id"] != null &&
         receivedAction.payload?["item_id"] != '') {
       String id = receivedAction.payload?["item_id"] ?? "";
@@ -355,9 +363,8 @@ class NotificationController {
       }
     } else {
       Future.delayed(Duration.zero, () {
-        Navigator.popUntil(
-            Constant.navigatorKey.currentContext!, (route) => route.isFirst);
-        MainActivity.globalKey.currentState?.onItemTapped(1);
+        HelperUtils.goToNextPage(Routes.notificationPage,
+            Constant.navigatorKey.currentContext!, false);
       });
     }
   }

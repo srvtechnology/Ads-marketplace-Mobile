@@ -1,4 +1,4 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:eClassify/utils/notification/notification_service.dart';
 
 import 'package:eClassify/data/repositories/auth_repository.dart';
 import 'package:eClassify/utils/login/lib/login_status.dart';
@@ -64,7 +64,7 @@ class EmailLogin extends LoginSystem {
           emit(MProgress());
           String otp = payloadData.otp ?? '';
 
-          String? fcmToken = await FirebaseMessaging.instance.getToken();
+          String? fcmToken = await NotificationService.getFCMToken();
 
           result = await AuthRepository().emailLoginVerifyOtp(
             email: verificationEmail ?? payloadData.email,

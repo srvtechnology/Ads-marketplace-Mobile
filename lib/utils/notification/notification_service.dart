@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:eClassify/app/routes.dart';
 import 'package:eClassify/data/cubits/chat/get_buyer_chat_users_cubit.dart';
@@ -10,8 +11,6 @@ import 'package:eClassify/data/cubits/chat/send_message.dart';
 import 'package:eClassify/data/cubits/item/fetch_my_item_cubit.dart';
 import 'package:eClassify/data/model/chat/chat_message_modal.dart';
 import 'package:eClassify/data/model/chat/chat_user_model.dart';
-import 'package:eClassify/data/model/data_output.dart';
-import 'package:eClassify/data/model/item/item_model.dart';
 import 'package:eClassify/data/repositories/item/item_repository.dart';
 import 'package:eClassify/ui/screens/chat/chat_audio/widgets/chat_widget.dart';
 import 'package:eClassify/ui/screens/chat/chat_screen.dart';
@@ -219,9 +218,7 @@ class NotificationService {
         if (message == null) {
           return;
         }
-        handleNotification(message, false, context);
-        // If it's a click from terminated state, we should also trigger the tap handler
-        // But onTapNotificationHandler is a listener. We should call the inner logic.
+        // If it's a click from terminated state, trigger the tap handler
         _handleTap(message, context);
       },
     );
@@ -351,6 +348,17 @@ class NotificationService {
               getItemsWithStatus: selectItemStatus,
             );
       });
+    } else if (message.data['type'] == "notification" ||
+        message.data['type'] == "general" ||
+        message.data['type'] == "default" ||
+        message.data['type'] == "0") {
+      Future.delayed(Duration.zero, () {
+        HelperUtils.goToNextPage(
+          Routes.notificationPage,
+          Constant.navigatorKey.currentContext!,
+          false,
+        );
+      });
     } else if (message.data["item_id"] != null &&
         message.data["item_id"] != '') {
       String id = message.data["item_id"] ?? "";
@@ -378,11 +386,10 @@ class NotificationService {
     } else {
       Future.delayed(Duration.zero, () {
         HelperUtils.goToNextPage(
-          Routes.main,
+          Routes.notificationPage,
           Constant.navigatorKey.currentContext!,
           false,
         );
-        MainActivity.globalKey.currentState?.onItemTapped(1);
       });
     }
   }
@@ -395,6 +402,52 @@ class NotificationService {
   }
 
 
+  /// Safely retrieves the FCM registration token across platforms.
+  /// On iOS, checks for APNs device token availability before attempting to get the FCM token,
+  /// preventing the [firebase_messaging/apns-token-not-set] crash on Simulators or unready APNs.
+  static Future<String?> getFCMToken() async {
+    try {
+      if (Platform.isIOS) {
+        NotificationSettings settings =
+            await FirebaseMessaging.instance.requestPermission(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
+
+        if (settings.authorizationStatus != AuthorizationStatus.authorized &&
+            settings.authorizationStatus != AuthorizationStatus.provisional) {
+          print("Notification permissions not granted on iOS.");
+          return null;
+        }
+
+        // On iOS, getToken() requires an APNs token. Check getAPNSToken() first.
+        String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken == null) {
+          // Retry for up to 3 seconds if device is negotiating APNs with Apple
+          for (int i = 0; i < 3; i++) {
+            await Future.delayed(const Duration(milliseconds: 1000));
+            apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+            if (apnsToken != null) break;
+          }
+        }
+
+        // If APNs token is still not set (e.g. running in iOS Simulator)
+        if (apnsToken == null) {
+          print(
+              "APNs token not available yet (Simulator or pending APNs registration). Skipping FCM token request.");
+          return null;
+        }
+      }
+
+      String? token = await FirebaseMessaging.instance.getToken();
+      return token;
+    } catch (e) {
+      print("Error getting FCM token: $e");
+      return null;
+    }
+  }
+
   static Future<void> registerListeners(context) async {
     NotificationSettings settings =
         await FirebaseMessaging.instance.requestPermission(
@@ -403,15 +456,13 @@ class NotificationService {
       sound: true,
     );
 
-    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+    if (settings.authorizationStatus == AuthorizationStatus.authorized ||
+        settings.authorizationStatus == AuthorizationStatus.provisional) {
       FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
           alert: true, badge: true, sound: true);
 
-      String? token = await FirebaseMessaging.instance.getToken();
+      String? token = await getFCMToken();
       print("FCM Token: $token");
-
-      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      print("APNS Token: $apnsToken");
 
       await foregroundNotificationHandler(context);
       await terminatedStateNotificationHandler(context);
