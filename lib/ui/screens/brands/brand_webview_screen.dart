@@ -57,7 +57,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     setState(() {
       _activeDialogCount++;
     });
-    _controller.runJavaScript("if (document && document.body) document.body.style.pointerEvents = 'none';").catchError((_) {});
+    _controller
+        .runJavaScript(
+            "if (document && document.body) document.body.style.pointerEvents = 'none';")
+        .catchError((_) {});
 
     try {
       return await showDialog<T>(
@@ -71,7 +74,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           _activeDialogCount = (_activeDialogCount - 1).clamp(0, 999);
         });
         if (_activeDialogCount == 0) {
-          _controller.runJavaScript("if (document && document.body) document.body.style.pointerEvents = 'auto';").catchError((_) {});
+          _controller
+              .runJavaScript(
+                  "if (document && document.body) document.body.style.pointerEvents = 'auto';")
+              .catchError((_) {});
         }
       }
     }
@@ -254,37 +260,60 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
   void _checkIfProductPage(String url) {
     String lowerUrl = url.toLowerCase();
-    
+
     // Basic check for product pages across platforms
-    bool isAmazonProduct = lowerUrl.contains('/dp/') || lowerUrl.contains('/gp/product/');
-    bool isFlipkartProduct = lowerUrl.contains('flipkart.com') && lowerUrl.contains('/p/');
-    bool isMyntraProduct = lowerUrl.contains('myntra.com') && (lowerUrl.contains('/buy') || RegExp(r'/[0-9]{5,}').hasMatch(lowerUrl));
-    
-    bool isDecathlonProduct = lowerUrl.contains('decathlon.in') && lowerUrl.contains('/p/');
-    bool isFirstcryProduct = lowerUrl.contains('firstcry.com') && lowerUrl.contains('product-detail');
-    bool isIkeaProduct = lowerUrl.contains('ikea.com') && lowerUrl.contains('/p/');
-    bool isSephoraProduct = lowerUrl.contains('sephora.in') && lowerUrl.contains('/product');
-    bool isUniqloProduct = lowerUrl.contains('uniqlo.com') && lowerUrl.contains('/products');
-    bool isZaraProduct = lowerUrl.contains('zara.com') && (lowerUrl.contains('-p0') || lowerUrl.contains('.html'));
+    bool isAmazonProduct =
+        lowerUrl.contains('/dp/') || lowerUrl.contains('/gp/product/');
+    bool isFlipkartProduct =
+        lowerUrl.contains('flipkart.com') && lowerUrl.contains('/p/');
+    bool isMyntraProduct = lowerUrl.contains('myntra.com') &&
+        (lowerUrl.contains('/buy') || RegExp(r'/[0-9]{5,}').hasMatch(lowerUrl));
+
+    bool isDecathlonProduct =
+        lowerUrl.contains('decathlon.in') && lowerUrl.contains('/p/');
+    bool isFirstcryProduct = lowerUrl.contains('firstcry.com') &&
+        lowerUrl.contains('product-detail');
+    bool isIkeaProduct =
+        lowerUrl.contains('ikea.com') && lowerUrl.contains('/p/');
+    bool isSephoraProduct =
+        lowerUrl.contains('sephora.in') && lowerUrl.contains('/product');
+    bool isUniqloProduct =
+        lowerUrl.contains('uniqlo.com') && lowerUrl.contains('/products');
+    bool isZaraProduct = lowerUrl.contains('zara.com') &&
+        (lowerUrl.contains('-p0') || lowerUrl.contains('.html'));
     // Lacoste: no URL-based check — detection is handled entirely by the SPA monitor DOM checks
     // (category pages also end in .html on Magento, so DOM detection is the only reliable signal)
-    
-    // Snitch, Rare Rabbit, The Bear House, Meesho product URL checks
-    bool isSnitchProduct = (lowerUrl.contains('snitch.com') || lowerUrl.contains('snitch.co.in')) && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
-    bool isRareRabbitProduct = lowerUrl.contains('thehouseofrare.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
-    bool isBearHouseProduct = lowerUrl.contains('thebearhouse.com') && (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
-    bool isMeeshoProduct = lowerUrl.contains('meesho.com') && (lowerUrl.contains('/p/') || lowerUrl.contains('/s/p/'));
-    
-    // Generic fallback for product URLs
-    bool isGenericProduct = lowerUrl.contains('/products/') || lowerUrl.contains('/product/');
 
-    bool isProduct = isAmazonProduct || isFlipkartProduct || isMyntraProduct || 
-                     isDecathlonProduct || isFirstcryProduct || isIkeaProduct || 
-                     isSephoraProduct || isUniqloProduct || isZaraProduct ||
-                     isSnitchProduct || isRareRabbitProduct || isBearHouseProduct ||
-                     isMeeshoProduct ||
-                     isGenericProduct;
-    
+    // Snitch, Rare Rabbit, The Bear House, Meesho product URL checks
+    bool isSnitchProduct = (lowerUrl.contains('snitch.com') ||
+            lowerUrl.contains('snitch.co.in')) &&
+        (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isRareRabbitProduct = lowerUrl.contains('thehouseofrare.com') &&
+        (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isBearHouseProduct = lowerUrl.contains('thebearhouse.com') &&
+        (lowerUrl.contains('/products') || lowerUrl.contains('/product'));
+    bool isMeeshoProduct = lowerUrl.contains('meesho.com') &&
+        (lowerUrl.contains('/p/') || lowerUrl.contains('/s/p/'));
+
+    // Generic fallback for product URLs
+    bool isGenericProduct =
+        lowerUrl.contains('/products/') || lowerUrl.contains('/product/');
+
+    bool isProduct = isAmazonProduct ||
+        isFlipkartProduct ||
+        isMyntraProduct ||
+        isDecathlonProduct ||
+        isFirstcryProduct ||
+        isIkeaProduct ||
+        isSephoraProduct ||
+        isUniqloProduct ||
+        isZaraProduct ||
+        isSnitchProduct ||
+        isRareRabbitProduct ||
+        isBearHouseProduct ||
+        isMeeshoProduct ||
+        isGenericProduct;
+
     if (isProduct != isProductPage) {
       setState(() {
         isProductPage = isProduct;
@@ -292,12 +321,15 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
-  Future<void> _addToCart(BuildContext context, Map<String, dynamic> product) async {
+  Future<void> _addToCart(
+      BuildContext context, Map<String, dynamic> product) async {
     // Allow manual price override from the dialog price field
     final String rawPrice = (product['price'] ?? '').toString().trim();
-    double priceNum = double.tryParse(rawPrice.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+    double priceNum =
+        double.tryParse(rawPrice.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
     if (priceNum <= 0) {
-      HelperUtils.showSnackBarMessage(context, "Could not detect product price", type: MessageType.error);
+      HelperUtils.showSnackBarMessage(context, "Could not detect product price",
+          type: MessageType.error);
       return;
     }
 
@@ -313,7 +345,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Adding to Cart...', style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text('Adding to Cart...',
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
               ],
             ),
           ),
@@ -321,11 +354,13 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       },
     );
 
-    final success = await context.read<CartCubit>().addScrapedProductToCart(product);
+    final success =
+        await context.read<CartCubit>().addScrapedProductToCart(product);
     if (context.mounted) {
       Navigator.of(context).pop(); // hide progress
       if (success) {
-        HelperUtils.showSnackBarMessage(context, "Added to Cart successfully", type: MessageType.success);
+        HelperUtils.showSnackBarMessage(context, "Added to Cart successfully",
+            type: MessageType.success);
         // Prompt to go to cart
         _showAppDialog(
           context: context,
@@ -357,8 +392,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
     }
   }
-
-
 
   /// Safely parses the Object returned by runJavaScriptReturningResult into a Map.
   /// Handles single-encoded JSON (iOS) and double-encoded JSON (Chromium Android)
@@ -396,7 +429,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         await Future.delayed(Duration(milliseconds: delayMs));
       }
       try {
-        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
+        final Object result =
+            await _controller.runJavaScriptReturningResult(jsScript);
         final Map<String, dynamic> product = _parseJsResult(result);
         if (product.isNotEmpty) {
           lastResult = product;
@@ -425,7 +459,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Extracting details...', style: TextStyle(color: Colors.white, fontSize: 16)),
+                Text('Extracting details...',
+                    style: TextStyle(color: Colors.white, fontSize: 16)),
               ],
             ),
           ),
@@ -451,10 +486,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       if (Platform.isAndroid) {
         // Android WebView: wait for React SPA hydration before scraping
         await Future.delayed(const Duration(milliseconds: 2000));
-        product = await _runJsScraperWithRetry(jsScript, maxRetries: 4, delayMs: 800);
+        product =
+            await _runJsScraperWithRetry(jsScript, maxRetries: 4, delayMs: 800);
       } else {
         // iOS: run with fast retry (if attempt 0 has price, returns immediately with 0 delay)
-        product = await _runJsScraperWithRetry(jsScript, maxRetries: 2, delayMs: 500);
+        product =
+            await _runJsScraperWithRetry(jsScript, maxRetries: 2, delayMs: 500);
       }
       debugPrint('[SCRAPER RESULT] URL: $currentUrl => product: $product');
 
@@ -475,12 +512,14 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
-  void _showShadeSelectionDialog(BuildContext context, Map<String, dynamic> product) {
+  void _showShadeSelectionDialog(
+      BuildContext context, Map<String, dynamic> product) {
     String detectedShade = '';
 
     String variantsStr = (product['variants'] ?? '').toString();
     if (variantsStr.isNotEmpty) {
-      RegExp shadeRegex = RegExp(r'(?:Shade|Colour|Color):\s*([^,]+)', caseSensitive: false);
+      RegExp shadeRegex =
+          RegExp(r'(?:Shade|Colour|Color):\s*([^,]+)', caseSensitive: false);
       var match = shadeRegex.firstMatch(variantsStr);
       if (match != null) {
         detectedShade = match.group(1)?.trim() ?? '';
@@ -489,7 +528,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
     }
 
-    final TextEditingController shadeController = TextEditingController(text: detectedShade);
+    final TextEditingController shadeController =
+        TextEditingController(text: detectedShade);
 
     _showAppDialog(
       context: context,
@@ -504,151 +544,169 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Select Shade",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: context.color.textDefaultColor,
-                          ),
-                        ),
-                      ),
-                      InkWell(
-                        onTap: () => Navigator.of(dialogContext).pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: context.color.textLightColor.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            size: 20,
-                            color: context.color.textDefaultColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Please specify or confirm your selected product shade:",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.color.textDefaultColor.withValues(alpha: 0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    "Product Shade",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.color.textDefaultColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: shadeController,
-                    style: TextStyle(color: context.color.textDefaultColor),
-                    decoration: InputDecoration(
-                      hintText: "Enter shade (e.g. 4.5WN, 01 Fair To Light)",
-                      hintStyle: TextStyle(fontSize: 14, color: context.color.textLightColor),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.territoryColor),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOversizedItemNotice(dialogContext),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.5)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                          },
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
                           child: Text(
-                            "Cancel",
-                            style: TextStyle(color: context.color.textDefaultColor, fontSize: 15),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.color.territoryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                            "Select Shade",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: context.color.textDefaultColor,
                             ),
                           ),
-                          onPressed: () {
-                            String sVal = shadeController.text.trim();
-                            if (sVal.isNotEmpty) {
-                              product['variants'] = "Shade: $sVal";
-                            } else {
-                              product['variants'] = '';
-                            }
-
-                            Navigator.of(dialogContext).pop();
-
-                            _addToCart(context, product);
-                          },
-                          child: const Text(
-                            "Confirm & Import",
-                            style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                        ),
+                        InkWell(
+                          onTap: () => Navigator.of(dialogContext).pop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 20,
+                              color: context.color.textDefaultColor,
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      "Please specify or confirm your selected product shade:",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.8),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      "Product Shade",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: context.color.textDefaultColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: shadeController,
+                      style: TextStyle(color: context.color.textDefaultColor),
+                      decoration: InputDecoration(
+                        hintText: "Enter shade (e.g. 4.5WN, 01 Fair To Light)",
+                        hintStyle: TextStyle(
+                            fontSize: 14, color: context.color.textLightColor),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: context.color.territoryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildOversizedItemNotice(dialogContext),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(
+                                  color: context.color.textLightColor
+                                      .withValues(alpha: 0.5)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                            },
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(
+                                  color: context.color.textDefaultColor,
+                                  fontSize: 15),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.color.territoryColor,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              String sVal = shadeController.text.trim();
+                              if (sVal.isNotEmpty) {
+                                product['variants'] = "Shade: $sVal";
+                              } else {
+                                product['variants'] = '';
+                              }
+
+                              Navigator.of(dialogContext).pop();
+
+                              _addToCart(context, product);
+                            },
+                            child: const Text(
+                              "Confirm & Import",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
   }
 
-  void _showSizeColourSelectionDialog(BuildContext context, Map<String, dynamic> product) {
+  void _showSizeColourSelectionDialog(
+      BuildContext context, Map<String, dynamic> product) {
     String detectedSize = '';
     String detectedColour = '';
 
     String variantsStr = (product['variants'] ?? '').toString();
     if (variantsStr.isNotEmpty) {
-      RegExp colorRegex = RegExp(r'(?:Colour|Color|Shade):\s*([^,]+)', caseSensitive: false);
+      RegExp colorRegex =
+          RegExp(r'(?:Colour|Color|Shade):\s*([^,]+)', caseSensitive: false);
       RegExp sizeRegex = RegExp(r'Size:\s*([^,]+)', caseSensitive: false);
 
       var colorMatch = colorRegex.firstMatch(variantsStr);
@@ -662,9 +720,12 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
 
       if (detectedSize.isEmpty && detectedColour.isEmpty) {
-        List<String> parts = variantsStr.split(',').map((e) => e.trim()).toList();
+        List<String> parts =
+            variantsStr.split(',').map((e) => e.trim()).toList();
         for (var part in parts) {
-          if (RegExp(r'^([0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS|Free Size)$', caseSensitive: false).hasMatch(part)) {
+          if (RegExp(r'^([0-9]{1,3}|S|M|L|XL|XXL|XXXL|XS|Free Size)$',
+                  caseSensitive: false)
+              .hasMatch(part)) {
             detectedSize = part;
           } else if (part.isNotEmpty) {
             detectedColour = part;
@@ -674,8 +735,15 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
       if (detectedSize.isNotEmpty) {
         detectedSize = detectedSize.split('\n')[0].split('\r')[0];
-        detectedSize = detectedSize.replaceAll(RegExp(r'\s*(?:Sizing|Size Chart|Get help|Find your size).*$', caseSensitive: false), '').trim();
-        RegExp multiSizeRegex = RegExp(r'^(.+?\b(?:XXS|XS|S|M|L|XL|XXL|XXXL|[0-9]{1,2}))(?:\s+(?:XXS|XS|S|M|L|XL|XXL|XXXL|[0-9]{1,2}))+$', caseSensitive: false);
+        detectedSize = detectedSize
+            .replaceAll(
+                RegExp(r'\s*(?:Sizing|Size Chart|Get help|Find your size).*$',
+                    caseSensitive: false),
+                '')
+            .trim();
+        RegExp multiSizeRegex = RegExp(
+            r'^(.+?\b(?:XXS|XS|S|M|L|XL|XXL|XXXL|[0-9]{1,2}))(?:\s+(?:XXS|XS|S|M|L|XL|XXL|XXXL|[0-9]{1,2}))+$',
+            caseSensitive: false);
         var match = multiSizeRegex.firstMatch(detectedSize);
         if (match != null) {
           detectedSize = match.group(1)?.trim() ?? detectedSize;
@@ -683,8 +751,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       }
     }
 
-    final TextEditingController sizeController = TextEditingController(text: detectedSize);
-    final TextEditingController colourController = TextEditingController(text: detectedColour);
+    final TextEditingController sizeController =
+        TextEditingController(text: detectedSize);
+    final TextEditingController colourController =
+        TextEditingController(text: detectedColour);
 
     _showAppDialog(
       context: context,
@@ -699,215 +769,253 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             behavior: HitTestBehavior.opaque,
             child: Padding(
               padding: const EdgeInsets.all(20.0),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Select Size & Colour",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: context.color.textDefaultColor,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            "Select Size & Colour",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: context.color.textDefaultColor,
+                            ),
                           ),
                         ),
-                      ),
-                      InkWell(
-                        onTap: () => Navigator.of(dialogContext).pop(),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: BoxDecoration(
-                            color: context.color.textLightColor.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
+                        InkWell(
+                          onTap: () => Navigator.of(dialogContext).pop(),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close,
+                              size: 20,
+                              color: context.color.textDefaultColor,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.close,
-                            size: 20,
-                            color: context.color.textDefaultColor,
-                          ),
+                        ),
+                      ],
+                    ),
+                    if ((product['title'] ?? '').toString().isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        product['title'].toString(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: context.color.textDefaultColor,
                         ),
                       ),
                     ],
-                  ),
-                  if ((product['title'] ?? '').toString().isNotEmpty) ...[
-                    const SizedBox(height: 10),
+                    if ((product['price'] ?? '').toString().isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "₹${product['price']}",
+                        style: TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: context.color.territoryColor,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
                     Text(
-                      product['title'].toString(),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      "Please specify or confirm your selected size and colour:",
                       style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: context.color.textDefaultColor
+                            .withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 18),
+                    Text(
+                      "Select Size",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
                         color: context.color.textDefaultColor,
                       ),
                     ),
-                  ],
-                  if ((product['price'] ?? '').toString().isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      "₹${product['price']}",
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        color: context.color.territoryColor,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  Text(
-                    "Please specify or confirm your selected size and colour:",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.color.textDefaultColor.withValues(alpha: 0.8),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    "Select Size",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.color.textDefaultColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: sizeController,
-                    style: TextStyle(color: context.color.textDefaultColor),
-                    decoration: InputDecoration(
-                      hintText: "Enter size (e.g. 30, 32, M, L)",
-                      hintStyle: TextStyle(fontSize: 14, color: context.color.textLightColor),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.territoryColor),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Select Colour",
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                      color: context.color.textDefaultColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: colourController,
-                    style: TextStyle(color: context.color.textDefaultColor),
-                    decoration: InputDecoration(
-                      hintText: "Enter colour (e.g. Blue, Black)",
-                      hintStyle: TextStyle(fontSize: 14, color: context.color.textLightColor),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.3)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(color: context.color.territoryColor),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _buildOversizedItemNotice(dialogContext),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            side: BorderSide(color: context.color.textLightColor.withValues(alpha: 0.5)),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop();
-                          },
-                          child: Text(
-                            "Cancel",
-                            style: TextStyle(color: context.color.textDefaultColor, fontSize: 15),
-                          ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: sizeController,
+                      style: TextStyle(color: context.color.textDefaultColor),
+                      decoration: InputDecoration(
+                        hintText: "Enter size (e.g. 30, 32, M, L)",
+                        hintStyle: TextStyle(
+                            fontSize: 14, color: context.color.textLightColor),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: context.color.territoryColor),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        flex: 2,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: context.color.territoryColor,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "Select Colour",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: context.color.textDefaultColor,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: colourController,
+                      style: TextStyle(color: context.color.textDefaultColor),
+                      decoration: InputDecoration(
+                        hintText: "Enter colour (e.g. Blue, Black)",
+                        hintStyle: TextStyle(
+                            fontSize: 14, color: context.color.textLightColor),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                              color: context.color.textLightColor
+                                  .withValues(alpha: 0.3)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              BorderSide(color: context.color.territoryColor),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    _buildOversizedItemNotice(dialogContext),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              side: BorderSide(
+                                  color: context.color.textLightColor
+                                      .withValues(alpha: 0.5)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.of(dialogContext).pop();
+                            },
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(
+                                  color: context.color.textDefaultColor,
+                                  fontSize: 15),
                             ),
                           ),
-                          onPressed: () {
-                            List<String> finalVariants = [];
-                            String cVal = colourController.text.trim();
-                            String sVal = sizeController.text.trim();
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: context.color.territoryColor,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              List<String> finalVariants = [];
+                              String cVal = colourController.text.trim();
+                              String sVal = sizeController.text.trim();
 
-                            if (cVal.isNotEmpty) {
-                              finalVariants.add("Colour: $cVal");
-                            }
-                            if (sVal.isNotEmpty) {
-                              finalVariants.add("Size: $sVal");
-                            }
+                              if (cVal.isNotEmpty) {
+                                finalVariants.add("Colour: $cVal");
+                              }
+                              if (sVal.isNotEmpty) {
+                                finalVariants.add("Size: $sVal");
+                              }
 
-                            product['variants'] = finalVariants.join(', ');
+                              product['variants'] = finalVariants.join(', ');
 
-                            if (sVal.isNotEmpty && product['sizePrices'] != null && product['sizePrices'] is Map) {
-                              Map sizePrices = product['sizePrices'] as Map;
-                              String key = sVal.toUpperCase();
-                              if (sizePrices.containsKey(key) && sizePrices[key].toString().isNotEmpty) {
-                                double sizeP = double.tryParse(sizePrices[key].toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-                                double currentP = double.tryParse((product['price'] ?? '0').toString().replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
-                                if (sizeP > 100 && (currentP == 0 || (sizeP <= currentP * 1.3 && sizeP >= currentP * 0.3))) {
-                                  product['price'] = sizeP.toStringAsFixed(0);
+                              if (sVal.isNotEmpty &&
+                                  product['sizePrices'] != null &&
+                                  product['sizePrices'] is Map) {
+                                Map sizePrices = product['sizePrices'] as Map;
+                                String key = sVal.toUpperCase();
+                                if (sizePrices.containsKey(key) &&
+                                    sizePrices[key].toString().isNotEmpty) {
+                                  double sizeP = double.tryParse(sizePrices[key]
+                                          .toString()
+                                          .replaceAll(
+                                              RegExp(r'[^0-9.]'), '')) ??
+                                      0;
+                                  double currentP = double.tryParse(
+                                          (product['price'] ?? '0')
+                                              .toString()
+                                              .replaceAll(
+                                                  RegExp(r'[^0-9.]'), '')) ??
+                                      0;
+                                  if (sizeP > 100 &&
+                                      (currentP == 0 ||
+                                          (sizeP <= currentP * 1.3 &&
+                                              sizeP >= currentP * 0.3))) {
+                                    product['price'] = sizeP.toStringAsFixed(0);
+                                  }
                                 }
                               }
-                            }
 
-                            Navigator.of(dialogContext).pop();
+                              Navigator.of(dialogContext).pop();
 
-                            _addToCart(context, product);
-                          },
-                          child: const Text(
-                            "Confirm & Import",
-                            style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                              _addToCart(context, product);
+                            },
+                            child: const Text(
+                              "Confirm & Import",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
+        );
+      },
+    );
   }
 
   String _getJsScript(String currentUrl) {
@@ -1539,7 +1647,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           return JSON.stringify(product);
         })();
       ''';
-
     } else if (currentUrl.contains('firstcry.com')) {
       return r'''
         (function() {
@@ -2193,98 +2300,227 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           }
 
           // ═══════════════════════════════════════════════════════════════════
-          // 1. PRICE EXTRACTION (DISCOUNT-AWARE & VIEWPORT-AWARE)
-          // When an item is on sale (e.g. ₹ 2,550.00 -35% ₹ 1,650.00):
-          // Zara shows the old struck-through MRP and the highlighted sale price.
-          // The scraper MUST pick the discounted selling price (₹ 1,650.00).
+          // 1. PRICE EXTRACTION — 4-tier strategy for Zara India
+          //
+          // Tier 0: window.__NEXT_DATA__ (Next.js SPA — single product, no noise)
+          // Tier 1: JSON-LD structured data (og:price / ld+json)
+          // Tier 2: Body-text scan anchored to "MRP INCL" label
+          // Tier 3: Broad viewport scan (last resort)
+          //
+          // Tiers 0 & 1 are immune to related-product card price noise because
+          // they read machine-readable metadata for THIS product only.
+          // For sale items the minimum of all extracted prices is used.
           // ═══════════════════════════════════════════════════════════════════
           var bestPriceVal = 0;
           var bestPriceEl = null;
+          var dbgTier = 'none';
+          var dbgInfo = '';
 
-          // Collect all leaf-like price elements visible in the viewport
-          var visiblePrices = [];
-          var priceCandidates = document.querySelectorAll(
-            '.price-current__amount-item--sale, [class*="price-current__amount-item--sale"], [class*="sale"] .money-amount__main, .money-amount__main, .price-current__amount-item, .price-current__amount, [class*="price-current"], [class*="money-amount"], [data-qa-action="product-detail-price"], .product-detail-info__price, [class*="product"] [class*="price"], span, div, p, strong'
-          );
-
-          for (var i = 0; i < priceCandidates.length; i++) {
-            var el = priceCandidates[i];
-            // Skip wrapper nodes that contain child money-amount elements to avoid double-counting
-            if (el.querySelector('.money-amount__main, [class*="price-current__amount-item"]')) continue;
-
-            var txt = (el.innerText || '').trim();
-            if (!txt || txt.length > 35) continue;
-            if (!(/[\u20b9\u0024]|INR|Rs/i.test(txt) || /^[\d,]+(?:\.[0-9]{1,2})?$/.test(txt))) continue;
-
-            var pVal = parseIndianPrice(txt);
-            if (pVal <= 50 || pVal >= 1000000) continue;
-
-            var score = getViewportScore(el);
-            if (score <= -5000) continue; // Skip off-screen elements
-
-            var isOld = isStrikethroughOrOld(el);
-            var isSale = isSaleOrDiscounted(el);
-
-            visiblePrices.push({
-              el: el,
-              val: pVal,
-              score: score,
-              isOld: isOld,
-              isSale: isSale
-            });
+          // helper: convert raw price text or number to rupees integer
+          function extractRupeeVal(raw) {
+            if (raw === undefined || raw === null) return 0;
+            var s = String(raw).replace(/,/g, '').replace(/[\u20b9\u0024\s]/g, '');
+            var n = parseFloat(s);
+            if (!isFinite(n) || n <= 0) return 0;
+            if (n > 100000) n = Math.round(n / 100); // paise → rupees
+            return (n >= 100 && n <= 500000) ? Math.round(n) : 0;
           }
 
-          // Pick the true selling price from visiblePrices
-          if (visiblePrices.length > 0) {
-            var nonOldPrices = visiblePrices.filter(function(p) { return !p.isOld; });
-            var salePrices = nonOldPrices.filter(function(p) { return p.isSale; });
-
-            if (salePrices.length === 0) {
-              salePrices = visiblePrices.filter(function(p) { return p.isSale; });
+          // ══════════════════════════════════════════════════════════════════
+          // STRATEGY 1 (PRIMARY): H1-ANCHORED PRICE LOOKUP
+          // The product page h1 belongs ONLY to the main product — never to
+          // related/recommended cards. Walk UP from h1 to find the containing
+          // product-info block, then find the price inside that block.
+          // This is completely immune to related-product card noise.
+          // ══════════════════════════════════════════════════════════════════
+          try {
+            var titleEls = document.querySelectorAll(
+              'h1, .product-detail-info__header-name, [class*="product-detail-info__header"], [class*="product-detail-info__name"]'
+            );
+            var mainTitleEl = null;
+            for (var ti = 0; ti < titleEls.length; ti++) {
+              var tScore = getViewportScore(titleEls[ti]);
+              if (tScore > -5000) { mainTitleEl = titleEls[ti]; break; }
             }
 
-            if (salePrices.length > 0) {
-              // 1. Explicit sale price elements take absolute highest priority (pick minimum among sale prices)
-              salePrices.sort(function(a, b) { return a.val - b.val; });
-              bestPriceVal = salePrices[0].val;
-              bestPriceEl = salePrices[0].el;
-            } else if (nonOldPrices.length > 0) {
-              // 2. Non-struck prices: On discounted items, the selling price is the MINIMUM
-              nonOldPrices.sort(function(a, b) { return a.val - b.val; });
-              bestPriceVal = nonOldPrices[0].val;
-              bestPriceEl = nonOldPrices[0].el;
-            } else {
-              // 3. Fallback: pick the minimum non-zero price
-              visiblePrices.sort(function(a, b) { return a.val - b.val; });
-              bestPriceVal = visiblePrices[0].val;
-              bestPriceEl = visiblePrices[0].el;
+            if (mainTitleEl) {
+              var hcur = mainTitleEl.parentElement;
+              for (var hd = 0; hd < 12 && hcur && hcur !== document.body && bestPriceVal === 0; hd++) {
+                // Look for price elements in this ancestor container
+                var hPriceEls = hcur.querySelectorAll(
+                  '.money-amount__main, [class*="money-amount__main"], ' +
+                  '.price-current__amount-item .money-amount, [class*="price-current__amount-item"] .money-amount'
+                );
+                var hPrices = [];
+                for (var hpi = 0; hpi < hPriceEls.length; hpi++) {
+                  var hpEl = hPriceEls[hpi];
+                  if (hpEl.querySelector('.money-amount__main')) continue; // skip wrappers
+                  if (isStrikethroughOrOld(hpEl)) continue; // skip struck-through old prices
+                  var hpTxt = (hpEl.innerText || '').trim();
+                  var hpVal = extractRupeeVal(hpTxt);
+                  if (hpVal > 0) hPrices.push({ el: hpEl, val: hpVal });
+                }
+                if (hPrices.length > 0) {
+                  hPrices.sort(function(a, b) { return a.val - b.val; });
+                  bestPriceVal = hPrices[0].val;
+                  bestPriceEl = hPrices[0].el;
+                  dbgTier = 'h1-anchor-d' + hd;
+                }
+                hcur = hcur.parentElement;
+              }
             }
-          }
+          } catch(_s1) { dbgInfo += ' s1err:' + _s1; }
 
-          // Fallback: If no price found yet, scan body innerText for prices near "MRP INCL"
+          // ══════════════════════════════════════════════════════════════════
+          // STRATEGY 2: URL v1/v2 PARAMS → __NEXT_DATA__ EXACT MATCH
+          // Extract the color reference (v1) and size reference (v2) from the
+          // URL, then navigate __NEXT_DATA__ to find the EXACT product's price.
+          // ══════════════════════════════════════════════════════════════════
           if (bestPriceVal === 0) {
-            var bodyText = (document.body.innerText || '').replace(/\u00a0/g, ' ');
-            // Match all prices immediately preceding "MRP INCL"
-            var lineMatch = bodyText.match(/([\u20b9\u0024][^\r\n]+?)[\r\n\s]{1,40}MRP\s+INCL/i);
-            if (lineMatch) {
-              var allMatches = lineMatch[1].match(/[\u20b9\u0024]\s*([0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g) || [];
-              var extractedVals = [];
-              for (var mi = 0; mi < allMatches.length; mi++) {
-                var v = parseIndianPrice(allMatches[mi]);
-                if (v > 50) extractedVals.push(v);
+            try {
+              var urlParams = new URLSearchParams(window.location.search);
+              var urlV1 = urlParams.get('v1') || '';
+              var urlV2 = urlParams.get('v2') || '';
+              var nd = window.__NEXT_DATA__;
+              if (nd && urlV1) {
+                var pp = nd.props && nd.props.pageProps;
+                // Try multiple possible pageProps structures
+                var productDetail = (pp && (
+                  (pp.product && pp.product.detail) ||
+                  pp.product ||
+                  pp.productDetail ||
+                  pp.pdp
+                )) || null;
+
+                var colorsArr = productDetail ? (productDetail.colors || productDetail.detail && productDetail.detail.colors || []) : [];
+
+                for (var ci = 0; ci < colorsArr.length && bestPriceVal === 0; ci++) {
+                  var colorObj = colorsArr[ci];
+                  var colorRef = String(colorObj.id || colorObj.reference || colorObj.productId || '');
+                  // Match if color ref starts with/equals v1
+                  if (colorRef !== urlV1 && !colorRef.startsWith(urlV1) && !urlV1.startsWith(colorRef)) continue;
+
+                  var sizesArr = colorObj.sizes || [];
+                  for (var si = 0; si < sizesArr.length; si++) {
+                    var sizeObj = sizesArr[si];
+                    var sizeRef = String(sizeObj.id || sizeObj.reference || sizeObj.sku || '');
+                    // If we have v2, match size; otherwise use first size
+                    if (urlV2 && sizeRef !== urlV2 && !sizeRef.startsWith(urlV2) && !urlV2.startsWith(sizeRef)) continue;
+                    var szPrice = sizeObj.price || sizeObj.salePrice || sizeObj.currentPrice;
+                    if (szPrice !== undefined && szPrice !== null) {
+                      var szVal = extractRupeeVal(String(szPrice));
+                      if (szVal > 0) {
+                        bestPriceVal = szVal;
+                        dbgTier = 'next-data-v1match';
+                        break;
+                      }
+                    }
+                  }
+                  // If v2 didn't match anything, try first size
+                  if (bestPriceVal === 0 && sizesArr.length > 0) {
+                    var fsPrice = sizesArr[0].price || sizesArr[0].salePrice;
+                    if (fsPrice !== undefined) {
+                      var fsVal = extractRupeeVal(String(fsPrice));
+                      if (fsVal > 0) { bestPriceVal = fsVal; dbgTier = 'next-data-first-size'; }
+                    }
+                  }
+                }
               }
-              if (extractedVals.length > 0) {
-                // Discounted price is the MINIMUM of the displayed prices on that line
-                extractedVals.sort(function(a, b) { return a - b; });
-                bestPriceVal = extractedVals[0];
-              }
-            }
+            } catch(_s2) { dbgInfo += ' s2err:' + _s2; }
           }
 
-          if (bestPriceVal > 50) {
-            price = String(bestPriceVal);
+          // ══════════════════════════════════════════════════════════════════
+          // STRATEGY 3: MRP INCL DOM-PROXIMITY WALK
+          // Find the "MRP INCL" text node and walk UP the DOM for the price
+          // in the same container. Sort by viewport score (most visible first).
+          // ══════════════════════════════════════════════════════════════════
+          if (bestPriceVal === 0) {
+            try {
+              var mrpEls = [];
+              var scanEls = document.querySelectorAll('p, span, div, li, small');
+              for (var ai = 0; ai < scanEls.length; ai++) {
+                var aEl = scanEls[ai];
+                if (aEl.children.length > 2) continue; // skip big containers
+                var aTxt = (aEl.innerText || '').trim().toUpperCase();
+                if (!aTxt.startsWith('MRP') || !aTxt.includes('INCL') || aTxt.length > 80) continue;
+                var aScore = getViewportScore(aEl);
+                if (aScore > -5000) mrpEls.push({ el: aEl, score: aScore });
+              }
+              mrpEls.sort(function(a, b) { return b.score - a.score; });
+              dbgInfo += ' mrpCount:' + mrpEls.length;
+
+              for (var mci = 0; mci < mrpEls.length && bestPriceVal === 0; mci++) {
+                var mcur = mrpEls[mci].el.parentElement;
+                for (var md = 0; md < 8 && mcur && mcur !== document.body; md++) {
+                  var mpEls = mcur.querySelectorAll('.money-amount__main, [class*="money-amount__main"]');
+                  var mpPrices = [];
+                  for (var mpi = 0; mpi < mpEls.length; mpi++) {
+                    var mpEl = mpEls[mpi];
+                    if (mpEl.querySelector('.money-amount__main')) continue;
+                    if (isStrikethroughOrOld(mpEl)) continue;
+                    var mpVal = extractRupeeVal((mpEl.innerText || '').trim());
+                    if (mpVal > 0) mpPrices.push({ el: mpEl, val: mpVal });
+                  }
+                  if (mpPrices.length > 0) {
+                    mpPrices.sort(function(a, b) { return a.val - b.val; });
+                    bestPriceVal = mpPrices[0].val;
+                    bestPriceEl = mpPrices[0].el;
+                    dbgTier = 'mrp-incl-d' + md;
+                    break;
+                  }
+                  mcur = mcur.parentElement;
+                }
+              }
+            } catch(_s3) { dbgInfo += ' s3err:' + _s3; }
           }
+
+          // ══════════════════════════════════════════════════════════════════
+          // STRATEGY 4: JSON-LD structured data
+          // ══════════════════════════════════════════════════════════════════
+          if (bestPriceVal === 0) {
+            try {
+              var ldScripts = document.querySelectorAll('script[type="application/ld+json"]');
+              var ldPrices = [];
+              for (var li = 0; li < ldScripts.length; li++) {
+                try {
+                  var ldJ = JSON.parse(ldScripts[li].textContent || '{}');
+                  var ldItems = Array.isArray(ldJ['@graph']) ? ldJ['@graph'] : [ldJ];
+                  for (var lj = 0; lj < ldItems.length; lj++) {
+                    var ldOffers = ldItems[lj].offers || ldItems[lj].Offers;
+                    if (!ldOffers) continue;
+                    var ldList = Array.isArray(ldOffers) ? ldOffers : [ldOffers];
+                    for (var lok = 0; lok < ldList.length; lok++) {
+                      var ldp = ldList[lok].price || ldList[lok].lowPrice;
+                      var ldpVal = extractRupeeVal(String(ldp || 0));
+                      if (ldpVal > 0) ldPrices.push(ldpVal);
+                    }
+                  }
+                } catch(_lj) {}
+              }
+              if (ldPrices.length > 0) {
+                ldPrices.sort(function(a, b) { return a - b; });
+                bestPriceVal = ldPrices[0];
+                dbgTier = 'json-ld';
+              }
+            } catch(_s4) {}
+          }
+
+          // ══════════════════════════════════════════════════════════════════
+          // STRATEGY 5: og:price:amount meta
+          // ══════════════════════════════════════════════════════════════════
+          if (bestPriceVal === 0) {
+            try {
+              var ogEl = document.querySelector('meta[property="og:price:amount"], meta[name="og:price:amount"]');
+              if (ogEl && ogEl.content) {
+                var ogVal = extractRupeeVal(ogEl.content);
+                if (ogVal > 0) { bestPriceVal = ogVal; dbgTier = 'og-meta'; }
+              }
+            } catch(_s5) {}
+          }
+
+          if (bestPriceVal > 50) price = String(bestPriceVal);
           product.price = price;
+          product._dbg = dbgTier + dbgInfo;
 
           // ═══════════════════════════════════════════════════════════════════
           // 2. TITLE EXTRACTION (VIEWPORT-AWARE)
@@ -2451,9 +2687,6 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           return JSON.stringify(product);
         })();
       ''';
-
-
-
     } else if (currentUrl.contains('snitch.com')) {
       return r'''
         (function() {
@@ -3161,7 +3394,8 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     }
   }
 
-  Widget _buildOversizedItemNotice(BuildContext context, {EdgeInsetsGeometry? margin}) {
+  Widget _buildOversizedItemNotice(BuildContext context,
+      {EdgeInsetsGeometry? margin}) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: margin,
@@ -3225,158 +3459,163 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
       },
       child: Scaffold(
         backgroundColor: context.color.primaryColor,
-        appBar: UiUtils.buildAppBar(context,
-            showBackButton: true,
-            onBackPress: () {
-              _handleBackNavigation();
-            },
-            titleWidget: Image.asset(
-              'assets/kora.png',
-              height: 28,
-              fit: BoxFit.contain,
-              alignment: Alignment.centerLeft,
-            ),
-          actions: [
-            IconButton(
-              onPressed: () {
-                Navigator.pushNamed(context, Routes.contactUs);
-              },
-              icon: Icon(
-                Icons.support_agent,
-                color: context.color.textDefaultColor,
-                size: 28,
-              ),
-            ),
-            BlocBuilder<CartCubit, CartState>(
-              builder: (context, state) {
-                int count = 0;
-                if (state is CartSuccess) {
-                  count = state.cart.totalItemsCount > 0 
-                      ? state.cart.totalItemsCount 
-                      : state.cart.items.fold(0, (sum, i) => sum + i.qty);
-                }
-                return Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.shopping_cart_outlined, color: context.color.textDefaultColor),
-                      onPressed: () {
-                        Navigator.pushNamed(context, Routes.ecommerceCart);
-                      },
-                    ),
-                    if (count > 0)
-                      Positioned(
-                        right: 4,
-                        top: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                          constraints: const BoxConstraints(
-                            minWidth: 16,
-                          minHeight: 16,
-                        ),
-                        child: Text(
-                          '$count',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ]),
-      body: Stack(
-        children: [
-          IgnorePointer(
-            ignoring: _isDialogShowing,
-            child: WebViewWidget(controller: _controller),
-          ),
-          if (isLoading)
-            Center(
-              child: UiUtils.progress(
-                  normalProgressColor: context.color.territoryColor),
-            ),
-        ],
-      ),
-      bottomNavigationBar: isProductPage
-          ? Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: context.color.primaryColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, -2),
-                  )
-                ],
-              ),
-              child: SafeArea(
-                top: false,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildOversizedItemNotice(
-                      context,
-                      margin: const EdgeInsets.only(bottom: 10),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: context.color.forthColor, // Global theme color
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        onPressed: () {
-                          _scrapeAndShowSizeColourDialog(context);
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.shopping_cart_outlined, color: context.color.buttonColor), // Theme icon color
-                            const SizedBox(width: 8),
-                            Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Order via Kora",
-                                  style: TextStyle(
-                                    color: context.color.buttonColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  "login not required",
-                                  style: TextStyle(
-                                    color: context.color.buttonColor.withValues(alpha: 0.85),
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.normal,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
+        appBar:
+            UiUtils.buildAppBar(context, showBackButton: true, onBackPress: () {
+          _handleBackNavigation();
+        },
+                titleWidget: Image.asset(
+                  'assets/kora.png',
+                  height: 28,
+                  fit: BoxFit.contain,
+                  alignment: Alignment.centerLeft,
+                ),
+                actions: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, Routes.contactUs);
+                },
+                icon: Icon(
+                  Icons.support_agent,
+                  color: context.color.textDefaultColor,
+                  size: 28,
                 ),
               ),
-            )
-          : null,
+              BlocBuilder<CartCubit, CartState>(
+                builder: (context, state) {
+                  int count = 0;
+                  if (state is CartSuccess) {
+                    count = state.cart.totalItemsCount > 0
+                        ? state.cart.totalItemsCount
+                        : state.cart.items.fold(0, (sum, i) => sum + i.qty);
+                  }
+                  return Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.shopping_cart_outlined,
+                            color: context.color.textDefaultColor),
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.ecommerceCart);
+                        },
+                      ),
+                      if (count > 0)
+                        Positioned(
+                          right: 4,
+                          top: 4,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Colors.red,
+                              shape: BoxShape.circle,
+                            ),
+                            constraints: const BoxConstraints(
+                              minWidth: 16,
+                              minHeight: 16,
+                            ),
+                            child: Text(
+                              '$count',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ]),
+        body: Stack(
+          children: [
+            IgnorePointer(
+              ignoring: _isDialogShowing,
+              child: WebViewWidget(controller: _controller),
+            ),
+            if (isLoading)
+              Center(
+                child: UiUtils.progress(
+                    normalProgressColor: context.color.territoryColor),
+              ),
+          ],
+        ),
+        bottomNavigationBar: isProductPage
+            ? Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: context.color.primaryColor,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, -2),
+                    )
+                  ],
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildOversizedItemNotice(
+                        context,
+                        margin: const EdgeInsets.only(bottom: 10),
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                context.color.forthColor, // Global theme color
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            _scrapeAndShowSizeColourDialog(context);
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.shopping_cart_outlined,
+                                  color: context
+                                      .color.buttonColor), // Theme icon color
+                              const SizedBox(width: 8),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Order via Kora",
+                                    style: TextStyle(
+                                      color: context.color.buttonColor,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "login not required",
+                                    style: TextStyle(
+                                      color: context.color.buttonColor
+                                          .withValues(alpha: 0.85),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }
