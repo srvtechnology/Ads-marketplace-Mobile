@@ -450,12 +450,11 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
       if (Platform.isAndroid) {
         // Android WebView: wait for React SPA hydration before scraping
-        await Future.delayed(const Duration(milliseconds: 2500));
+        await Future.delayed(const Duration(milliseconds: 2000));
         product = await _runJsScraperWithRetry(jsScript, maxRetries: 4, delayMs: 800);
       } else {
-        // iOS: existing single-shot synchronous JS — untouched
-        final Object result = await _controller.runJavaScriptReturningResult(jsScript);
-        product = _parseJsResult(result);
+        // iOS: run with fast retry (if attempt 0 has price, returns immediately with 0 delay)
+        product = await _runJsScraperWithRetry(jsScript, maxRetries: 2, delayMs: 500);
       }
       debugPrint('[SCRAPER RESULT] URL: $currentUrl => product: $product');
 
@@ -1095,148 +1094,313 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
         (function() {
           var product = { brand: 'Myntra', url: window.location.href };
 
-          // ── STRATEGY 1: Myntra Gateway API for Title, Image, URL & Price ──
-          // (Called within WebView so session cookies are sent - no CORS issue)
+          function cleanNum(val) {
+            if (!val) return 0;
+            var n = parseInt(String(val).replace(/[^0-9]/g, ''), 10);
+            return isNaN(n) ? 0 : n;
+          }
+
+          var discountedPrice = null;
+          var originalPrice = null;
+          var discountedCandidates = [];
+
+          // ── STRATEGY 1: Top On-Screen Banner & DOM Live Element Detection ──
           try {
-            var url = window.location.href;
-            // Extract style ID from URL (e.g. /watches/brand/.../30389309/buy or /30389309)
-            var styleId = null;
-            var pathM = url.match(/\/(\d{6,10})(?:\/buy)?(?:[?#].*)?$/);
-            if (pathM) styleId = pathM[1];
-            if (!styleId) {
-              var segM = url.match(/\/(\d{7,9})(?:\/|$|\?)/);
-              if (segM) styleId = segM[1];
+            // A. Top Sticky/Header Banner [aria-label="mini-product-banner"], #server-widgets_mini-product-banner
+            var miniBannerEl = document.querySelector('[aria-label="mini-product-banner"], #server-widgets_mini-product-banner, [id*="mini-product-banner"]');
+            if (miniBannerEl) {
+              var mbText = miniBannerEl.innerText || '';
+              var mbMatches = mbText.match(/[0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6}/g) || [];
+              var mbNums = [];
+              for (var mbi = 0; mbi < mbMatches.length; mbi++) {
+                var mbn = cleanNum(mbMatches[mbi]);
+                if (mbn > 50) mbNums.push(mbn);
+              }
+              if (mbNums.length >= 2) {
+                mbNums.sort(function(a, b) { return a - b; });
+                var bDisc = mbNums[0];
+                var bMrp = mbNums[mbNums.length - 1];
+                if (bDisc < bMrp) {
+                  discountedPrice = bDisc;
+                  originalPrice = bMrp;
+                  discountedCandidates.unshift(bDisc);
+                }
+              } else if (mbNums.length === 1) {
+                if (!originalPrice) originalPrice = mbNums[0];
+              }
             }
 
-            if (styleId) {
-              var xhr = new XMLHttpRequest();
-              xhr.open('GET', 'https://www.myntra.com/gateway/v2/product/' + styleId, false);
-              xhr.setRequestHeader('Accept', 'application/json');
-              xhr.setRequestHeader('x-meta-app', 'appFamily=msite');
-              xhr.send(null);
+            // B. Live container [aria-label="priceinfo_container"] / [aria-label="price_and_timer_container"]
+            var pInfo = document.querySelector('[aria-label="priceinfo_container"], [aria-label="price_and_timer_container"]');
+            if (pInfo) {
+              var mrpEl = pInfo.querySelector('[aria-label="mrp_price"]');
+              if (mrpEl) {
+                var mV = cleanNum(mrpEl.innerText);
+                if (mV > 50) originalPrice = mV;
+              }
 
-              if (xhr.status === 200) {
-                var data = JSON.parse(xhr.responseText);
-                var style = data.style || data.product || data.data || data;
+              // Extract all numbers inside priceinfo_container (e.g. "MRP ₹4,299 ₹1,504 65% OFF")
+              var allMatches = (pInfo.innerText || '').match(/[0-9]{1,3}(?:,[0-9]{3})+|[0-9]{3,6}/g) || [];
+              for (var mi = 0; mi < allMatches.length; mi++) {
+                var cand = cleanNum(allMatches[mi]);
+                // Discounted price must be > 50 and strictly less than MRP (if MRP is known)
+                if (cand > 50 && (!originalPrice || cand < originalPrice)) {
+                  discountedCandidates.push(cand);
+                  if (!discountedPrice) discountedPrice = cand;
+                }
+              }
+            }
 
-                // Title from API (avoid duplicating brand name if product name already starts with it)
-                var bName = (style.brandName || (style.brand && style.brand.name) || '').trim();
-                var pName = (style.name || '').trim();
-                if (pName) {
-                  if (bName && pName.toLowerCase().indexOf(bName.toLowerCase()) === 0) {
-                    product.title = pName;
-                  } else if (bName) {
-                    product.title = bName + ' ' + pName;
-                  } else {
-                    product.title = pName;
+            // C. Additional DOM elements: .pdp-price, .pdp-selling-price
+            var pdpPriceEl = document.querySelector('.pdp-price, .pdp-selling-price');
+            if (pdpPriceEl) {
+              var pVal = cleanNum(pdpPriceEl.innerText);
+              if (pVal > 50 && (!originalPrice || pVal < originalPrice)) {
+                discountedCandidates.push(pVal);
+                if (!discountedPrice) discountedPrice = pVal;
+              }
+            }
+            var pdpMrpEl = document.querySelector('.pdp-mrp, s, del');
+            if (pdpMrpEl && !originalPrice) {
+              var mValDom = cleanNum(pdpMrpEl.innerText);
+              if (mValDom > 50) originalPrice = mValDom;
+            }
+          } catch(e) {}
+
+          // ── STRATEGY 2: Redux SSR State (window.__REDUX_STATE__) ──
+          try {
+            var state = window.__REDUX_STATE__;
+            if (!state) {
+              var scripts = document.querySelectorAll('script');
+              for (var s = 0; s < scripts.length; s++) {
+                var scText = scripts[s].textContent || '';
+                if (scText.includes('__REDUX_STATE__')) {
+                  var sm = scText.match(/window\.__REDUX_STATE__\s*=\s*(\{.*?\});/);
+                  if (sm) {
+                    try { state = JSON.parse(sm[1]); break; } catch(e) {}
+                  }
+                }
+              }
+            }
+
+            if (state) {
+              var le = state.layoutEnginev2 || state.layoutEngine || {};
+              var pages = le.pages || {};
+              for (var pId in pages) {
+                var pData = pages[pId];
+                if (!pData || !pData.response || !pData.response.page) continue;
+                var page = pData.response.page;
+
+                // GTM Meta for title & price
+                if (page.pageMeta && page.pageMeta.gtmData) {
+                  var gtm = page.pageMeta.gtmData;
+                  if (gtm.productDisplayName && !product.title) {
+                    product.title = gtm.productDisplayName;
+                  }
+                  if (gtm.productPrice && !originalPrice) {
+                    var gtmMrp = cleanNum(gtm.productPrice);
+                    if (gtmMrp > 50) originalPrice = gtmMrp;
+                  }
+                  if (gtm.productPriceAfterDiscount) {
+                    var gtmDisc = cleanNum(gtm.productPriceAfterDiscount);
+                    if (gtmDisc > 50 && (!originalPrice || gtmDisc < originalPrice)) {
+                      discountedCandidates.push(gtmDisc);
+                      if (!discountedPrice) discountedPrice = gtmDisc;
+                    }
                   }
                 }
 
-                // Image from API (recursive search for first myntassets /images/ URL)
-                function findImg(obj, depth) {
-                  if (!obj || depth > 12) return null;
-                  if (typeof obj === 'string') {
-                    if (obj.startsWith('http') && obj.includes('myntassets') && obj.includes('/images/') && !obj.includes('logo')) return obj;
-                    return null;
-                  }
-                  if (Array.isArray(obj)) {
-                    for (var i = 0; i < obj.length; i++) { var r = findImg(obj[i], depth+1); if (r) return r; }
-                    return null;
-                  }
-                  if (typeof obj !== 'object') return null;
-                  for (var k in obj) {
-                    if (k === 'reviews' || k === 'relatedProducts' || k === 'similar') continue;
-                    var res = findImg(obj[k], depth+1);
-                    if (res) return res;
-                  }
-                  return null;
-                }
-                var img = findImg(style.media, 0) || findImg(style.styleImages, 0) || findImg(style.images, 0);
-                if (img) product.image = img;
+                var comps = (page.layout && page.layout.components) || [];
+                for (var ci = 0; ci < comps.length; ci++) {
+                  var comp = comps[ci];
+                  var itemData = comp.itemData || {};
 
-                // URL from API
-                if (style.landingPageUrl) {
-                  product.url = 'https://www.myntra.com/' + style.landingPageUrl.replace(/^\//, '');
-                } else {
-                  product.url = 'https://www.myntra.com/' + styleId;
-                }
-
-
-                // Sizes / sizePrices from API
-                try {
-                  var opts = style.styleOptions || style.sizes;
-                  if (Array.isArray(opts)) {
-                    var sp = {};
-                    for (var o = 0; o < opts.length; o++) {
-                      var opt = opts[o];
-                      var sz = (opt.value || opt.label || opt.size || '').toString().trim().toUpperCase();
-                      var pr = opt.discountedPrice != null ? opt.discountedPrice : (opt.price != null ? opt.price : opt.sellingPrice);
-                      if (sz && pr && Number(pr) > 50) {
-                        sp[sz] = Number(pr);
+                  // Check mini-product-banner first for on-screen banner pricing
+                  if (comp.id === 'mini-product-banner' || itemData.widgetType === 'MINI_PRODUCT_BANNER') {
+                    var mbData = itemData.data || {};
+                    if (mbData.price) {
+                      var mbMrp = cleanNum(mbData.price.mrp);
+                      var mbDisc = cleanNum(mbData.price.discounted);
+                      if (mbMrp > 50) originalPrice = mbMrp;
+                      if (mbDisc > 50 && (!mbMrp || mbDisc < mbMrp)) {
+                        discountedPrice = mbDisc;
+                        discountedCandidates.unshift(mbDisc);
                       }
                     }
-                    if (Object.keys(sp).length > 0) {
-                      product.sizePrices = sp;
+                    if (mbData.name && !product.title) {
+                      product.title = mbData.name;
+                    }
+                    if (mbData.defaultImageUrl && !product.image) {
+                      product.image = mbData.defaultImageUrl;
+                    }
+                    continue;
+                  }
+
+                  var cData = itemData.data || {};
+                  if (cData.showAD || cData.adText === 'AD') continue;
+
+                  // Title & Brand from PDP_PRODUCT_INFO
+                  if (cData.title && !product.title) {
+                    var brandName = (cData.brand && (cData.brand.name || cData.brand)) || '';
+                    var titleStr = typeof cData.title === 'string' ? cData.title : (cData.title.title || '');
+                    if (titleStr) {
+                      if (brandName && titleStr.toLowerCase().indexOf(brandName.toLowerCase()) === -1) {
+                        product.title = brandName + ' ' + titleStr;
+                      } else {
+                        product.title = titleStr;
+                      }
                     }
                   }
-                } catch(se) {}
+
+                  // Proper Price info from PDP_PRODUCT_INFO
+                  if (cData.priceInfo) {
+                    var pi = cData.priceInfo;
+                    var disc = pi.discounted != null ? pi.discounted : pi.discountedPrice;
+                    var mrp = pi.mrp != null ? pi.mrp : pi.maximumRetailPrice;
+                    var dVal = cleanNum(disc);
+                    var mVal2 = cleanNum(mrp);
+                    if (mVal2 > 50 && !originalPrice) originalPrice = mVal2;
+                    if (dVal > 50 && (!originalPrice || dVal < originalPrice)) {
+                      discountedCandidates.push(dVal);
+                      if (!discountedPrice) discountedPrice = dVal;
+                    }
+                  }
+
+                  // Image URL
+                  if (!product.image) {
+                    if (cData.pdpImageURL) {
+                      product.image = cData.pdpImageURL;
+                    } else if (Array.isArray(cData.allMedia) && cData.allMedia.length > 0) {
+                      var m0 = cData.allMedia[0];
+                      var src = (m0.image && m0.image.src) || m0.src;
+                      if (src) product.image = src;
+                    }
+                  }
+
+                  // Sizes & SizePrices
+                  if (!product.sizePrices) {
+                    var skuData = cData.skuData;
+                    if (Array.isArray(skuData)) {
+                      var sp = {};
+                      for (var k = 0; k < skuData.length; k++) {
+                        var sku = skuData[k];
+                        var sz = (sku.myntraSize || sku.brandSize || sku.value || '').toString().trim().toUpperCase();
+                        var szPrice = null;
+                        if (Array.isArray(sku.sellersData) && sku.sellersData.length > 0) {
+                          szPrice = sku.sellersData[0].discountedPrice || sku.sellersData[0].price;
+                        }
+                        if (sz && szPrice && Number(szPrice) > 50) {
+                          sp[sz] = Number(szPrice);
+                        }
+                      }
+                      if (Object.keys(sp).length > 0) {
+                        product.sizePrices = sp;
+                      }
+                    }
+                  }
+                }
               }
             }
           } catch(e) {}
 
-          // ── STRATEGY 2: Global SSR State (window.__myx.pdpData) ──
-          if (!product.price) {
+          // ── STRATEGY 3: Myntra Gateway API (Backup & Verification) ──
+          if (!product.title || !product.image || !discountedPrice) {
             try {
-              if (window.__myx && window.__myx.pdpData) {
-                var pData = window.__myx.pdpData;
-                if (pData.price) {
-                  var disc = pData.price.discounted != null ? pData.price.discounted : pData.price.discountedPrice;
-                  var mrp = pData.price.mrp != null ? pData.price.mrp : pData.price.maximumRetailPrice;
-                  if (disc && Number(disc) > 50) {
-                    product.price = String(disc);
-                  } else if (mrp && Number(mrp) > 50) {
-                    product.price = String(mrp);
+              var url = window.location.href;
+              var styleId = null;
+              var segM = url.match(/\/(\d{6,10})(?:[/?#]|$)/);
+              if (segM) styleId = segM[1];
+
+              if (styleId) {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', 'https://www.myntra.com/gateway/v2/product/' + styleId, false);
+                xhr.setRequestHeader('Accept', 'application/json');
+                xhr.setRequestHeader('x-meta-app', 'appFamily=msite');
+                xhr.send(null);
+
+                if (xhr.status === 200) {
+                  var data = JSON.parse(xhr.responseText);
+                  var style = data.style || data.product || data.data || data;
+
+                  var regP = style.price != null ? style.price : style.mrp;
+                  if (regP && Number(regP) > 50 && !originalPrice) {
+                    originalPrice = Number(regP);
                   }
-                }
-                if (!product.title && pData.name) {
-                  var pb = (pData.brand && pData.brand.name) || '';
-                  if (pb && pData.name.toLowerCase().indexOf(pb.toLowerCase()) === -1) {
-                    product.title = pb + ' ' + pData.name;
-                  } else {
-                    product.title = pData.name;
-                  }
-                }
-                if (!product.sizePrices && Array.isArray(pData.sizes)) {
-                  var spMap = {};
-                  for (var si = 0; si < pData.sizes.length; si++) {
-                    var sObj = pData.sizes[si];
-                    var sLabel = (sObj.label || sObj.size || sObj.name || '').toString().trim().toUpperCase();
-                    var sPrice = sObj.discountedPrice != null ? sObj.discountedPrice : (sObj.price != null ? sObj.price : sObj.sellingPrice);
-                    if (sLabel && sPrice && Number(sPrice) > 50) {
-                      spMap[sLabel] = Number(sPrice);
+
+                  // Price from styleOptions
+                  var opts = style.styleOptions || style.sizes;
+                  if (Array.isArray(opts)) {
+                    for (var oi = 0; oi < opts.length; oi++) {
+                      var optItem = opts[oi];
+                      var optDisc = optItem.discountedPrice != null ? optItem.discountedPrice : (optItem.sellingPrice != null ? optItem.sellingPrice : null);
+                      if (optDisc && Number(optDisc) > 50 && (!originalPrice || Number(optDisc) < originalPrice)) {
+                        discountedCandidates.push(Number(optDisc));
+                        if (!discountedPrice) discountedPrice = Number(optDisc);
+                      }
                     }
                   }
-                  if (Object.keys(spMap).length > 0) {
-                    product.sizePrices = spMap;
+                  var stDisc = style.discountedPrice != null ? style.discountedPrice : style.discounted;
+                  if (stDisc && Number(stDisc) > 50 && (!originalPrice || Number(stDisc) < originalPrice)) {
+                    discountedCandidates.push(Number(stDisc));
+                    if (!discountedPrice) discountedPrice = Number(stDisc);
                   }
-                }
-              }
-            } catch(e) {}
-          }
 
-          // ── STRATEGY 3: Scan <script> tags for pdpData JSON ──
-          if (!product.price) {
-            try {
-              var scripts = document.querySelectorAll('script');
-              for (var i = 0; i < scripts.length; i++) {
-                var sc = scripts[i].textContent || '';
-                if (sc.includes('pdpData') && sc.includes('price')) {
-                  var dm = sc.match(/"discounted"\s*:\s*([0-9]+)/i) || sc.match(/"discountedPrice"\s*:\s*([0-9]+)/i);
-                  if (dm) {
-                    var pv = parseInt(dm[1], 10);
-                    if (pv > 50) {
-                      product.price = String(pv);
-                      break;
+                  // Title from API
+                  if (!product.title) {
+                    var bName = (style.brandName || (style.brand && style.brand.name) || '').trim();
+                    var pName = (style.name || '').trim();
+                    if (pName) {
+                      if (bName && pName.toLowerCase().indexOf(bName.toLowerCase()) === 0) {
+                        product.title = pName;
+                      } else if (bName) {
+                        product.title = bName + ' ' + pName;
+                      } else {
+                        product.title = pName;
+                      }
+                    }
+                  }
+
+                  // Image from API
+                  if (!product.image) {
+                    function findImg(obj, depth) {
+                      if (!obj || depth > 12) return null;
+                      if (typeof obj === 'string') {
+                        if (obj.startsWith('http') && obj.includes('myntassets') && obj.includes('/images/') && !obj.includes('logo')) return obj;
+                        return null;
+                      }
+                      if (Array.isArray(obj)) {
+                        for (var i = 0; i < obj.length; i++) { var r = findImg(obj[i], depth+1); if (r) return r; }
+                        return null;
+                      }
+                      if (typeof obj !== 'object') return null;
+                      for (var k in obj) {
+                        if (k === 'reviews' || k === 'relatedProducts' || k === 'similar') continue;
+                        var res = findImg(obj[k], depth+1);
+                        if (res) return res;
+                      }
+                      return null;
+                    }
+                    var img = findImg(style.media, 0) || findImg(style.styleImages, 0) || findImg(style.images, 0);
+                    if (img) product.image = img;
+                  }
+
+                  if (style.landingPageUrl) {
+                    product.url = 'https://www.myntra.com/' + style.landingPageUrl.replace(/^\//, '');
+                  }
+
+                  // Sizes / sizePrices from API
+                  if (!product.sizePrices && Array.isArray(opts)) {
+                    var sp2 = {};
+                    for (var o2 = 0; o2 < opts.length; o2++) {
+                      var opt2 = opts[o2];
+                      var sz2 = (opt2.value || opt2.label || opt2.size || '').toString().trim().toUpperCase();
+                      var pr2 = opt2.discountedPrice != null ? opt2.discountedPrice : (opt2.price != null ? opt2.price : opt2.sellingPrice);
+                      if (sz2 && pr2 && Number(pr2) > 50) {
+                        sp2[sz2] = Number(pr2);
+                      }
+                    }
+                    if (Object.keys(sp2).length > 0) {
+                      product.sizePrices = sp2;
                     }
                   }
                 }
@@ -1244,186 +1408,108 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             } catch(e) {}
           }
 
-          // ── STRATEGY 4: DOM Element Price Detection (skip strikethrough MRP) ──
-          if (!product.price) {
-            try {
-              // Scan all elements for ₹ prices, skip strikethrough (MRP) elements
-              var allEls = document.querySelectorAll('span, div, strong, b, p, h1, h2, h3, h4');
-              var biggestNonStrike = 0;
-              var biggestFontSize = 0;
-              for (var ei = 0; ei < Math.min(allEls.length, 500); ei++) {
-                var el = allEls[ei];
-                var txt = (el.innerText || '').trim();
-                // Must look like a price: ₹X,XXX or just digits
-                var prM = txt.match(/^[₹\u20b9]?\s*([0-9]{1,3}(?:,[0-9]{3})*)$/);
-                if (!prM) continue;
-                var prVal = parseInt(prM[1].replace(/,/g, ''), 10);
-                if (prVal <= 50) continue;
-
-                // Skip if this element is strikethrough (MRP)
-                var cs = window.getComputedStyle(el);
-                if (cs.textDecoration && cs.textDecoration.includes('line-through')) continue;
-                // Skip if inside a <s>, <del>, <strike> or MRP container
-                if (el.closest && el.closest('s, del, strike, [class*="mrp"], [class*="strike"]')) continue;
-                // Skip if parent has line-through
-                var par = el.parentElement;
-                if (par) {
-                  var parCs = window.getComputedStyle(par);
-                  if (parCs.textDecoration && parCs.textDecoration.includes('line-through')) continue;
-                  if (par.tagName === 'S' || par.tagName === 'DEL' || par.tagName === 'STRIKE') continue;
-                }
-
-                var fSize = parseInt(cs.fontSize, 10) || 0;
-                if (fSize > biggestFontSize) {
-                  biggestFontSize = fSize;
-                  biggestNonStrike = prVal;
-                }
-              }
-              if (biggestNonStrike > 50) {
-                product.price = String(biggestNonStrike);
-              }
-            } catch(e) {}
-          }
-
-          // ── STRATEGY 4b: DOM CSS Selectors (pdp-price classes) ──
-          if (!product.price) {
-            try {
-              var priceSelectors = [
-                'strong.pdp-price',
-                '.pdp-price',
-                'span.pdp-price',
-                '[class*="pdp-price"]',
-                '[class*="pdp-selling-price"]',
-                '[class*="selling-price"]'
-              ];
-              for (var ps = 0; ps < priceSelectors.length; ps++) {
-                var pEls = document.querySelectorAll(priceSelectors[ps]);
-                for (var pe = 0; pe < pEls.length; pe++) {
-                  var pEl = pEls[pe];
-                  // Exclude elements that are strikethrough or within an MRP container
-                  var elStyle = window.getComputedStyle(pEl);
-                  if (elStyle.textDecoration && elStyle.textDecoration.includes('line-through')) continue;
-                  if (pEl.closest && pEl.closest('.pdp-mrp, [class*="pdp-mrp"], [class*="mrp"], del, s, strike')) continue;
-
-                  var pTxt = (pEl.innerText || '').replace(/[^0-9]/g, '');
-                  var pVal = parseInt(pTxt, 10);
-                  if (pVal > 50) {
-                    product.price = String(pVal);
-                    break;
-                  }
-                }
-                if (product.price) break;
-              }
-            } catch(e) {}
-          }
-
-
-          // ── STRATEGY 5: DOM Text Regex & Proximity Verification ──
-          if (!product.price) {
+          // ── STRATEGY 4: DOM Text Regex Fallback ──
+          if (!discountedPrice) {
             try {
               var rawText = document.body.innerText.replace(/[\s\u00a0]+/g, ' ');
 
-              // Case A1: "MRP ₹2,990 ₹2,810 (6% OFF)" or "MRP: ₹2,990 ₹2,810 6% OFF"
               var reg1 = /mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*\(?\s*([0-9]+)%\s*off\)?/i;
               var m1 = rawText.match(reg1);
               if (m1) {
-                var mrpV1 = parseInt(m1[1].replace(/,/g, ''), 10);
-                var sellV1 = parseInt(m1[2].replace(/,/g, ''), 10);
+                var mrpV1 = cleanNum(m1[1]);
+                var sellV1 = cleanNum(m1[2]);
                 if (sellV1 > 50 && sellV1 < mrpV1) {
-                  product.price = String(sellV1);
+                  discountedPrice = sellV1;
+                  if (!originalPrice) originalPrice = mrpV1;
                 }
               }
 
-              // Case A2: "₹2,810 MRP ₹2,990 (6% OFF)" or "₹2,810 MRP: ₹2,990 (6% OFF)"
-              if (!product.price) {
-                var reg2 = /(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*\(?\s*([0-9]+)%\s*off\)?/i;
-                var m2 = rawText.match(reg2);
-                if (m2) {
-                  var sellV2 = parseInt(m2[1].replace(/,/g, ''), 10);
-                  var mrpV2 = parseInt(m2[2].replace(/,/g, ''), 10);
-                  if (sellV2 > 50 && sellV2 < mrpV2) {
-                    product.price = String(sellV2);
-                  }
-                }
-              }
-
-              // Case A3: "₹2,810 (6% OFF) MRP ₹2,990"
-              if (!product.price) {
-                var reg3 = /(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*(?:\(?\s*[0-9]+%\s*off\)?)\s*mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
-                var m3 = rawText.match(reg3);
-                if (m3) {
-                  var sellV3 = parseInt(m3[1].replace(/,/g, ''), 10);
-                  var mrpV3 = parseInt(m3[2].replace(/,/g, ''), 10);
-                  if (sellV3 > 50 && sellV3 < mrpV3) {
-                    product.price = String(sellV3);
-                  }
-                }
-              }
-
-              // Case A4: Generic discount proximity search with mathematical discount validation
-              if (!product.price) {
-                var badgeRegex = /\(?\s*([1-9][0-9]?)%\s*off\)?/gi;
-                var badgeMatch;
-                while ((badgeMatch = badgeRegex.exec(rawText)) !== null) {
-                  var discPct = parseInt(badgeMatch[1], 10);
-                  var start = Math.max(0, badgeMatch.index - 120);
-                  var end = Math.min(rawText.length, badgeMatch.index + badgeMatch[0].length + 120);
-                  var snippet = rawText.substring(start, end);
-                  
-                  var priceRegex = /(?:rs\.?|inr|[\u20b9₹])\s*([0-9]{1,3}(?:,[0-9]{3})*)/gi;
-                  var prices = [];
-                  var pm;
-                  while ((pm = priceRegex.exec(snippet)) !== null) {
-                    var val = parseInt(pm[1].replace(/,/g, ''), 10);
-                    if (val > 50 && prices.indexOf(val) === -1) {
-                      prices.push(val);
-                    }
-                  }
-                  
-                  if (prices.length >= 2) {
-                    prices.sort(function(a, b) { return a - b; });
-                    for (var pi = 0; pi < prices.length - 1; pi++) {
-                      for (var pj = pi + 1; pj < prices.length; pj++) {
-                        var lower = prices[pi];
-                        var higher = prices[pj];
-                        var calculatedPct = Math.round((1 - lower / higher) * 100);
-                        if (Math.abs(calculatedPct - discPct) <= 1) {
-                          product.price = String(lower);
-                          break;
-                        }
-                      }
-                      if (product.price) break;
-                    }
-                    if (!product.price && prices[0] > 50) {
-                      product.price = String(prices[0]);
-                    }
-                  }
-                  if (product.price) break;
-                }
-              }
-
-              // Case B: Non-discounted fallback (only when no discount badge matched anywhere)
-              if (!product.price) {
-                var mrpReg = /mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)/i;
-                var mm = rawText.match(mrpReg);
-                if (mm) {
-                  var mrpPrice = parseInt(mm[1].replace(/,/g, ''), 10);
-                  if (mrpPrice > 50) product.price = String(mrpPrice);
+              var reg2 = /(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*mrp\s*[:\s]*(?:rs\.?|inr|[\u20b9₹])?\s*([0-9]{1,3}(?:,[0-9]{3})*)\s*\(?\s*([0-9]+)%\s*off\)?/i;
+              var m2 = rawText.match(reg2);
+              if (m2) {
+                var sellV2 = cleanNum(m2[1]);
+                var mrpV2 = cleanNum(m2[2]);
+                if (sellV2 > 50 && sellV2 < mrpV2) {
+                  discountedPrice = sellV2;
+                  if (!originalPrice) originalPrice = mrpV2;
                 }
               }
             } catch(e) {}
           }
 
-          // Price last-resort: first ₹ price on page
-          if (!product.price) {
-            try {
-              var rawText2 = document.body.innerText.replace(/\n/g, ' ');
-              var m2 = rawText2.match(/[\u20b9₹]\s*([1-9][0-9,]{2,8})/i);
-              if (m2) product.price = String(parseInt(m2[1].replace(/,/g, ''), 10));
-            } catch(e) {}
+          // ── 5. FINAL PRICE SELECTION (PROPER DISCOUNTED PRICE OR ORIGINAL PRICE) ──
+          // "I want to take proper discounted price if have or else take original price."
+          if (discountedPrice && discountedPrice > 50 && (!originalPrice || discountedPrice < originalPrice)) {
+            product.price = String(discountedPrice);
+          } else if (discountedCandidates.length > 0) {
+            var minDisc = null;
+            for (var dci = 0; dci < discountedCandidates.length; dci++) {
+              var dc = discountedCandidates[dci];
+              if (dc > 50 && (!originalPrice || dc < originalPrice)) {
+                if (minDisc === null || dc < minDisc) minDisc = dc;
+              }
+            }
+            if (minDisc) {
+              product.price = String(minDisc);
+            } else if (originalPrice && originalPrice > 50) {
+              product.price = String(originalPrice);
+            } else {
+              product.price = String(discountedCandidates[0]);
+            }
+          } else if (originalPrice && originalPrice > 50) {
+            product.price = String(originalPrice);
           }
 
-          // Title fallback (if API didn't work)
+          // ── 6. ACTIVE SELECTED VARIANT CHECK ──
+          try {
+            var variants = [];
+            var sEls = document.querySelectorAll('button, li');
+            var selectedSizeVal = null;
+            for (var v = 0; v < sEls.length; v++) {
+              var sb = sEls[v];
+              var cls = (sb.className || '').toLowerCase();
+              if (cls.includes('active') || cls.includes('selected') || sb.getAttribute('aria-selected') === 'true') {
+                var stxt = (sb.innerText || '').trim();
+                if (stxt.match(/^([0-9]{1,3}|XS|S|M|L|XL|XXL|XXXL|One Size|Free Size)$/i)) {
+                  selectedSizeVal = stxt.toUpperCase();
+                  variants.push('Size: ' + stxt);
+                  break;
+                }
+              }
+            }
+            var colBtn = document.querySelector('[class*="colour"][class*="select"], [class*="color"][class*="select"], [aria-selected="true"][class*="colour"]');
+            if (colBtn) {
+              var colTxt = (colBtn.innerText || colBtn.getAttribute('title') || '').trim();
+              if (colTxt && colTxt.length < 20) variants.push('Colour: ' + colTxt);
+            }
+            product.variants = variants.join(', ');
+
+            // If user has a size selected and we have per-size price, use that size's proper discounted price
+            if (selectedSizeVal && product.sizePrices && product.sizePrices[selectedSizeVal]) {
+              var spVal = product.sizePrices[selectedSizeVal];
+              if (spVal && Number(spVal) > 50) {
+                product.price = String(spVal);
+              }
+            }
+          } catch(e) {}
+
+          // ── 7. POST-VALIDATION ANTI-MRP SAFEGUARD ──
+          if (originalPrice && product.price && cleanNum(product.price) === originalPrice) {
+            // If any valid discounted price strictly less than original price exists, use it!
+            if (discountedPrice && discountedPrice < originalPrice) {
+              product.price = String(discountedPrice);
+            } else if (discountedCandidates.length > 0) {
+              for (var ci2 = 0; ci2 < discountedCandidates.length; ci2++) {
+                var dv = discountedCandidates[ci2];
+                if (dv > 50 && dv < originalPrice) {
+                  product.price = String(dv);
+                  break;
+                }
+              }
+            }
+          }
+
+          // ── 8. TITLE & IMAGE FALLBACKS ──
           if (!product.title || product.title.length < 3) {
             try {
               var dTitle = document.title || '';
@@ -1431,29 +1517,24 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
             } catch(e) {}
           }
 
-          // ── STRATEGY 6: Variants (Size & Colour) ──
-          try {
-            var variants = [];
-            var sEls = document.querySelectorAll('button, li');
-            for (var v = 0; v < sEls.length; v++) {
-              var sb = sEls[v];
-              var cls = (sb.className || '').toLowerCase();
-              if (cls.includes('active') || cls.includes('selected') || sb.getAttribute('aria-selected') === 'true') {
-                var stxt = (sb.innerText || '').trim();
-                if (stxt.match(/^([0-9]{1,3}|XS|S|M|L|XL|XXL|XXXL|One Size|Free Size)$/i)) {
-                  variants.push('Size: ' + stxt);
+          if (!product.image) {
+            try {
+              var allImgs = document.querySelectorAll('img');
+              for (var im = 0; im < allImgs.length; im++) {
+                var iEl = allImgs[im];
+                if (iEl.closest && iEl.closest('#mini-product-banner, [id*="mini-product"], [class*="banner"]')) continue;
+                var iSrc = iEl.src || iEl.getAttribute('data-src') || '';
+                if (iSrc && iSrc.includes('myntassets') && iSrc.includes('/assets/images/') && !iSrc.includes('logo')) {
+                  product.image = iSrc;
                   break;
                 }
               }
-            }
-            // Also try colour
-            var colBtn = document.querySelector('[class*="colour"][class*="select"], [class*="color"][class*="select"], [aria-selected="true"][class*="colour"]');
-            if (colBtn) {
-              var colTxt = (colBtn.innerText || colBtn.getAttribute('title') || '').trim();
-              if (colTxt && colTxt.length < 20) variants.push('Colour: ' + colTxt);
-            }
-            product.variants = variants.join(', ');
-          } catch(e) {}
+            } catch(e) {}
+          }
+
+          if (product.image && product.image.includes('($height)')) {
+            product.image = product.image.replace('($height)', '1440').replace('($width)', '1080').replace('($qualityPercentage)', '90');
+          }
 
           return JSON.stringify(product);
         })();
