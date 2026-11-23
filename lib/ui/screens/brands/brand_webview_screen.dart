@@ -179,11 +179,40 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
 
           // 1. Specific & general URL pattern checks
           if (url.includes('/products/') || url.includes('/products') || url.includes('/product/') || url.includes('/product')) return true;
-          if (url.includes('/dp/') || url.includes('/gp/product/') || url.includes('/p/')) return true;
+          if (url.includes('/dp/') || url.includes('/gp/product/') || url.includes('/gp/aw/d/') || url.includes('/p/')) return true;
           if (url.includes('myntra.com') && (url.includes('/buy') || /\/[0-9]{5,}/.test(url))) return true;
           if (url.includes('firstcry.com') && url.includes('product-detail')) return true;
           if (url.includes('zara.com') && (url.includes('-p0') || url.includes('.html'))) return true;
           if (url.includes('meesho.com') && (url.includes('/p/') || url.includes('/s/p/'))) return true;
+
+          // 1b. Amazon-specific checks (handles mobile /gp/aw/d/, sponsored /sspa/, /gp/slredirect/, ASINs, and PDP DOM)
+          if (url.includes('amazon.') || url.includes('/dp/') || url.includes('/gp/aw/d/')) {
+            if (url.includes('/dp/') ||
+                url.includes('/gp/product/') ||
+                url.includes('/gp/aw/d/') ||
+                url.includes('/gp/slredirect/') ||
+                url.includes('/sspa/click') ||
+                url.includes('/product/') ||
+                url.includes('/d/b0') ||
+                /\/b0[a-z0-9]{8}/i.test(url)) {
+              return true;
+            }
+            if (document.getElementById('productTitle') ||
+                document.getElementById('title') ||
+                document.getElementById('add-to-cart-button') ||
+                document.getElementById('buy-now-button') ||
+                document.getElementById('dp') ||
+                document.getElementById('dp-container') ||
+                document.getElementById('landingImage') ||
+                document.getElementById('main-image') ||
+                document.getElementById('corePrice_mobile_feature_div') ||
+                document.getElementById('corePriceDisplay_desktop_feature_div') ||
+                document.querySelector('#title_feature_div') ||
+                document.querySelector('[data-feature-name="title"]') ||
+                document.querySelector('input[name="submit.add-to-cart"]')) {
+              return true;
+            }
+          }
           // Lacoste (Magento): use DOM check below — URL alone is not reliable (category pages also end in .html)
 
           // 2. Shopify check (non-Lacoste pages only)
@@ -205,7 +234,7 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           if (ogType && (ogType.content === 'product' || ogType.content === 'og:product')) return true;
 
           // 4. DOM check: "ADD TO BAG" or "ADD TO CART" buttons on page
-          var btns = document.querySelectorAll('button, a, input[type="submit"], div[role="button"]');
+          var btns = document.querySelectorAll('button, a, input[type="submit"], input[type="button"], div[role="button"], span.a-button-text, [id*="add-to-cart"], [id*="addToCart"], [id*="buy-now"], [id*="buyNow"]');
           for (var i = 0; i < Math.min(btns.length, 120); i++) {
             var txt = (btns[i].innerText || btns[i].value || '').trim().toUpperCase();
             if (txt === 'ADD TO BAG' || txt === 'ADD TO CART' || txt === 'BUY NOW' || txt.includes('ADD TO BAG') || txt.includes('ADD TO CART')) {
@@ -262,8 +291,17 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
     String lowerUrl = url.toLowerCase();
 
     // Basic check for product pages across platforms
-    bool isAmazonProduct =
-        lowerUrl.contains('/dp/') || lowerUrl.contains('/gp/product/');
+    bool isAmazonProduct = (lowerUrl.contains('amazon.') ||
+            lowerUrl.contains('/dp/') ||
+            lowerUrl.contains('/gp/aw/d/')) &&
+        (lowerUrl.contains('/dp/') ||
+            lowerUrl.contains('/gp/product/') ||
+            lowerUrl.contains('/gp/aw/d/') ||
+            lowerUrl.contains('/gp/slredirect/') ||
+            lowerUrl.contains('/sspa/click') ||
+            lowerUrl.contains('/product/') ||
+            lowerUrl.contains('/d/b0') ||
+            RegExp(r'/[bB]0[a-zA-Z0-9]{8}').hasMatch(lowerUrl));
     bool isFlipkartProduct =
         lowerUrl.contains('flipkart.com') && lowerUrl.contains('/p/');
     bool isMyntraProduct = lowerUrl.contains('myntra.com') &&
@@ -1038,7 +1076,10 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
               var priceEl = document.querySelector('#corePrice_mobile_feature_div .a-price-whole') 
                          || document.querySelector('.priceToPay .a-price-whole') 
                          || document.querySelector('.apexPriceToPay .a-price-whole')
-                         || document.querySelector('#corePriceDisplay_desktop_feature_div .a-price-whole');
+                         || document.querySelector('#corePriceDisplay_desktop_feature_div .a-price-whole')
+                         || document.querySelector('.a-price .a-offscreen')
+                         || document.querySelector('#priceblock_ourprice')
+                         || document.querySelector('#priceblock_dealprice');
               if (priceEl) {
                   price = priceEl.innerText;
               } else {
@@ -1046,7 +1087,17 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
                   if (bigPrice) price = bigPrice.innerText;
               }
           }
-          product.price = price ? price.replace(/[^0-9]/g, '') : '';
+          if (price) {
+            var pM = price.replace(/,/g, '').match(/([0-9]+(?:\.[0-9]{1,2})?)/);
+            if (pM) {
+              var pFloat = parseFloat(pM[1]);
+              product.price = isFinite(pFloat) && pFloat > 0 ? String(Math.round(pFloat)) : '';
+            } else {
+              product.price = price.replace(/[^0-9]/g, '');
+            }
+          } else {
+            product.price = '';
+          }
           
           var imgEl = document.querySelector('#landingImage') || document.querySelector('#imgBlkFront') || document.querySelector('#main-image') || document.querySelector('.a-dynamic-image');
           product.image = imgEl ? imgEl.src : '';
