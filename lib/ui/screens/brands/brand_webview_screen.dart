@@ -2059,62 +2059,206 @@ class _BrandWebViewScreenState extends State<BrandWebViewScreen> {
           title = title.replace(/Online at Sephora.*/i, '').replace(/-\s*Sephora.*/i, '').trim();
           product.title = title;
           
-          // 2. PRICE
+          // 2. PRICE (Live DOM first so sales & shade switches are always accurate)
           var price = '';
-          try {
-              var jsonScripts = document.querySelectorAll('script[type="application/ld+json"]');
-              for (var j = 0; j < jsonScripts.length; j++) {
-                  var data = JSON.parse(jsonScripts[j].innerText);
-                  var target = data.offers || (data[0] ? data[0].offers : null) || data;
-                  if (target && (target.price || target.highPrice || target.lowPrice)) {
-                      var p = target.price || target.highPrice || target.lowPrice;
-                      if (p) {
-                          price = p.toString().replace(/[^0-9]/g, '');
-                          if (price) break;
-                      }
-                  }
+
+          function parseSephoraPrice(raw) {
+            if (raw === undefined || raw === null) return 0;
+            var s = String(raw).replace(/,/g, '').replace(/[\u20b9\s]/g, '');
+            var m = s.match(/([0-9]+(?:\.[0-9]{1,2})?)/);
+            if (!m) return 0;
+            var n = parseFloat(m[1]);
+            if (!isFinite(n) || n <= 10 || n >= 500000) return 0;
+            return Math.round(n);
+          }
+
+          function isSephoraStruckOrOld(el) {
+            if (!el) return false;
+            var cur = el;
+            for (var d = 0; d < 5 && cur && cur !== document.body; d++) {
+              if (cur.tagName === 'DEL' || cur.tagName === 'S' || cur.tagName === 'STRIKE') return true;
+              var cls = (cur.className && typeof cur.className === 'string') ? cur.className.toLowerCase() : '';
+              if (cls.includes('strike') || cls.includes('cross') || cls.includes('line-through') ||
+                  cls.includes('old-price') || cls.includes('original-price') || cls.includes('was-price') ||
+                  cls.includes('undiscounted')) {
+                return true;
               }
+              try {
+                var cs = window.getComputedStyle(cur);
+                var td = (cs.textDecorationLine || cs.textDecoration || '');
+                if (td.includes('line-through')) return true;
+              } catch(_) {}
+              cur = cur.parentElement;
+            }
+            return false;
+          }
+
+          function isSephoraVisible(el) {
+            if (!el) return false;
+            try {
+              var rect = el.getBoundingClientRect();
+              if (rect.width === 0 || rect.height === 0) return false;
+              var cs = window.getComputedStyle(el);
+              if (cs.display === 'none' || cs.visibility === 'hidden' || parseFloat(cs.opacity || '1') === 0) return false;
+              return true;
+            } catch(_) { return false; }
+          }
+
+          function extractSephoraPricesFromNode(container) {
+            var vals = [];
+            if (!container) return vals;
+            var nodes = container.querySelectorAll('span, div, p, strong, b, em, h1, h2, h3, h4, s, del');
+            var candidates = [container];
+            for (var i = 0; i < nodes.length; i++) candidates.push(nodes[i]);
+
+            for (var ci = 0; ci < candidates.length; ci++) {
+              var el = candidates[ci];
+              if (!isSephoraVisible(el)) continue;
+              // Prefer leaf currency nodes so struck MRP and selling price aren't conflated
+              var hasCurrencyChild = false;
+              var kids = el.children || [];
+              for (var ki = 0; ki < kids.length; ki++) {
+                if (/[\u20b9]|Rs\.?\s*\d|INR\s*\d/i.test(kids[ki].innerText || '')) {
+                  hasCurrencyChild = true;
+                  break;
+                }
+              }
+              if (hasCurrencyChild) continue;
+
+              var txt = (el.innerText || '').trim();
+              if (!txt || txt.length > 60) continue;
+              if (/save|off\s+on|above|cashback|emi|shipping|delivery|coupon|voucher/i.test(txt)) continue;
+              if (isSephoraStruckOrOld(el)) continue;
+
+              var matches = txt.match(/(?:\u20b9|Rs\.?|INR)\s*[0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|\u20b9\s*[0-9]+(?:\.[0-9]{1,2})?/gi) || [];
+              for (var mi = 0; mi < matches.length; mi++) {
+                var pv = parseSephoraPrice(matches[mi]);
+                if (pv > 0) vals.push(pv);
+              }
+            }
+            return vals;
+          }
+
+          // Tier 1: DOM anchored to "*Inclusive of all taxes"
+          try {
+            var taxEls = [];
+            var scanEls = document.querySelectorAll('p, span, div, small, em');
+            for (var si = 0; si < scanEls.length; si++) {
+              var sEl = scanEls[si];
+              if (sEl.children.length > 2) continue;
+              if (sEl.closest && sEl.closest('footer')) continue;
+              var sTxt = (sEl.innerText || '').trim();
+              if (sTxt.length > 80) continue;
+              if (/INCL\.?\s+OF\s+ALL\s+TAXES|INCLUSIVE\s+OF\s+ALL\s+TAXES/i.test(sTxt) && isSephoraVisible(sEl)) {
+                taxEls.push(sEl);
+              }
+            }
+            for (var ti = 0; ti < taxEls.length && !price; ti++) {
+              var cur = taxEls[ti];
+              for (var d = 0; d < 7 && cur && cur !== document.body; d++) {
+                var found = extractSephoraPricesFromNode(cur);
+                if (found.length > 0) {
+                  found.sort(function(a, b) { return a - b; });
+                  price = String(found[0]);
+                  break;
+                }
+                cur = cur.parentElement;
+              }
+            }
           } catch(e) {}
 
-          if (!price) {
-              var pdpPriceEl = document.querySelector('.pdp-price') || 
-                               document.querySelector('.pdp-selling-price') || 
-                               document.querySelector('[class*="pdp-price"]') || 
-                               document.querySelector('.product-price') ||
-                               document.querySelector('[class*="product-price"]');
-              if (pdpPriceEl) {
-                  var m = pdpPriceEl.innerText.match(/₹\s*([0-9,]+)/) || pdpPriceEl.innerText.match(/([0-9,]{3,})/);
-                  if (m) price = m[1].replace(/[^0-9]/g, '');
+          // Tier 2: DOM anchored to visible product title
+          if (!price && titleEl) {
+            try {
+              var tCur = titleEl.parentElement;
+              for (var td = 0; td < 8 && tCur && tCur !== document.body; td++) {
+                var tFound = extractSephoraPricesFromNode(tCur);
+                if (tFound.length > 0) {
+                  tFound.sort(function(a, b) { return a - b; });
+                  price = String(tFound[0]);
+                  break;
+                }
+                tCur = tCur.parentElement;
               }
+            } catch(e) {}
           }
 
+          // Tier 3: Body text anchored to "Inclusive of all taxes"
           if (!price) {
-              var rootContainer = document.querySelector('.pdp-container') || document.querySelector('.product-detail') || document.querySelector('#pdp') || document.body;
-              var priceEls = rootContainer.querySelectorAll('[class*="price"], [class*="Price"], [id*="price"], div, span, p, strong, h1, h2, h3');
-              var maxFontSize = 0;
-              for (var i = 0; i < Math.min(priceEls.length, 150); i++) {
-                  var text = priceEls[i].innerText ? priceEls[i].innerText.trim() : '';
-                  var m = text.match(/(?:MRP\s*)?₹\s*([0-9,]+)/i);
-                  if (m) {
-                      var style = window.getComputedStyle(priceEls[i]);
-                      if (style.textDecoration && style.textDecoration.includes('line-through')) continue;
-                      var cls = (priceEls[i].className || '') + ' ' + (priceEls[i].parentElement ? priceEls[i].parentElement.className || '' : '');
-                      if (cls.toLowerCase().includes('strike') || cls.toLowerCase().includes('cross')) continue;
-                      
-                      var fSize = parseInt(style.fontSize, 10) || 0;
-                      if (fSize > maxFontSize && fSize > 0) {
-                          maxFontSize = fSize;
-                          price = m[1].replace(/[^0-9]/g, '');
-                      }
+            try {
+              var bodyText = (document.body.innerText || '').replace(/\u00a0/g, ' ');
+              var taxMatch = bodyText.match(/([^\r\n]{0,80}\u20b9[^\r\n]{1,60})[\r\n\s]{1,60}\*?\s*INCL(?:USIVE|\.?)\s+OF\s+ALL\s+TAXES/i);
+              if (taxMatch) {
+                var rMatches = taxMatch[1].match(/\u20b9\s*([0-9]{1,3}(?:,[0-9]{2,3})*(?:\.[0-9]{1,2})?|[0-9]+(?:\.[0-9]{1,2})?)/g) || [];
+                var rVals = [];
+                for (var ri = 0; ri < rMatches.length; ri++) {
+                  var rv = parseSephoraPrice(rMatches[ri]);
+                  if (rv > 0) rVals.push(rv);
+                }
+                if (rVals.length > 0) {
+                  rVals.sort(function(a, b) { return a - b; });
+                  price = String(rVals[0]);
+                }
+              }
+            } catch(e) {}
+          }
+
+          // Tier 4: Scoped PDP price selectors
+          if (!price) {
+            try {
+              var rootContainer = document.querySelector('.pdp-container, .product-detail, #pdp, main') || document.body;
+              var priceEls = rootContainer.querySelectorAll('.pdp-price, .pdp-selling-price, [class*="pdp-price"], .product-price, [class*="product-price"], [class*="price"], [class*="Price"]');
+              var scopedVals = [];
+              for (var pi = 0; pi < Math.min(priceEls.length, 150); pi++) {
+                var pEl = priceEls[pi];
+                if (pEl.closest && pEl.closest('footer')) continue;
+                var vals = extractSephoraPricesFromNode(pEl);
+                for (var vi = 0; vi < vals.length; vi++) scopedVals.push(vals[vi]);
+                if (scopedVals.length > 0) break;
+              }
+              if (scopedVals.length > 0) {
+                scopedVals.sort(function(a, b) { return a - b; });
+                price = String(scopedVals[0]);
+              }
+            } catch(e) {}
+          }
+
+          // Tier 5 (Last Resort): JSON-LD / og:price meta tags
+          if (!price) {
+            try {
+              var jsonScripts = document.querySelectorAll('script[type="application/ld+json"]');
+              var ldPrices = [];
+              for (var j = 0; j < jsonScripts.length; j++) {
+                try {
+                  var data = JSON.parse(jsonScripts[j].innerText || '{}');
+                  var items = Array.isArray(data['@graph']) ? data['@graph'] : (Array.isArray(data) ? data : [data]);
+                  for (var k = 0; k < items.length; k++) {
+                    var offers = items[k] && items[k].offers;
+                    if (!offers) continue;
+                    var offerList = Array.isArray(offers) ? offers : [offers];
+                    for (var oi = 0; oi < offerList.length; oi++) {
+                      var off = offerList[oi];
+                      if (!off) continue;
+                      var p = off.lowPrice || off.price || off.highPrice;
+                      var pv = parseSephoraPrice(p);
+                      if (pv > 0) ldPrices.push(pv);
+                    }
                   }
+                } catch(_) {}
               }
+              if (ldPrices.length > 0) {
+                ldPrices.sort(function(a, b) { return a - b; });
+                price = String(ldPrices[0]);
+              }
+            } catch(e) {}
           }
 
           if (!price) {
-              var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
-              if (ogPrice && ogPrice.content) {
-                  price = ogPrice.content.replace(/[^0-9]/g, '');
-              }
+            var ogPrice = document.querySelector('meta[property="product:price:amount"]') || document.querySelector('meta[property="og:price:amount"]');
+            if (ogPrice && ogPrice.content) {
+              var ogVal = parseSephoraPrice(ogPrice.content);
+              if (ogVal > 0) price = String(ogVal);
+            }
           }
           
           product.price = price;
